@@ -434,9 +434,9 @@ See our [detailed roadmap](ROADMAP.md) for planned features and improvements.
 
 - **Q3 2023**: Enhanced circuit library for common ML models
 - **Q4 2023**: Improved GPU acceleration for proof generation
-- **Q1 2024**: WebAssembly support for browser-based clients
-- **Q2 2024**: Integration with popular ML frameworks (TensorFlow, JAX)
-- **Q3 2024**: Formal security analysis and certification
+- **Q1 2025**: WebAssembly support for browser-based clients
+- **Q2 2025**: Integration with popular ML frameworks (TensorFlow, JAX)
+- **Q3 2025**: Formal security analysis and certification
 
 ## 📝 Changelog
 
