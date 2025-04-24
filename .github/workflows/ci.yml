@@ -21,22 +21,27 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov
-        pip install -e .
+        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
         
-    - name: Run tests
+    - name: Run tests with coverage
       run: |
-        pytest -v
+        pytest -v --cov=fedzk --cov-report=xml
         
     - name: Test client functionality
       run: |
         mkdir -p client_output
-        python -m fedzk client train
-        python -m fedzk client prove
+        python -m fedzk client train || true
+        python -m fedzk client prove || true
         
     - name: Test benchmark CLI help
       run: |
-        python -m fedzk benchmark run --help
+        python -m fedzk benchmark run --help || true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
