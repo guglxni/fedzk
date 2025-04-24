@@ -47,6 +47,8 @@
 
 FEDzk is a cutting-edge framework that integrates federated learning with zero-knowledge proofs to address privacy and security concerns in distributed machine learning. Traditional federated learning systems face challenges with respect to verifiability and trust; our framework solves these issues by providing cryptographic guarantees for model update integrity.
 
+> ⚠️ **Important:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development.
+
 ### Key Differentiators
 
 - **Provable Security**: Unlike conventional federated learning frameworks, FEDzk provides mathematical guarantees for the integrity of model updates
@@ -490,5 +492,3 @@ The FedZK project follows a standard Python package structure:
 - `examples/` - Usage examples
 
 For a detailed overview of the project organization, please see [Project Structure Documentation](docs/project_structure.md).
-
-> **Note:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development.
