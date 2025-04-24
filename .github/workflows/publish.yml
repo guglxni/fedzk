@@ -1,0 +1,153 @@
+name: Build and Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    
+    - name: Check code formatting
+      run: |
+        black . --check
+    
+    - name: Lint with flake8
+      run: |
+        flake8 .
+    
+    - name: Test with pytest
+      run: |
+        pytest --cov=fedzk
+
+  build:
+    name: Build Package and Docs
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install build wheel
+    
+    - name: Build documentation
+      run: |
+        mkdocs build
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Store distribution packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package-distributions
+        path: |
+          dist/
+          site/
+
+  publish-test-pypi:
+    name: Publish to Test PyPI
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-rc')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi-publish
+    
+    steps:
+    - name: Download distribution packages
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Publish to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip-existing: true
+
+  publish-pypi:
+    name: Publish to PyPI
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi-publish
+    
+    steps:
+    - name: Download distribution packages
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+  github-release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [publish-test-pypi, publish-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Download distribution packages
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+    
+    - name: Get tag version
+      id: tag
+      run: |
+        echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: FedZK ${{ steps.tag.outputs.version }}
+        files: |
+          dist/*.tar.gz
+          dist/*.whl
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ contains(github.ref, '-rc') }} 

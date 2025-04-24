@@ -1,0 +1,96 @@
+/* FedZK Documentation Custom Styling */
+
+/* Primary color adjustments */
+:root {
+  --md-primary-fg-color: #3949ab;
+  --md-primary-fg-color--light: #6f74dd;
+  --md-primary-fg-color--dark: #00227b;
+  --md-accent-fg-color: #6f74dd;
+}
+
+/* Logo styling */
+.md-logo img {
+  border-radius: 5px;
+}
+
+/* Custom styling for code blocks */
+.md-typeset pre > code {
+  border-radius: 5px;
+}
+
+/* Custom sidebar styling */
+.md-sidebar {
+  border-right: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+/* Admonition styling */
+.md-typeset .admonition {
+  border-radius: 5px;
+  border-left-width: 4px;
+}
+
+/* Table styling */
+.md-typeset table:not([class]) {
+  border-radius: 5px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12), 0 3px 1px -2px rgba(0,0,0,.2);
+}
+
+.md-typeset table:not([class]) th {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* API documentation styling */
+.doc-contents .doc-function {
+  padding: 1em;
+  margin-bottom: 1em;
+  border-radius: 5px;
+  border-left: 4px solid var(--md-primary-fg-color);
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Mermaid diagram styling */
+.mermaid {
+  text-align: center;
+  margin: 1.5em 0;
+}
+
+/* Improve readability of main content */
+.md-typeset {
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-content {
+    max-width: 61rem;
+  }
+}
+
+/* Dark mode adjustments */
+[data-md-color-scheme="slate"] {
+  --md-hue: 210;
+}
+
+/* Code annotations styling */
+.md-annotation__index {
+  background-color: var(--md-primary-fg-color);
+}
+
+.md-tooltip {
+  background-color: var(--md-primary-fg-color);
+}
+
+/* Link styling */
+.md-typeset a:hover {
+  text-decoration: underline;
+}
+
+/* Copy to clipboard button */
+.md-clipboard {
+  color: var(--md-primary-fg-color);
+}
+
+/* Tabs styling */
+.md-tabs {
+  background-color: var(--md-primary-fg-color--dark);
+} 

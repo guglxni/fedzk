@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block site_nav %}
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+  <div class="md-sidebar__scrollwrap">
+    <div class="md-sidebar__inner">
+      <nav class="md-nav md-nav--primary" aria-label="{{ lang.t('nav.title') }}">
+        <div class="md-nav__title" data-md-component="logo">
+          <a href="{{ config.site_url | default('/') }}" title="{{ config.site_name }}" class="md-nav__button md-logo" aria-label="{{ config.site_name }}">
+            {% include "partials/logo.html" %}
+          </a>
+          {{ config.site_name }}
+        </div>
+        
+        <!-- Custom sidebar navigation -->
+        <ul class="md-nav__list">
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}" class="md-nav__link">Home</a>
+          </li>
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}getting_started/" class="md-nav__link">Getting Started</a>
+          </li>
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}architecture/" class="md-nav__link">Architecture</a>
+          </li>
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}api_reference/" class="md-nav__link">API Reference</a>
+          </li>
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}benchmarking/" class="md-nav__link">Benchmarking</a>
+          </li>
+          <li class="md-nav__item">
+            <a href="{{ config.site_url | default('/') }}zk_proofs/" class="md-nav__link">Zero-Knowledge Proofs</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+{{ super() }}
+{% endblock %} 

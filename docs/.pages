@@ -1,0 +1,9 @@
+title: FedZK Documentation
+arrange:
+  - index.md
+  - getting_started.md
+  - architecture.md
+  - api_reference.md
+  - benchmarking.md
+  - zk_proofs.md
+  - ... 

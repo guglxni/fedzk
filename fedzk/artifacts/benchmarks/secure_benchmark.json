@@ -1,0 +1,64 @@
+{
+  "id": "a9dfc153-5a36-452e-bafb-1e8addcd6c29",
+  "timestamp": "2025-04-24T06:00:20.086285",
+  "config": {
+    "num_clients": 3,
+    "secure": true,
+    "mpc_server": null,
+    "fallback_mode": "warn",
+    "input_size": 10
+  },
+  "summary": {
+    "total_duration": 0.08207893371582031,
+    "successful_clients": 3,
+    "aggregated_updates": 0,
+    "avg_train_time": 0.0010600090026855469,
+    "avg_proof_time": 0.07340391476949056,
+    "avg_submit_time": 0.003811995188395182,
+    "avg_total_time": 0.07827591896057129
+  },
+  "client_metrics": [
+    {
+      "client_id": 1,
+      "secure": true,
+      "mpc_server": false,
+      "timestamp": "2025-04-24T06:00:20.002628",
+      "train_time": 0.0011551380157470703,
+      "gradient_size": 10,
+      "proof_time": 0.07287216186523438,
+      "submit_time": 0.004163980484008789,
+      "status": "mocked_accepted",
+      "model_version": 1,
+      "succeeded": true,
+      "total_time": 0.07819128036499023
+    },
+    {
+      "client_id": 2,
+      "secure": true,
+      "mpc_server": false,
+      "timestamp": "2025-04-24T06:00:20.003202",
+      "train_time": 0.0006721019744873047,
+      "gradient_size": 10,
+      "proof_time": 0.07259178161621094,
+      "submit_time": 0.004396915435791016,
+      "status": "mocked_accepted",
+      "model_version": 1,
+      "succeeded": true,
+      "total_time": 0.07766079902648926
+    },
+    {
+      "client_id": 0,
+      "secure": true,
+      "mpc_server": false,
+      "timestamp": "2025-04-24T06:00:20.002347",
+      "train_time": 0.0013527870178222656,
+      "gradient_size": 10,
+      "proof_time": 0.07474780082702637,
+      "submit_time": 0.002875089645385742,
+      "status": "mocked_accepted",
+      "model_version": 1,
+      "succeeded": true,
+      "total_time": 0.07897567749023438
+    }
+  ]
+}

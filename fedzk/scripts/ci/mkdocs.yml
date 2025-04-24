@@ -1,0 +1,105 @@
+site_name: FedZK
+site_description: Privacy-Preserving Verifiable Federated Learning Protocol
+site_author: FedZK Team
+repo_url: https://github.com/username/fedzk
+repo_name: fedzk
+edit_uri: edit/main/docs/
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Architecture: architecture.md
+  - API Reference: api_reference.md
+  - Benchmarking: benchmarking.md
+  - Zero-Knowledge Proofs: zk_proofs.md
+
+# Theme
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  font:
+    text: Roboto
+    code: Roboto Mono
+  custom_dir: docs/overrides
+  logo: images/logo.png
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - footnotes
+  - attr_list
+  - def_list
+  - tables
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+# Plugins
+plugins:
+  - search
+  - awesome-pages
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append(".")
+          selection:
+            filters:
+              - "!^_"
+          rendering:
+            show_source: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - social
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/username/fedzk
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fedzk/
+  version:
+    provider: mike
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+# Additional JavaScript for Mermaid diagrams
+extra_javascript:
+  - https://unpkg.com/mermaid@8.13.4/dist/mermaid.min.js
+
+# Copyright
+copyright: Copyright &copy; 2025 FedZK Team 

@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use FedZK in your research, please cite it as below."
+title: "FedZK: Secure Federated Learning with Zero-Knowledge Proofs"
+authors:
+  - family-names: "Guglani"
+    given-names: "Aaryan"
+version: 0.1.0
+date-released: 2025-04-24
+url: "https://github.com/aaryanguglani/fedzk"
+repository-code: "https://github.com/aaryanguglani/fedzk"
+license: MIT
+type: software
+keywords:
+  - "federated learning"
+  - "zero-knowledge proofs"
+  - "privacy-preserving machine learning"
+  - "secure aggregation"
+abstract: >
+  FedZK is a framework for secure federated learning using zero-knowledge proofs.
+  It allows clients to train models locally and submit verifiable proofs about their
+  gradient updates, ensuring integrity and privacy in the training process. 
