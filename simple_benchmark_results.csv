@@ -1,3 +1,0 @@
-dataset,model_type,device,proof_generation_time,verification_time,cpu,cpu_cores,gpu
-MNIST,cnn,mps,0.5040290832519532,0.20390443801879882,Apple M4 Pro,12,Apple M4 Integrated GPU (MPS)
-CIFAR-10,cnn,mps,0.5036571025848389,0.20301198959350586,Apple M4 Pro,12,Apple M4 Integrated GPU (MPS)
