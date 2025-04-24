@@ -27,4 +27,4 @@ def test_benchmark_command():
     """Test the benchmark command."""
     result = runner.invoke(app, ["benchmark", "run", "--help"])
     assert result.exit_code == 0
-    assert "Run benchmarks" in result.stdout 
+    assert "Run end-to-end benchmark" in result.stdout 
