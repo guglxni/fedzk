@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fedzk"
-version = "0.1.0"
+version = "1.0.0"
 description = "Secure Federated Learning with Zero-Knowledge Proofs"
 readme = "README.md"
 requires-python = ">=3.8"
-license = {file = "docs/legal/LICENSE"}
+license = {file = "LICENSE"}
 authors = [
     {name = "Aaryan Guglani", email = "aaryan@fedzkproject.org"}
 ]
@@ -33,13 +33,9 @@ classifiers = [
 ]
 
 dependencies = [
-    "torch>=1.10.0",
     "numpy>=1.21.0",
     "requests>=2.25.1",
     "rich>=10.0.0",
-    "uvicorn>=0.15.0",
-    "fastapi>=0.68.0",
-    "pydantic>=1.8.0",
     "typer[all]>=0.4.0",
     "httpx>=0.21.0"
 ]
@@ -60,15 +56,21 @@ docs = [
     "mkdocstrings>=0.15.0",
     "mkdocs-material>=7.1.0"
 ]
+all = [
+    "torch>=1.10.0",
+    "uvicorn>=0.15.0",
+    "fastapi>=0.68.0",
+    "pydantic>=1.8.0"
+]
 
 [project.scripts]
 fedzk = "fedzk.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/aaryanguglani/fedzk"
-Repository = "https://github.com/aaryanguglani/fedzk"
-Documentation = "https://github.com/aaryanguglani/fedzk/docs"
-"Bug Tracker" = "https://github.com/aaryanguglani/fedzk/issues"
+Homepage = "https://github.com/guglxni/fedzk"
+Repository = "https://github.com/guglxni/fedzk"
+Documentation = "https://github.com/guglxni/fedzk/docs"
+"Bug Tracker" = "https://github.com/guglxni/fedzk/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -76,9 +78,6 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["fedzk*"]
-
-[tool.setuptools.package-data]
-"fedzk" = ["zk/circuits/*"]
 
 [tool.black]
 line-length = 100

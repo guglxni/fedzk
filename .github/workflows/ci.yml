@@ -21,17 +21,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install pytest pytest-cov
         pip install -e .
         
     - name: Run tests
       run: |
-        pytest --maxfail=1 --disable-warnings -q
+        pytest -v
         
     - name: Test client functionality
       run: |
         mkdir -p client_output
         python -m fedzk client train
         python -m fedzk client prove
+        
     - name: Test benchmark CLI help
       run: |
         python -m fedzk benchmark run --help
