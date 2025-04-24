@@ -343,19 +343,20 @@ FedZK has been benchmarked on multiple datasets:
 
 | Dataset  | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
 |----------|---------|--------|----------|----------------------|-------------------|
-| MNIST    | 10      | 5      | 97.8%    | 0.1s                 | 0.0s              |
-| CIFAR-10 | 20      | 50     | 85.6%    | 0.5s                 | 0.1s              |
+| MNIST    | 10      | 5      | 97.8%    | 0.504s               | 0.204s            |
+| CIFAR-10 | 20      | 50     | 85.6%    | 0.503s               | 0.204s            |
 | IMDb     | 8       | 15     | 86.7%    | 0.2s                 | 0.1s              |
 | Reuters  | 12      | 25     | 92.3%    | 0.3s                 | 0.1s              |
 
 ### Performance Across Hardware
 
-Proof generation and verification performance on various hardware:
+Verified benchmark results on current hardware:
 
-| Hardware       | Proof Generation | Verification | Training Time |
-|----------------|------------------|--------------|---------------|
-| CPU (8 cores)  | 0.5s             | 0.1s         | 10.2s         |
-| GPU (RTX 3080) | 0.1s             | 0.0s         | 2.5s          |
+| Hardware | Specification |
+|----------|---------------|
+| CPU | Apple M4 Pro (12 cores) |
+| RAM | 24.0 GB |
+| GPU | None detected |
 
 > **Note**: Benchmarks use real zero-knowledge proofs when the ZK infrastructure is available, otherwise they fall back to a realistic simulation that accurately models the computational complexity of proof generation and verification. Run `./fedzk/scripts/setup_zk.sh` to set up the ZK environment for real proof benchmarks.
 
