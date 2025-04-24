@@ -1,73 +1,61 @@
-# FedZK Implementation Plan
+# FedZK Roadmap
 
-This document outlines the next steps for FedZK, grouped by theme:
+This document outlines the planned development roadmap for FedZK. It serves as a guide for contributors and users to understand the project's direction.
 
-## 1. Circuits & ZK-Logic
+## Current Status (v0.1.0)
 
-- Parameterize & generalize
-  - Make `n`, the L₂-threshold, and the nonzero-count bound configurable at run time.
-  - Support other norms (L₁, L∞) and statistical measures (mean, variance, median).
-- New cheat-proof primitives
-  - Range proofs to show each gradient lies within a bound [–B, B] without revealing its value.
-  - Zero-knowledge dot-product or sum-to-zero checks for additional integrity guarantees.
-- Circuit optimization
-  - Fuse accumulation steps and reduce gate counts for faster proofs.
-  - Experiment with PLONK backend or alternative SNARK setups to shrink proof size and improve performance.
+- ✅ Core federated learning workflow with zero-knowledge proofs
+- ✅ Basic MPC server for remote proof generation and verification
+- ✅ Coordinator API for model aggregation
+- ✅ Command-line interface for all operations
+- ✅ Simple benchmarking suite
+- ✅ API key authentication
 
-## 2. Client/Coordinator Workflow
+## Short-Term Goals (v0.2.0)
 
-- Multi-round support
-  - Automate iterative federated training rounds with stateful coordination.
-  - Build a driver script or scheduler that orchestrates multiple clients in parallel.
-- Anonymity & fairness
-  - Implement anonymous aggregation (proving membership without revealing identity).
-  - Add Sybil-resistance proofs to ensure contributions come from distinct data samples.
+- [ ] Improved error handling and recovery for network issues
+- [ ] Expanded circuit templates for more complex models
+- [ ] Support for custom aggregation strategies
+- [ ] WebUI for monitoring coordinator and MPC server
+- [ ] Enhanced logging and telemetry
+- [ ] Docker images for easy deployment
 
-## 3. Python Library & CLI UX
+## Mid-Term Goals (v0.3.0)
 
-- Higher-level API
-  - Provide `FedZKProver` and `FedZKVerifier` Python classes for clean integration into ML pipelines.
-- CLI improvements
-  - Offer single commands like `fedzk train` and `fedzk prove` to compile circuits, generate proofs, and send them.
-  - Add `--dry-run` and `--profile` modes for diagnostics and performance profiling.
+- [ ] Horizontal scaling support for the MPC server
+- [ ] Integration with popular machine learning frameworks (PyTorch, TensorFlow)
+- [ ] Advanced privacy features (differential privacy, secure aggregation)
+- [ ] Federated learning with heterogeneous models
+- [ ] Support for asynchronous federated learning
+- [ ] Comprehensive documentation website
 
-## 4. Testing, CI & Quality
+## Long-Term Vision
 
-- Circom in CI
-  - Add a GitHub Actions step to run `circom --check` on every pull request, catching parse or formatting issues early.
-- Fuzz & edge-case tests
-  - Randomize gradient inputs (including zeros, negatives, max values) to stress-test both circuits and Python logic.
-- Benchmark automation
-  - Compare proof sizes and generation/verification timings across different Circom versions and SNARK backends.
+- [ ] Production-ready deployment with high availability
+- [ ] Multi-cloud federated learning support
+- [ ] Advanced zero-knowledge circuit optimization
+- [ ] SDK for mobile devices (iOS, Android)
+- [ ] Integration with federated analytics
+- [ ] Support for encrypted model storage and transport
+- [ ] Advanced attack prevention mechanisms
 
-## 5. Documentation & Onboarding
+## How to Contribute
 
-- Tutorials & cookbooks
-  - Step-by-step guide: how to add your own ZK check (for example, an L∞ norm circuit).
-  - Jupyter notebook or video demo showing an end-to-end privacy-preserving federated training workflow.
-- Architecture diagram
-  - Visualize the data and proof flow: client → circuit → proof → coordinator → aggregation.
+We welcome contributions to any aspect of the roadmap. If you're interested in helping with a specific feature:
 
-## 6. Real-world Integration
+1. Check the [Issues](https://github.com/aaryanguglani/fedzk/issues) page for related tasks
+2. Join the discussion in [GitHub Discussions](https://github.com/aaryanguglani/fedzk/discussions)
+3. Submit a pull request with your implementation
 
-- Deep integration with ML frameworks
-  - Provide TensorFlow and PyTorch hooks to feed real training gradients directly into the proof pipeline.
-- Scalable deployment
-  - Package client and coordinator as Docker microservices with HTTP/gRPC interfaces.
-- Use-case prototypes
-  - Build demos in domains like healthcare or finance to showcase privacy and integrity guarantees.
+For major features or changes, please open an issue first to discuss your approach.
 
-## 7. Research & Extensions
+## Feature Requests
 
-- Alternative ZK frameworks
-  - Evaluate the next-generation tools (Circom 3, Halo2, Cairo, STARK-based systems) for different trust and performance models.
-- Formal verification
-  - Use formal methods (ZoKrates, TLA+) to rigorously verify the correctness of aggregation logic.
+If you have ideas that aren't on the roadmap, please submit them as feature requests in the GitHub Issues section. We appreciate detailed descriptions of use cases and requirements.
 
----
+## Release Schedule
 
-Choose the items that best fit your project goals (performance, feature set, UX, or research) and iterate from there. 
- 
- 
- 
- 
+We aim to follow a regular release schedule:
+- Minor releases (~monthly): Bug fixes and small improvements
+- Feature releases (~quarterly): New functionality from the roadmap
+- Major versions: When significant architectural changes are introduced 

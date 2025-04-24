@@ -1,21 +1,21 @@
-name: Version Bump and Changelog Update
+name: Version Bump
 
 on:
   workflow_dispatch:
     inputs:
       bump_type:
-        description: 'Type of version bump'
+        description: "Type of bump (patch, minor, major)"
         required: true
-        default: 'patch'
+        default: "patch"
         type: choice
         options:
           - patch
           - minor
           - major
       pre_release_tag:
-        description: 'Pre-release tag (leave empty for stable release)'
-        required: false
-        default: 'none'
+        description: "Pre-release tag (none, dev, alpha, beta, rc)"
+        required: true
+        default: "none"
         type: choice
         options:
           - none
@@ -28,67 +28,75 @@ jobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
+          fetch-depth: 0  # This is important for git history and versioning
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install bump2version
-
+          pip install bumpversion
+          pip install pre-commit
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+      
       - name: Configure Git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
 
-      - name: Bump version (stable)
+      - name: Bump stable version
         if: ${{ inputs.pre_release_tag == 'none' }}
         run: |
-          bump2version ${{ inputs.bump_type }}
-          git push --tags origin main
+          if [ "${{ inputs.bump_type }}" == "patch" ]; then
+            bumpversion patch
+          elif [ "${{ inputs.bump_type }}" == "minor" ]; then
+            bumpversion minor
+          elif [ "${{ inputs.bump_type }}" == "major" ]; then
+            bumpversion major
+          fi
 
-      - name: Bump version (pre-release)
+      - name: Bump pre-release version
         if: ${{ inputs.pre_release_tag != 'none' }}
         run: |
-          # If we're transitioning from a release to a pre-release, first bump the version
-          if [[ $(grep "current_version" .bumpversion.cfg | awk '{print $3}' | grep -c "-") -eq 0 ]]; then
-            bump2version ${{ inputs.bump_type }}
+          if [ "${{ inputs.bump_type }}" == "patch" ]; then
+            bumpversion patch --new-version $(bumpversion patch --list | grep current_version | sed -r s,"^.*=",,)-${{ inputs.pre_release_tag }}.0
+          elif [ "${{ inputs.bump_type }}" == "minor" ]; then
+            bumpversion minor --new-version $(bumpversion minor --list | grep current_version | sed -r s,"^.*=",,)-${{ inputs.pre_release_tag }}.0
+          elif [ "${{ inputs.bump_type }}" == "major" ]; then
+            bumpversion major --new-version $(bumpversion major --list | grep current_version | sed -r s,"^.*=",,)-${{ inputs.pre_release_tag }}.0
           fi
-          # Then apply the pre-release tag
-          bump2version --new-version $(bump2version --list ${{ inputs.bump_type }} --dry-run | grep new_version | sed -r s,"^.*=",,)"-${{ inputs.pre_release_tag }}1" ${{ inputs.bump_type }} --allow-dirty
-          git push --tags origin main
+
+      - name: Get new version
+        id: get_version
+        run: |
+          echo "new_version=$(grep -m 1 "current_version =" .bumpversion.cfg | cut -d "=" -f2 | tr -d ' ')" >> $GITHUB_OUTPUT
 
       - name: Generate changelog
-        uses: github-changelog-generator/github-changelog-generator-action@v1.3.0
+        id: generate_changelog
+        uses: janheinrichmerker/action-github-changelog-generator@v2.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          output: CHANGELOG.md
+          futureRelease: ${{ steps.get_version.outputs.new_version }}
+          stripHeaders: true
           stripGeneratorNotice: true
-          unreleasedLabel: "## [Unreleased]"
-          breakingLabel: "### BREAKING CHANGES"
-          enhancementLabel: "### Added"
-          bugsLabel: "### Fixed"
-          securityLabel: "### Security"
-          issuesWoLabelsLabel: "### Other"
-          prWoLabelsLabel: "### Changes"
-          addSections: '{"documentation":{"prefix":"### Documentation","labels":["documentation"]},"tests":{"prefix":"### Testing","labels":["tests"]},"dependencies":{"prefix":"### Dependencies","labels":["dependencies"]}}'
-          excludeLabels: "duplicate,question,invalid,wontfix,skip-changelog"
+          issuesLabel: "**Closed issues:**"
+          prLabel: "**Merged pull requests:**"
+          issues: true
           pullRequests: true
-          prWoLabels: true
-          issues: false
+          author: true
         
-      - name: Commit changelog
+      - name: Commit and push changelog if changes
         run: |
-          if [[ $(git status --porcelain | grep CHANGELOG.md) ]]; then
+          if [[ -n "$(git status --porcelain)" ]]; then
             git add CHANGELOG.md
-            git commit -m "Update CHANGELOG.md for v$(grep "current_version" .bumpversion.cfg | awk '{print $3}')"
-            git push origin main
-          fi 
+            git commit -m "Update CHANGELOG.md for version ${{ steps.get_version.outputs.new_version }}"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi

@@ -1,7 +1,9 @@
-"""
-FedZK: Federated Learning with Zero-Knowledge Proofs.
+# Copyright (c) 2025 Aaryan Guglani and FedZK Contributors
+# SPDX-License-Identifier: MIT
 
-A framework for secure federated learning using zero-knowledge proofs.
-"""
+# Copyright (c) 2025 Aaryan Guglani and FedZK Contributors
+# SPDX-License-Identifier: MIT
 
-__version__ = "1.0.0" 
+"""FedZK: Secure Federated Learning with Zero-Knowledge Proofs."""
+
+__version__ = "0.1.0"
