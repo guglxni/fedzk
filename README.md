@@ -339,7 +339,7 @@ The [examples](examples) directory contains sample code and deployment configura
 
 ## 📊 Benchmarks
 
-FEDzk has been benchmarked on multiple datasets:
+FedZK has been benchmarked on multiple datasets:
 
 | Dataset  | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
 |----------|---------|--------|----------|----------------------|-------------------|
@@ -356,6 +356,8 @@ Proof generation and verification performance on various hardware:
 |----------------|------------------|--------------|---------------|
 | CPU (8 cores)  | 0.5s             | 0.1s         | 10.2s         |
 | GPU (RTX 3080) | 0.1s             | 0.0s         | 2.5s          |
+
+> **Note**: Benchmarks use real zero-knowledge proofs when the ZK infrastructure is available, otherwise they fall back to a realistic simulation that accurately models the computational complexity of proof generation and verification. Run `./fedzk/scripts/setup_zk.sh` to set up the ZK environment for real proof benchmarks.
 
 Benchmark methodology: Measurements taken on CIFAR-10 dataset with a CNN model containing approximately 5M parameters. Batch size of 32 was used for all experiments.
 

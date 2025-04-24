@@ -29,7 +29,27 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.datasets import fetch_20newsgroups
 import torchtext
 
-# Mock ZK proof functionality for benchmarking
+# Import real ZK proof functionality instead of using mock
+try:
+    from fedzk.prover.zkgenerator import ZKProver
+    from fedzk.prover.verifier import ZKVerifier
+    
+    # Define paths to necessary files
+    ZK_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "zk")
+    CIRCUIT_WASM = os.path.join(ZK_DIR, "model_update.wasm")
+    PROVING_KEY = os.path.join(ZK_DIR, "proving_key.zkey")
+    VERIFICATION_KEY = os.path.join(ZK_DIR, "verification_key.json")
+    
+    # Check if ZK setup files exist
+    USE_REAL_ZK = (os.path.exists(CIRCUIT_WASM) and 
+                   os.path.exists(PROVING_KEY) and 
+                   os.path.exists(VERIFICATION_KEY))
+except ImportError:
+    USE_REAL_ZK = False
+    print("Warning: Real ZK prover/verifier not available. Using mock implementation.")
+
+
+# Fallback to MockZKProver if real implementation is unavailable
 class MockZKProver:
     def __init__(self, model_size, complexity_factor=1.0):
         self.model_size = model_size  # Number of parameters
@@ -331,9 +351,16 @@ class FedZKBenchmark:
             [client_data_size] * (self.num_clients - 1) + [len(train_dataset) - client_data_size * (self.num_clients - 1)]
         )
         
-        # Initialize ZK prover
+        # Initialize ZK prover/verifier
         param_count = sum(p.numel() for p in self.model.parameters())
-        zk_prover = MockZKProver(model_size=param_count)
+        
+        if USE_REAL_ZK:
+            # Use real ZK prover/verifier
+            zk_prover = ZKProver(circuit_path=CIRCUIT_WASM, proving_key_path=PROVING_KEY)
+            zk_verifier = ZKVerifier(verification_key_path=VERIFICATION_KEY)
+        else:
+            # Fallback to mock implementation
+            zk_prover = MockZKProver(model_size=param_count)
         
         # Training parameters
         criterion = nn.CrossEntropyLoss()
@@ -379,11 +406,31 @@ class FedZKBenchmark:
                             break
                 
                 # Generate ZK proof for this client update
-                proof_result = zk_prover.generate_proof(client_model, data[:5])
-                proof_times.append(proof_result["time_taken"])
+                if USE_REAL_ZK:
+                    # Extract gradient updates as a dictionary
+                    gradient_dict = {}
+                    for name, param in client_model.named_parameters():
+                        original_param = global_model[name]
+                        gradient_dict[name] = param.data - original_param
+                    
+                    # Measure proof generation time
+                    start_time = time.time()
+                    proof, public_inputs = zk_prover.generate_real_proof(gradient_dict, max_inputs=4)
+                    proof_time = time.time() - start_time
+                    
+                    # Measure verification time
+                    start_time = time.time()
+                    is_valid = zk_verifier.verify_real_proof(proof, public_inputs)
+                    verification_time = time.time() - start_time
+                    
+                    proof_result = {"time_taken": proof_time}
+                    verification_result = {"time_taken": verification_time}
+                else:
+                    # Use mock implementation
+                    proof_result = zk_prover.generate_proof(client_model, data[:5])
+                    verification_result = zk_prover.verify_proof(proof_result["proof"], "model_hash", "data_hash")
                 
-                # Verify the proof
-                verification_result = zk_prover.verify_proof(proof_result["proof"], "model_hash", "data_hash")
+                proof_times.append(proof_result["time_taken"])
                 verification_times.append(verification_result["time_taken"])
                 
                 # Store the updated model
@@ -452,8 +499,16 @@ def main():
                         help="Output file for benchmark results")
     parser.add_argument("--device", default="cuda", choices=["cuda", "cpu"],
                         help="Device to run benchmarks on")
+    parser.add_argument("--use-real-zk", action="store_true",
+                        help="Force use of real ZK proofs (if available)")
     
     args = parser.parse_args()
+    
+    # If user explicitly requests real ZK, check if it's available
+    if args.use_real_zk and not USE_REAL_ZK:
+        print("Warning: Real ZK infrastructure not found or incomplete.")
+        print("Run './fedzk/scripts/setup_zk.sh' to set up the ZK environment.")
+        print("Falling back to mock implementation.")
     
     results = []
     
