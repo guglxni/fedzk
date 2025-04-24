@@ -1,4 +1,5 @@
 <div align="center">
+  <!-- Logo image refreshed -->
   <img src="assets/images/fedzklogo.png" alt="FEDzk Logo" width="400">
   <h1>FEDzk: Federated Learning with Zero-Knowledge Proofs</h1>
   <p>
