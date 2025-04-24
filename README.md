@@ -475,4 +475,17 @@ Copyright (c) 2025 Aaryan Guglani and FEDzk Contributors
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Please check out our [contributing guidelines](/fedzk/docs/CONTRIBUTING.md) to get started. 
+We welcome contributions from the community! Please check out our [contributing guidelines](docs/CONTRIBUTING.md) to get started.
+
+## Project Structure
+
+The FedZK project follows a standard Python package structure:
+
+- `src/fedzk/` - Main Python package
+- `tests/` - Test suite
+- `docs/` - Documentation
+- `examples/` - Usage examples
+
+For a detailed overview of the project organization, please see [Project Structure Documentation](docs/project_structure.md).
+
+> **Note:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development. 
