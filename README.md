@@ -24,10 +24,10 @@
   
   <p>
     <a href="https://github.com/guglxni/fedzk/releases">
-      <img src="https://img.shields.io/github/v/release/guglxni/fedzk?style=flat-square" alt="GitHub release">
+      <img src="https://img.shields.io/github/v/release/guglxni/fedzk?style=flat-square&label=Release&color=blue" alt="GitHub release">
     </a>
     <a href="https://github.com/guglxni/fedzk/blob/main/LICENSE">
-      <img src="https://img.shields.io/github/license/guglxni/fedzk?style=flat-square" alt="License">
+      <img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License">
     </a>
     <a href="https://github.com/guglxni/fedzk/stargazers">
       <img src="https://img.shields.io/github/stars/guglxni/fedzk?style=flat-square" alt="Stars">
@@ -38,6 +38,7 @@
     <a href="https://github.com/guglxni/fedzk/issues">
       <img src="https://img.shields.io/github/issues/guglxni/fedzk?style=flat-square" alt="Issues">
     </a>
+    <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square" alt="Version">
   </p>
 </div>
 
@@ -313,27 +314,27 @@ profiler.report()
 
 For more detailed documentation, examples, and API references, please refer to:
 
-- [Getting Started Guide](/fedzk/docs/getting_started.md)
-- [API Documentation](/fedzk/docs/api_reference.md)
-- [Architecture Overview](/fedzk/docs/architecture.md)
-- [Implementation Details](/fedzk/docs/implementation_details.md)
-- [Zero-Knowledge Proofs](/fedzk/docs/zk_proofs.md)
-- [Security Considerations](/fedzk/docs/security.md)
-- [Performance Tuning](/fedzk/docs/performance.md)
-- [Deployment Guide](/fedzk/docs/deployment_guide.md)
-- [Contribution Guidelines](/fedzk/docs/CONTRIBUTING.md)
+- [Getting Started Guide](docs/getting_started.md)
+- [API Documentation](docs/api_reference.md)
+- [Architecture Overview](docs/architecture.md)
+- [Implementation Details](docs/implementation_details.md)
+- [Zero-Knowledge Proofs](docs/zk_proofs.md)
+- [Security Considerations](docs/security.md)
+- [Performance Tuning](docs/performance.md)
+- [Deployment Guide](docs/deployment_guide.md)
+- [Contribution Guidelines](docs/CONTRIBUTING.md)
 
 ## 📋 Examples
 
-The [examples](/fedzk/examples) directory contains sample code and deployment configurations:
+The [examples](examples) directory contains sample code and deployment configurations:
 
-- [Basic Training](/fedzk/examples/basic_training.py): Simple federated learning setup
-- [Distributed Deployment](/fedzk/examples/distributed_deployment.py): Multi-node configuration
-- [Docker Deployment](/fedzk/examples/Dockerfile): Containerized deployment
-- [Custom Circuits](/fedzk/examples/custom_circuits.py): Creating custom verification circuits
-- [Secure MPC](/fedzk/examples/secure_mpc.py): Multi-party computation integration
-- [Differential Privacy](/fedzk/examples/differential_privacy.py): Adding differential privacy
-- [Model Compression](/fedzk/examples/model_compression.py): Reducing communication overhead
+- [Basic Training](examples/basic_training.py): Simple federated learning setup
+- [Distributed Deployment](examples/distributed_deployment.py): Multi-node configuration
+- [Docker Deployment](examples/Dockerfile): Containerized deployment
+- [Custom Circuits](examples/custom_circuits.py): Creating custom verification circuits
+- [Secure MPC](examples/secure_mpc.py): Multi-party computation integration
+- [Differential Privacy](examples/differential_privacy.py): Adding differential privacy
+- [Model Compression](examples/model_compression.py): Reducing communication overhead
 
 ## 📊 Benchmarks
 
@@ -419,14 +420,14 @@ inspector.analyze_complexity()
 
 If you encounter issues not covered in the documentation:
 
-1. Check the [Troubleshooting Guide](/fedzk/docs/troubleshooting.md)
+1. Check the [Troubleshooting Guide](docs/troubleshooting.md)
 2. Search existing [GitHub Issues](https://github.com/guglxni/fedzk/issues)
 3. Ask in the community channels
 4. If the issue persists, [file a detailed bug report](https://github.com/guglxni/fedzk/issues/new/choose)
 
 ## 🗺️ Roadmap
 
-See our [detailed roadmap](/fedzk/ROADMAP.md) for planned features and improvements.
+See our [detailed roadmap](ROADMAP.md) for planned features and improvements.
 
 ### Upcoming Features
 
@@ -438,7 +439,7 @@ See our [detailed roadmap](/fedzk/ROADMAP.md) for planned features and improveme
 
 ## 📝 Changelog
 
-See the [CHANGELOG.md](/fedzk/CHANGELOG.md) for a detailed history of changes.
+See the [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
 ## 📄 Citation
 
@@ -455,7 +456,7 @@ If you use FEDzk in your research, please cite:
 
 ## 🔒 Security
 
-We take security seriously. Please review our [security policy](/fedzk/docs/legal/SECURITY.md) for reporting vulnerabilities.
+We take security seriously. Please review our [security policy](docs/legal/SECURITY.md) for reporting vulnerabilities.
 
 ### Security Features
 
@@ -467,7 +468,9 @@ We take security seriously. Please review our [security policy](/fedzk/docs/lega
 
 ## 📄 License
 
-This project is licensed under the terms found in the [LICENSE](/fedzk/LICENSE) file.
+This project is licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2025 Aaryan Guglani and FEDzk Contributors
 
 ## 🤝 Contributing
 
