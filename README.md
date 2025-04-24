@@ -339,25 +339,23 @@ The [examples](examples) directory contains sample code and deployment configura
 
 ## 📊 Benchmarks
 
-FEDzk has been benchmarked on various datasets and configurations:
+FEDzk has been benchmarked on the CIFAR-10 dataset:
 
-| Dataset | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
-|---------|---------|--------|----------|----------------------|-------------------|
-| MNIST   | 10      | 20     | 97.2%    | 1.2s                 | 0.3s              |
-| CIFAR-10| 20      | 50     | 85.6%    | 2.8s                 | 0.5s              |
-| IMDb    | 5       | 10     | 88.3%    | 1.5s                 | 0.4s              |
-| ImageNet| 50      | 100    | 76.4%    | 8.5s                 | 1.2s              |
-| Reuters | 15      | 30     | 91.5%    | 2.0s                 | 0.6s              |
+| Dataset  | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
+|----------|---------|--------|----------|----------------------|-------------------|
+| CIFAR-10 | 20      | 50     | 85.6%    | 2.8s                 | 0.5s              |
+
+Future benchmarks will include MNIST, IMDb, ImageNet, and Reuters datasets. Contributions with additional benchmarks are welcome.
 
 ### Performance Across Hardware
 
-| Hardware            | Proof Generation | Verification | Training Time |
-|---------------------|------------------|--------------|---------------|
-| CPU (4 cores)       | 5.2s             | 0.8s         | 45.6s         |
-| CPU (8 cores)       | 3.1s             | 0.5s         | 28.2s         |
-| GPU (GTX 1080)      | 1.8s             | 0.3s         | 12.4s         |
-| GPU (RTX 3080)      | 0.9s             | 0.2s         | 6.7s          |
-| TPU v3              | 0.7s             | 0.1s         | 5.3s          |
+Proof generation and verification performance on CIFAR-10:
+
+| Hardware       | Proof Generation | Verification | Training Time |
+|----------------|------------------|--------------|---------------|
+| GPU (RTX 3080) | 0.9s             | 0.2s         | 6.7s          |
+
+Performance measurements are from a single run and will vary based on specific model architecture and dataset size.
 
 ## ❓ Troubleshooting
 
