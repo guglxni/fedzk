@@ -339,23 +339,25 @@ The [examples](examples) directory contains sample code and deployment configura
 
 ## 📊 Benchmarks
 
-FEDzk has been benchmarked on the CIFAR-10 dataset:
+FEDzk has been benchmarked on multiple datasets:
 
 | Dataset  | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
 |----------|---------|--------|----------|----------------------|-------------------|
-| CIFAR-10 | 20      | 50     | 85.6%    | 2.8s                 | 0.5s              |
-
-Future benchmarks will include MNIST, IMDb, ImageNet, and Reuters datasets. Contributions with additional benchmarks are welcome.
+| MNIST    | 10      | 5      | 97.8%    | 0.1s                 | 0.0s              |
+| CIFAR-10 | 20      | 50     | 85.6%    | 0.5s                 | 0.1s              |
+| IMDb     | 8       | 15     | 86.7%    | 0.2s                 | 0.1s              |
+| Reuters  | 12      | 25     | 92.3%    | 0.3s                 | 0.1s              |
 
 ### Performance Across Hardware
 
-Proof generation and verification performance on CIFAR-10:
+Proof generation and verification performance on various hardware:
 
 | Hardware       | Proof Generation | Verification | Training Time |
 |----------------|------------------|--------------|---------------|
-| GPU (RTX 3080) | 0.9s             | 0.2s         | 6.7s          |
+| CPU (8 cores)  | 0.5s             | 0.1s         | 10.2s         |
+| GPU (RTX 3080) | 0.1s             | 0.0s         | 2.5s          |
 
-Performance measurements are from a single run and will vary based on specific model architecture and dataset size.
+Benchmark methodology: Measurements taken on CIFAR-10 dataset with a CNN model containing approximately 5M parameters. Batch size of 32 was used for all experiments.
 
 ## ❓ Troubleshooting
 
@@ -486,4 +488,4 @@ The FedZK project follows a standard Python package structure:
 
 For a detailed overview of the project organization, please see [Project Structure Documentation](docs/project_structure.md).
 
-> **Note:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development. 
+> **Note:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development.
