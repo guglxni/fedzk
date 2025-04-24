@@ -320,7 +320,7 @@ For more detailed documentation, examples, and API references, please refer to:
 - [Architecture Overview](docs/architecture.md)
 - [Implementation Details](docs/implementation_details.md)
 - [Zero-Knowledge Proofs](docs/zk_proofs.md)
-- [Security Considerations](docs/security.md)
+- [Security Considerations](docs/legal/SECURITY.md)
 - [Performance Tuning](docs/performance.md)
 - [Deployment Guide](docs/deployment_guide.md)
 - [Contribution Guidelines](docs/CONTRIBUTING.md)
