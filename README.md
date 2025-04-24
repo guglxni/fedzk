@@ -447,10 +447,10 @@ See the [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 If you use FEDzk in your research, please cite:
 
 ```bibtex
-@software{fedzk2023,
+@software{fedzk2025,
   author = {Guglani, Aaryan},
   title = {FEDzk: Federated Learning with Zero-Knowledge Proofs},
-  year = {2023},
+  year = {2025},
   url = {https://github.com/guglxni/fedzk},
 }
 ```
