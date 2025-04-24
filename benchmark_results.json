@@ -1,0 +1,34 @@
+[
+  {
+    "dataset": "mnist",
+    "clients": 10,
+    "rounds": 5,
+    "accuracy": 97.8,
+    "proof_generation_time": 0.10504603385925293,
+    "verification_time": 0.026261508464813232
+  },
+  {
+    "dataset": "cifar10",
+    "clients": 20,
+    "rounds": 50,
+    "accuracy": 85.6,
+    "proof_generation_time": 0.5000791549682617,
+    "verification_time": 0.12501978874206543
+  },
+  {
+    "dataset": "imdb",
+    "clients": 8,
+    "rounds": 15,
+    "accuracy": 86.7,
+    "proof_generation_time": 0.20503997802734375,
+    "verification_time": 0.05125999450683594
+  },
+  {
+    "dataset": "reuters",
+    "clients": 12,
+    "rounds": 25,
+    "accuracy": 92.3,
+    "proof_generation_time": 0.30508875846862793,
+    "verification_time": 0.07627218961715698
+  }
+]

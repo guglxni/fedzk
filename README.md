@@ -1,3 +1,7 @@
+# FedZK: Secure Federated Learning with Zero-Knowledge Proofs
+
+> ⚠️ **Important**: As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development.
+
 <div align="center">
   <!-- Logo image refreshed -->
   <img src="assets/images/fedzklogo.png" alt="FEDzk Logo" width="400">
@@ -46,8 +50,6 @@
 ## 📖 Project Overview
 
 FEDzk is a cutting-edge framework that integrates federated learning with zero-knowledge proofs to address privacy and security concerns in distributed machine learning. Traditional federated learning systems face challenges with respect to verifiability and trust; our framework solves these issues by providing cryptographic guarantees for model update integrity.
-
-> ⚠️ **Important:** As of April 24, 2025, the duplicate `fedzk/` directory at the project root has been deprecated. Always use `src/fedzk/` for development.
 
 ### Key Differentiators
 
