@@ -112,9 +112,24 @@ def get_hardware_info():
         except:
             pass
     
-    # Get GPU info if CUDA is available
+    # Get GPU info
     if torch.cuda.is_available():
         info["gpu"] = torch.cuda.get_device_name(0)
+    # Check for Apple Silicon GPU via MPS
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        # Detect Apple Silicon model
+        try:
+            # Get chip info using sysctl on macOS
+            if platform.system() == "Darwin":
+                chip_info = subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"]).decode().strip()
+                if "Apple" in chip_info:
+                    # Extract the chip model (M1, M2, M3, etc.)
+                    apple_chip = chip_info.split()[0] + " " + chip_info.split()[1]
+                    info["gpu"] = f"{apple_chip} Integrated GPU (MPS)"
+                else:
+                    info["gpu"] = "Apple Silicon GPU (MPS)"
+        except:
+            info["gpu"] = "Apple Silicon GPU (MPS)"
     
     return info
 
@@ -123,6 +138,15 @@ class SimpleBenchmark:
     def __init__(self, dataset_name, model_type="cnn", device="cpu"):
         self.dataset_name = dataset_name
         self.model_type = model_type
+        
+        # Automatically use MPS if available on Mac and device is set to something other than cpu
+        if device != "cpu" and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            device = "mps"
+        elif device != "cpu" and torch.cuda.is_available():
+            device = "cuda"
+        else:
+            device = "cpu"
+            
         self.device = device
         self.results = {
             "dataset": dataset_name,
@@ -235,10 +259,22 @@ def main():
                         help="Type of model to use")
     parser.add_argument("--output", default="simple_benchmark_results.csv",
                         help="Output file for benchmark results")
-    parser.add_argument("--device", default="cpu", choices=["cuda", "cpu"],
-                        help="Device to run benchmarks on")
+    parser.add_argument("--device", default="auto", choices=["auto", "cuda", "mps", "cpu"],
+                        help="Device to run benchmarks on (auto will select the best available)")
     
     args = parser.parse_args()
+    
+    # Determine best device if auto is selected
+    if args.device == "auto":
+        if torch.cuda.is_available():
+            args.device = "cuda"
+            print("CUDA GPU detected, using CUDA for benchmarks")
+        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            args.device = "mps"
+            print("Apple Silicon GPU detected, using MPS for benchmarks")
+        else:
+            args.device = "cpu"
+            print("No GPU detected, using CPU for benchmarks")
     
     # Get hardware info
     hw_info = get_hardware_info()
@@ -248,6 +284,7 @@ def main():
     print(f"  CPU Cores: {hw_info['cpu_cores']}")
     print(f"  RAM: {hw_info['ram']}")
     print(f"  GPU: {hw_info['gpu']}")
+    print(f"  PyTorch Device: {args.device}")
     print()
     
     results = []

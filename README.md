@@ -356,7 +356,7 @@ Verified benchmark results on current hardware:
 |----------|---------------|
 | CPU | Apple M4 Pro (12 cores) |
 | RAM | 24.0 GB |
-| GPU | None detected |
+| GPU | Apple M4 Integrated GPU (MPS) |
 
 > **Note**: Benchmarks use real zero-knowledge proofs when the ZK infrastructure is available, otherwise they fall back to a realistic simulation that accurately models the computational complexity of proof generation and verification. Run `./fedzk/scripts/setup_zk.sh` to set up the ZK environment for real proof benchmarks.
 
