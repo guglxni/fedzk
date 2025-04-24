@@ -57,6 +57,7 @@ venv.bak/
 
 # Project specific
 .DS_Store
+.specstory/
 
 # Environment files
 .env.local
