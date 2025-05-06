@@ -8,6 +8,11 @@ repos:
     -   id: check-added-large-files
     -   id: check-merge-conflict
     -   id: debug-statements
+    -   id: check-ast
+    -   id: check-json
+    -   id: check-toml
+    -   id: detect-private-key
+    -   id: forbid-new-submodules
 
 -   repo: https://github.com/psf/black
     rev: 23.3.0
@@ -22,7 +27,11 @@ repos:
         additional_dependencies: [
             'flake8-docstrings',
             'flake8-import-order',
-            'flake8-bugbear'
+            'flake8-bugbear',
+            'flake8-bandit',
+            'flake8-annotations',
+            'flake8-pytest-style',
+            'flake8-comprehensions'
         ]
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
@@ -48,4 +57,52 @@ repos:
     rev: v2.42.1
     hooks:
     -   id: commitizen
-        stages: [commit-msg] 
+        stages: [commit-msg]
+
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+    -   id: bandit
+        args: ["-c", "pyproject.toml"]
+        additional_dependencies: ["bandit[toml]"]
+
+-   repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+    -   id: python-safety-dependencies-check
+        files: requirements/.*\.txt$
+
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
+    hooks:
+    -   id: codespell
+        args: [
+            "--ignore-words-list=nd,dum,ser,fo",
+            "--skip=*.json,*.lock,*.html"
+        ]
+
+-   repo: https://github.com/PyCQA/pylint
+    rev: v2.17.5
+    hooks:
+    -   id: pylint
+        args: [
+            "--disable=import-error,missing-module-docstring",
+            "--ignore=tests",
+            "--extension-pkg-whitelist=numpy,torch",
+            "--fail-under=8.0"
+        ]
+        additional_dependencies: [
+            "pylint-pytest",
+            "numpy",
+            "typer"
+        ]
+
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+    -   id: mdformat
+        files: (\.md$)
+        additional_dependencies: [
+            "mdformat-gfm",
+            "mdformat-black"
+        ] 

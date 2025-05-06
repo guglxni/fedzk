@@ -4,8 +4,9 @@ Integration tests for the FedZK Coordinator API.
 
 import pytest
 from fastapi.testclient import TestClient
-from fedzk.coordinator.api import app
+
 import fedzk.coordinator.logic as logic
+from fedzk.coordinator.api import app
 
 
 @pytest.fixture(autouse=True)
@@ -63,8 +64,7 @@ def test_submit_and_aggregate(monkeypatch):
 
     # Check status endpoint after aggregation
     status = client.get("/status").json()
-    assert status == {"pending_updates": 0, "model_version": 2} 
- 
- 
- 
- 
+    assert status == {"pending_updates": 0, "model_version": 2}
+
+
+

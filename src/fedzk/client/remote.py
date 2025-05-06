@@ -6,8 +6,9 @@ HTTP client for FedZK Coordinator API.
 Provides methods to submit gradient updates with proofs and fetch coordinator status.
 """
 
+from typing import Any, Dict, List, Optional
+
 import requests
-from typing import Dict, List, Any, Optional
 
 
 class ClientAPI:
@@ -20,7 +21,7 @@ class ClientAPI:
             base_url: Coordinator base URL (e.g. http://localhost:8000)
             timeout: Optional request timeout in seconds
         """
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.timeout = timeout
 
     def submit_update(
@@ -55,8 +56,7 @@ class ClientAPI:
         url = f"{self.base_url}/status"
         response = requests.get(url, timeout=self.timeout)
         response.raise_for_status()
-        return response.json() 
- 
- 
- 
- 
+        return response.json()
+
+
+

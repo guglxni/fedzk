@@ -73,3 +73,5 @@ temp_build/
 client_output/
 test_results/
 benchmark_results/
+# SpecStory explanation file
+.specstory/.what-is-this.md

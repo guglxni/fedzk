@@ -8,12 +8,14 @@ This module provides a FastAPI service for the coordinator node in the FedZK sys
 which aggregates model updates from clients after verifying their ZK proofs.
 """
 
-from fastapi import FastAPI, HTTPException
-from fedzk.prover.verifier import ZKVerifier
-from pydantic import BaseModel
-from typing import Dict, List, Any, Union
+from typing import Any, Dict, List
 
-app = FastAPI(title="FedZK Aggregator", 
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from fedzk.prover.verifier import ZKVerifier
+
+app = FastAPI(title="FedZK Aggregator",
               description="Coordinator service for FedZK federated learning with zero-knowledge proofs")
 
 # Initialize verifier with dummy verification key
@@ -55,21 +57,21 @@ def submit_update(update: UpdateSubmission):
         # Simulate FedAvg (average values for each param)
         keys = pending_updates[0].keys()
         avg_update = {
-            k: [(sum(grad[k][i] for grad in pending_updates) / len(pending_updates)) 
+            k: [(sum(grad[k][i] for grad in pending_updates) / len(pending_updates))
                 for i in range(len(pending_updates[0][k]))]
             for k in keys
         }
-        
+
         # Reset pending updates
         pending_updates.clear()
-        
+
         # Update model version
         global current_version
         current_version += 1
-        
+
         return {
-            "status": "aggregated", 
-            "version": current_version, 
+            "status": "aggregated",
+            "version": current_version,
             "global_update": avg_update
         }
 

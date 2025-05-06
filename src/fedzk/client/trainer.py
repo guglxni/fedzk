@@ -8,10 +8,11 @@ This module contains the LocalTrainer class which handles local model training
 on a client's private data and returns the gradients for federated aggregation.
 """
 
+from typing import Dict, Optional
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Dict, Optional
 
 
 class LocalTrainer:
@@ -21,11 +22,11 @@ class LocalTrainer:
     This class performs local training for one epoch and returns the gradients
     which can then be used in the federated learning protocol.
     """
-    
+
     def __init__(
-        self, 
-        model: nn.Module, 
-        dataloader: DataLoader, 
+        self,
+        model: nn.Module,
+        dataloader: DataLoader,
         learning_rate: float = 0.01,
         loss_fn: Optional[nn.Module] = None
     ):
@@ -43,7 +44,7 @@ class LocalTrainer:
         self.learning_rate = learning_rate
         self.loss_fn = loss_fn if loss_fn is not None else nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=self.learning_rate)
-    
+
     def train_one_epoch(self) -> Dict[str, torch.Tensor]:
         """
         Trains the model for one epoch, returns gradients by parameter name.
@@ -56,22 +57,22 @@ class LocalTrainer:
             Dictionary mapping parameter names to their gradient tensors
         """
         self.model.train()
-        
+
         # Store initial parameter values
-        initial_params = {name: param.clone().detach() 
+        initial_params = {name: param.clone().detach()
                         for name, param in self.model.named_parameters()}
-        
+
         # Training loop
         for inputs, targets in self.dataloader:
             # Forward pass
             outputs = self.model(inputs)
             loss = self.loss_fn(outputs, targets)
-            
+
             # Backward pass
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-        
+
         # Compute parameter gradients (change from initial parameters)
         gradients = {}
         for name, param in self.model.named_parameters():
@@ -80,5 +81,5 @@ class LocalTrainer:
                 # Multiply by -1 to get actual gradient direction
                 gradient = (initial_params[name] - param.clone().detach()) * -1.0
                 gradients[name] = gradient
-        
+
         return gradients

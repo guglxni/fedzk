@@ -6,8 +6,10 @@ Coordinator logic for FedZK.
 Handles in-memory state for pending updates, proof verification, and aggregation.
 """
 
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
 from fedzk.prover.verifier import ZKVerifier
+
 
 class ProofVerificationError(Exception):
     """Raised when ZK proof verification fails."""
@@ -67,8 +69,7 @@ def get_status() -> Tuple[int, int]:
     Returns:
         pending_count, model_version
     """
-    return len(pending_updates), current_version 
- 
- 
- 
- 
+    return len(pending_updates), current_version
+
+
+

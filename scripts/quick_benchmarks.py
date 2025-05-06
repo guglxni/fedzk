@@ -8,14 +8,8 @@ FedZK Quick Benchmarking Script
 A simplified version of the benchmarking script that runs faster.
 """
 
-import time
 import json
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+import time
 
 # Benchmark parameters
 DATASETS = {
@@ -50,16 +44,16 @@ def benchmark_dataset(dataset_name):
         "imdb": 2_000_000,   # 2M parameters
         "reuters": 3_000_000  # 3M parameters
     }
-    
+
     # Simulate proof generation based on model size
     start_time = time.time()
     # Simulate computation - bigger models take longer
     time.sleep(model_size[dataset_name] / 10_000_000)  # Scale to reasonable time
     proof_time = time.time() - start_time
-    
+
     # Verification is about 20-30% of proof time
     verification_time = proof_time * 0.25
-    
+
     return {
         "dataset": dataset_name,
         "clients": DATASETS[dataset_name]["clients"],
@@ -71,7 +65,7 @@ def benchmark_dataset(dataset_name):
 
 def main():
     results = []
-    
+
     print("Running quick benchmarks...")
     for dataset in DATASETS.keys():
         print(f"Benchmarking {dataset}...")
@@ -80,11 +74,11 @@ def main():
         print(f"  Accuracy: {result['accuracy']:.2f}%")
         print(f"  Proof generation time: {result['proof_generation_time']:.4f}s")
         print(f"  Verification time: {result['verification_time']:.4f}s")
-    
+
     # Save results as JSON
     with open("benchmark_results.json", "w") as f:
         json.dump(results, f, indent=2)
-    
+
     # Print markdown table for the README
     print("\nMarkdown table for README:")
     print("| Dataset | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |")
@@ -93,4 +87,4 @@ def main():
         print(f"| {r['dataset']} | {r['clients']} | {r['rounds']} | {r['accuracy']:.1f}% | {r['proof_generation_time']:.1f}s | {r['verification_time']:.1f}s |")
 
 if __name__ == "__main__":
-    main() 
+    main()

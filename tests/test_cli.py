@@ -1,10 +1,8 @@
 """Tests for the CLI module."""
 
-import pytest
 from typer.testing import CliRunner
 
 from fedzk.cli import app
-
 
 runner = CliRunner()
 
@@ -27,4 +25,4 @@ def test_benchmark_command():
     """Test the benchmark command."""
     result = runner.invoke(app, ["benchmark", "run", "--help"])
     assert result.exit_code == 0
-    assert "Run end-to-end benchmark" in result.stdout 
+    assert "Run end-to-end benchmark" in result.stdout

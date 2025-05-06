@@ -2,14 +2,16 @@
 
 import pytest
 from fastapi.testclient import TestClient
+
 import fedzk.mpc.server as mpc_server
-from fedzk.prover.zkgenerator import ZKProver
 from fedzk.prover.verifier import ZKVerifier
+from fedzk.prover.zkgenerator import ZKProver
+
 
 @pytest.fixture(autouse=True)
 def patch_file_existence(monkeypatch):
     # Always pretend circuits and keys exist
-    monkeypatch.setattr(mpc_server.os.path, 'exists', lambda path: True)
+    monkeypatch.setattr(mpc_server.os.path, "exists", lambda path: True)
     # Set and reload allowed API keys
     monkeypatch.setenv("MPC_API_KEYS", "testkey")
     # Update server allowed keys list
@@ -19,7 +21,7 @@ client = TestClient(mpc_server.app)
 
 def test_generate_proof_standard(monkeypatch):
     # Stub standard proof generation
-    monkeypatch.setattr(ZKProver, 'generate_real_proof', lambda self, grads: ('proof_std', ['sig_std']))
+    monkeypatch.setattr(ZKProver, "generate_real_proof", lambda self, grads: ("proof_std", ["sig_std"]))
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/generate_proof",
@@ -32,8 +34,8 @@ def test_generate_proof_standard(monkeypatch):
 
 def test_generate_proof_secure(monkeypatch):
     # Stub secure proof generation with additional parameters
-    monkeypatch.setattr(ZKProver, 'generate_real_proof_secure', 
-                       lambda self, grads, max_norm=100, min_active=3: ('proof_sec', ['sig_sec']))
+    monkeypatch.setattr(ZKProver, "generate_real_proof_secure",
+                       lambda self, grads, max_norm=100, min_active=3: ("proof_sec", ["sig_sec"]))
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/generate_proof",
@@ -57,7 +59,7 @@ def test_generate_proof_validation_error():
 
 def test_generate_proof_missing_files(monkeypatch):
     # Simulate missing circuit/key files
-    monkeypatch.setattr(mpc_server.os.path, 'exists', lambda path: False)
+    monkeypatch.setattr(mpc_server.os.path, "exists", lambda path: False)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/generate_proof", json={"gradients": [0.5], "secure": False}, headers=headers
@@ -68,7 +70,7 @@ def test_generate_proof_missing_files(monkeypatch):
 
 def test_verify_proof_standard(monkeypatch):
     # Stub standard verification
-    monkeypatch.setattr(ZKVerifier, 'verify_real_proof', lambda self, proof, inputs: True)
+    monkeypatch.setattr(ZKVerifier, "verify_real_proof", lambda self, proof, inputs: True)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof",
@@ -81,7 +83,7 @@ def test_verify_proof_standard(monkeypatch):
 
 def test_verify_proof_secure(monkeypatch):
     # Stub secure verification
-    monkeypatch.setattr(ZKVerifier, 'verify_real_proof_secure', lambda self, proof, inputs: False)
+    monkeypatch.setattr(ZKVerifier, "verify_real_proof_secure", lambda self, proof, inputs: False)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof",
@@ -103,7 +105,7 @@ def test_verify_proof_validation_error():
 
 def test_verify_proof_missing_key(monkeypatch):
     # Simulate missing verification key file
-    monkeypatch.setattr(mpc_server.os.path, 'exists', lambda path: False)
+    monkeypatch.setattr(mpc_server.os.path, "exists", lambda path: False)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof", json={"proof": "p", "public_inputs": [], "secure": False}, headers=headers
@@ -152,7 +154,7 @@ def test_generate_proof_batch(monkeypatch):
         total = sum(gradient_dict["gradients"])
         # Divide by 10 to simulate the reverse conversion
         return (f"proof_{int(total//10)}", ["sig"])
-    monkeypatch.setattr(ZKProver, 'generate_real_proof', dummy_gen)
+    monkeypatch.setattr(ZKProver, "generate_real_proof", dummy_gen)
     headers = {"x-api-key": "testkey"}
     # Three gradient batches for three clients
     batch_payload = {
@@ -178,8 +180,7 @@ def test_generate_proof_batch(monkeypatch):
     assert proofs[0] == {"proof": "proof_6", "public_inputs": ["sig"]}
     assert proofs[1] == {"proof": "proof_9", "public_inputs": ["sig"]}
     # sum 1.5 truncated to int 1
-    assert proofs[2] == {"proof": "proof_1", "public_inputs": ["sig"]} 
- 
- 
- 
- 
+    assert proofs[2] == {"proof": "proof_1", "public_inputs": ["sig"]}
+
+
+

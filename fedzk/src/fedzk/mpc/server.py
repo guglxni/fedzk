@@ -6,15 +6,16 @@ MPC Server module for FedZK Proof generation and verification.
 Exposes /generate_proof and /verify_proof endpoints.
 """
 
-import os
 import logging
+import os
+from typing import Any, Dict, List, Optional
+
+import torch
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
-from typing import List, Any, Dict, Optional
-import torch
 
-from fedzk.prover.zkgenerator import ZKProver
 from fedzk.prover.verifier import ZKVerifier
+from fedzk.prover.zkgenerator import ZKProver
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -99,7 +100,7 @@ def generate_proof_endpoint(req: GenerateRequest, request: Request):
 
         # Convert float gradients to integers for the circuit
         integer_gradients = [int(g) if isinstance(g, int) else int(g * 10) for g in req.gradients]
-        
+
         # Prepare gradient dict for prover
         gradient_tensor = torch.tensor(integer_gradients)
         gradient_dict: Dict[str, torch.Tensor] = {"gradients": gradient_tensor}
@@ -109,16 +110,16 @@ def generate_proof_endpoint(req: GenerateRequest, request: Request):
             # For secure circuits, ensure we have integer values for maxNorm and minNonZero
             max_norm = getattr(req, "max_norm", 100)
             min_active = getattr(req, "min_active", 3)
-            
+
             # Convert to integers if they're floats
             if isinstance(max_norm, float):
                 max_norm = int(max_norm * 100)  # Scale appropriately
             if isinstance(min_active, float):
                 min_active = int(min_active)
-                
+
             proof, public_inputs = prover.generate_real_proof_secure(
-                gradient_dict, 
-                max_norm=max_norm, 
+                gradient_dict,
+                max_norm=max_norm,
                 min_active=min_active
             )
         else:
@@ -162,8 +163,7 @@ def verify_proof_endpoint(req: VerifyRequest, request: Request):
         raise
     except Exception as e:
         logger.exception("Error in verify_proof")
-        raise HTTPException(status_code=500, detail=str(e)) 
- 
- 
- 
- 
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+

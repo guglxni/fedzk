@@ -68,14 +68,15 @@ for file in *.sym; do
     fi
 done
 
-# Move .circom files to circuits
-echo -e "${YELLOW}Moving circuit files to circuits/...${RESET}"
-for file in *.circom; do
-    if [ -f "$file" ] && [ "$file" != "*.circom" ]; then
-        echo -e "Moving $file to circuits/"
-        mv "$file" circuits/
-    fi
-done
+# Commenting out the obsolete logic for moving .circom files to a root circuits/ directory
+# # Move .circom files to circuits
+# echo -e "${YELLOW}Moving circuit files to circuits/...${RESET}"
+# for file in *.circom; do
+#    if [ -f "$file" ] && [ "$file" != "*.circom" ]; then
+#        echo -e "Moving $file to circuits/"
+#        mv "$file" circuits/
+#    fi
+# done
 
 # Move build_benchmark.sh to scripts
 if [ -f "build_benchmark.sh" ]; then

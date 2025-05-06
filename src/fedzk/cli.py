@@ -8,18 +8,17 @@ This module provides a CLI for interacting with the FedZK system,
 allowing users to generate and verify zero-knowledge proofs.
 """
 
-import os
-import sys
 import json
-import torch
-import numpy as np
+import os
 from pathlib import Path
-import logging
-import typer
 from typing import Optional
 
-from fedzk.prover.zkgenerator import ZKProver
+import numpy as np
+import torch
+import typer
+
 from fedzk.prover.verifier import ZKVerifier
+from fedzk.prover.zkgenerator import ZKProver
 
 # Create Typer app
 app = typer.Typer(help="FedZK: Zero-Knowledge Proofs for Federated Learning")
@@ -36,28 +35,28 @@ app.add_typer(benchmark_app, name="benchmark")
 def load_gradient_data(input_path):
     """Load gradient data from a file (npz or JSON)."""
     input_path = Path(input_path)
-    
+
     if input_path.suffix == ".npz":
         # Load from numpy .npz file
         np_data = np.load(input_path)
         gradient_dict = {}
-        
+
         for key in np_data.files:
             gradient_dict[key] = torch.tensor(np_data[key])
-        
+
         return gradient_dict
-    
+
     elif input_path.suffix == ".json":
         # Load from JSON file
-        with open(input_path, 'r') as f:
+        with open(input_path, "r") as f:
             data = json.load(f)
-        
+
         gradient_dict = {}
         for key, value in data.items():
             gradient_dict[key] = torch.tensor(value)
-        
+
         return gradient_dict
-    
+
     else:
         raise ValueError(f"Unsupported file format: {input_path.suffix}")
 
@@ -67,20 +66,20 @@ def setup_command():
     """Setup ZK circuits and keys."""
     # This is just a wrapper for setup_zk.sh
     typer.echo("Setting up ZK circuits and keys...")
-    
+
     # Check if setup_zk.sh exists and is executable
     setup_script = Path(__file__).parent / "scripts" / "setup_zk.sh"
     if not setup_script.exists():
         typer.echo(f"Error: Setup script not found at {setup_script}")
         raise typer.Exit(code=1)
-    
+
     import subprocess
     result = subprocess.run([str(setup_script)], check=False)
-    
+
     if result.returncode != 0:
         typer.echo("Error: Setup failed")
         raise typer.Exit(code=result.returncode)
-    
+
     typer.echo("Setup completed successfully")
 
 
@@ -100,19 +99,19 @@ def generate_command(
 ):
     """Generate ZK proof for gradients."""
     typer.echo(f"Generating proof from {input_file}...")
-    
+
     try:
         gradient_dict = load_gradient_data(input_file)
     except Exception as e:
         typer.echo(f"Error loading gradient data: {e}")
         raise typer.Exit(code=1)
-    
+
     if secure:
         typer.echo("Using secure circuit with constraints")
-    
+
     if batch:
         typer.echo(f"Using batch processing with chunk size {chunk_size}")
-    
+
     # Initialize the prover
     if batch:
         from fedzk.prover.batch_zkgenerator import BatchZKProver
@@ -128,20 +127,20 @@ def generate_command(
             max_norm_squared=max_norm,
             min_active=min_active
         )
-    
+
     # Generate the proof
     try:
         if mpc_server:
             typer.echo(f"Using MPC server at {mpc_server} for proof generation")
             from fedzk.mpc.client import MPCClient
-            
+
             mpc_client = MPCClient(
                 server_url=mpc_server,
                 api_key=api_key,
                 fallback_disabled=fallback_disabled,
                 fallback_mode=fallback_mode
             )
-            
+
             result = mpc_client.generate_proof(
                 gradient_dict,
                 secure=secure,
@@ -153,13 +152,13 @@ def generate_command(
         else:
             # Generate proof locally
             result = prover.generate_proof(gradient_dict)
-        
+
         # Save the proof to file
-        with open(output, 'w') as f:
+        with open(output, "w") as f:
             json.dump(result, f, indent=2)
-        
+
         typer.echo(f"Proof saved to {output}")
-        
+
     except Exception as e:
         typer.echo(f"Error generating proof: {e}")
         raise typer.Exit(code=1)
@@ -175,38 +174,38 @@ def verify_command(
 ):
     """Verify ZK proof."""
     typer.echo(f"Verifying proof from {input_file}...")
-    
+
     try:
-        with open(input_file, 'r') as f:
+        with open(input_file, "r") as f:
             proof_data = json.load(f)
     except Exception as e:
         typer.echo(f"Error loading proof data: {e}")
         raise typer.Exit(code=1)
-    
+
     if secure:
         typer.echo("Using secure circuit verification")
-    
+
     if batch:
         typer.echo("Verifying batch proof")
-    
+
     # Initialize the verifier
     if batch:
         from fedzk.prover.batch_zkgenerator import BatchZKVerifier
         verifier = BatchZKVerifier(secure=secure)
     else:
         verifier = ZKVerifier(secure=secure)
-    
+
     # Verify the proof
     try:
         if mpc_server:
             typer.echo(f"Using MPC server at {mpc_server} for proof verification")
             from fedzk.mpc.client import MPCClient
-            
+
             mpc_client = MPCClient(
                 server_url=mpc_server,
                 api_key=api_key
             )
-            
+
             is_valid = mpc_client.verify_proof(
                 proof_data,
                 secure=secure,
@@ -215,13 +214,13 @@ def verify_command(
         else:
             # Verify proof locally
             is_valid = verifier.verify_proof(proof_data)
-        
+
         if is_valid:
             typer.echo("✅ Proof verification succeeded!")
         else:
             typer.echo("❌ Proof verification failed!")
             raise typer.Exit(code=1)
-        
+
     except Exception as e:
         typer.echo(f"Error verifying proof: {e}")
         raise typer.Exit(code=1)
@@ -234,7 +233,7 @@ def serve_mpc_command(
 ):
     """Serve the MPC proof HTTP API."""
     typer.echo(f"Starting MPC server on {host}:{port}...")
-    
+
     try:
         from fedzk.mpc.server import run_server
         run_server(host=host, port=port)
@@ -261,10 +260,10 @@ def benchmark_run_command(
 ):
     """Run end-to-end benchmark."""
     typer.echo(f"Running benchmark with {clients} clients...")
-    
+
     try:
         from fedzk.benchmark.runner import run_benchmark
-        
+
         results = run_benchmark(
             num_clients=clients,
             secure=secure,
@@ -274,19 +273,19 @@ def benchmark_run_command(
             coordinator_host=coordinator_host,
             coordinator_port=coordinator_port
         )
-        
+
         # Save results to JSON
-        with open(output, 'w') as f:
+        with open(output, "w") as f:
             json.dump(results, f, indent=2)
-        
+
         typer.echo(f"Benchmark results saved to {output}")
-        
+
         # Save to CSV if requested
         if csv:
             from fedzk.benchmark.reporter import save_to_csv
             save_to_csv(results, csv)
             typer.echo(f"CSV report saved to {csv}")
-        
+
         # Send to report URL if provided
         if report_url:
             import requests
@@ -302,7 +301,7 @@ def benchmark_run_command(
                     typer.echo(f"Error reporting results: HTTP {response.status_code}")
             except Exception as e:
                 typer.echo(f"Error reporting results: {e}")
-        
+
     except Exception as e:
         typer.echo(f"Error running benchmark: {e}")
         raise typer.Exit(code=1)
@@ -330,4 +329,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    main()

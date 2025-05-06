@@ -1,12 +1,12 @@
 import argparse
 import json
-from pathlib import Path
 
 import pytest
 import torch
 
-from fedzk.cli import generate_command, load_gradient_data
+from fedzk.cli import generate_command
 from fedzk.prover.zkgenerator import ZKProver
+
 
 class DummyResponse:
     def raise_for_status(self):
@@ -19,12 +19,12 @@ def patch_environment(monkeypatch, tmp_path):
     input_file = tmp_path / "input.json"
     input_file.write_text(json.dumps(data))
     # Patch load_gradient_data to load from our dummy file
-    monkeypatch.setattr('fedzk.cli.load_gradient_data', lambda path: {"param1": torch.tensor([1.0, 2.0])})
+    monkeypatch.setattr("fedzk.cli.load_gradient_data", lambda path: {"param1": torch.tensor([1.0, 2.0])})
     # Patch requests.post to simulate network failure
     import requests
-    monkeypatch.setattr(requests, 'post', lambda *args, **kwargs: DummyResponse())
+    monkeypatch.setattr(requests, "post", lambda *args, **kwargs: DummyResponse())
     # Stub local proof generation to known output
-    monkeypatch.setattr(ZKProver, 'generate_real_proof', lambda self, grad: ("local_proof", ["local_sig"]))
+    monkeypatch.setattr(ZKProver, "generate_real_proof", lambda self, grad: ("local_proof", ["local_sig"]))
     return input_file, tmp_path
 
 def test_mpc_fallback(tmp_path, patch_environment, capsys):
@@ -87,4 +87,4 @@ def test_mpc_no_fallback(tmp_path, patch_environment, capsys):
     captured = capsys.readouterr()
     # Should report MPC error without fallback message
     assert "MPC generate_proof failed" in captured.out
-    assert not output_file.exists() 
+    assert not output_file.exists()

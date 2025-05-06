@@ -54,13 +54,13 @@ jobs:
           if [ "${{ github.event.inputs.pre_release_tag }}" == "none" ]; then
             # For stable releases, use regular bump
             bumpversion --verbose ${{ github.event.inputs.bump_type }}
-            echo "version=$(python -c 'from fedzk.src.fedzk import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+            echo "version=$(python -c 'from fedzk import __version__; print(__version__)')" >> $GITHUB_OUTPUT
           else
             # For pre-releases
             bumpversion --verbose --no-commit --no-tag ${{ github.event.inputs.bump_type }}
             bumpversion --verbose --no-commit --no-tag prerelease --pre-release-tag ${{ github.event.inputs.pre_release_tag }}
             git add .
-            version=$(python -c 'from fedzk.src.fedzk import __version__; print(__version__)')
+            version=$(python -c 'from fedzk import __version__; print(__version__)')
             echo "version=$version" >> $GITHUB_OUTPUT
           fi
 
@@ -87,3 +87,10 @@ jobs:
           else
             echo "No changes to commit"
           fi
+
+      - name: Update CHANGELOG
+        run: |
+          # Get the new version after bump
+          version=$(python -c 'from fedzk import __version__; print(__version__)')
+          echo "New version for changelog: $version"
+          # (commands to update changelog would go here if automated)

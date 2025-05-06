@@ -9,8 +9,6 @@ This example demonstrates how to add differential privacy to
 federated learning to enhance privacy guarantees.
 """
 
-import numpy as np
-from typing import List, Dict, Tuple
 
 print("FedZK Differential Privacy Example")
 print("==================================")
@@ -21,4 +19,4 @@ print("\nKey concepts that would be demonstrated:")
 print("1. Adding calibrated noise to model updates")
 print("2. Privacy budget calculation")
 print("3. Integration with zero-knowledge proofs")
-print("4. Trade-offs between privacy and utility") 
+print("4. Trade-offs between privacy and utility")

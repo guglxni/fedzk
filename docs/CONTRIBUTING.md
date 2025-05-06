@@ -184,4 +184,6 @@ By contributing to FedZK, you agree that your contributions will be licensed und
 
 ## Questions?
 
-Feel free to [open an issue](https://github.com/guglxni/fedzk/issues/new) for any questions or join our [community channels](../README.md#community--support) for real-time discussions. 
+Feel free to [open an issue](https://github.com/guglxni/fedzk/issues/new) for any questions related to the project or contributing.
+
+We're in the process of establishing community channels - please check back for updates in the future. 

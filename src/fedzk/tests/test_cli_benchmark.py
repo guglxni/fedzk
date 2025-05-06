@@ -2,7 +2,9 @@
 
 import subprocess
 import sys
+
 import pytest
+
 
 def run_cli_command(args):
     """
@@ -38,8 +40,7 @@ def test_invalid_benchmark_command(cmd):
     args = cmd.split()
     result = run_cli_command(args)
     assert result.returncode != 0
-    assert "usage:" in result.stdout 
- 
- 
- 
- 
+    assert "usage:" in result.stdout
+
+
+

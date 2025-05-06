@@ -139,40 +139,37 @@ Example report structure:
 This data can be used for performance analysis, regression testing, and integration with monitoring systems.
 """
 
-import os
-import time
-import json
-import threading
-import multiprocessing
-import logging
 import argparse
-import sys
 import csv
+import json
+import logging
+import multiprocessing
+import os
 import random
-from pathlib import Path
-from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Dict, List, Tuple, Optional, Any, Union
+import sys
+import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
-import torch
-import torch.nn as nn
 import numpy as np
 import requests
-from rich.table import Table
+import torch
 from rich.console import Console
-from rich.progress import Progress, TaskID
+from rich.progress import Progress
+from rich.table import Table
+
+from fedzk.coordinator.logic import (
+    pending_updates,
+)
 
 # Import required FedZK components
-from fedzk.prover.zkgenerator import ZKProver
-from fedzk.prover.verifier import ZKVerifier
-from fedzk.coordinator.logic import submit_update, get_status, current_version, pending_updates
-
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("benchmark")
 
@@ -197,7 +194,7 @@ class CoordinatorServer:
         is_running (bool): Whether the server is currently running
         url (str): Complete URL to the running server
     """
-    
+
     def __init__(self, host: str = "127.0.0.1", port: int = 8000):
         """
         Initialize the coordinator server.
@@ -218,12 +215,12 @@ class CoordinatorServer:
         if self.is_running:
             logger.info("Server is already running")
             return
-        
+
         # Reset global state (this affects only the parent process)
         global current_version, pending_updates
         current_version = 1
         pending_updates.clear()
-        
+
         # Launch server in separate process
         self.server_process = multiprocessing.Process(
             target=run_coordinator_server,
@@ -232,10 +229,10 @@ class CoordinatorServer:
         )
         self.server_process.start()
         self.is_running = True
-        
+
         # Wait for server to start up
         self._wait_for_server()
-        
+
     def _wait_for_server(self, max_attempts=10, delay=0.5):
         """Wait for the server to become available."""
         for attempt in range(max_attempts):
@@ -246,12 +243,12 @@ class CoordinatorServer:
                     return True
             except requests.RequestException:
                 pass
-            
+
             time.sleep(delay)
-        
+
         logger.warning("Coordinator server did not start properly")
         return False
-        
+
     def stop_server(self):
         """Stop the server process."""
         if self.server_process and self.server_process.is_alive():
@@ -260,7 +257,7 @@ class CoordinatorServer:
             self.server_process.join(timeout=2)
         else:
             logger.warning("No server process running or already terminated")
-            
+
         self.is_running = False
         self.server_process = None
 
@@ -268,14 +265,15 @@ class CoordinatorServer:
 def run_coordinator_server(host: str, port: int):
     """Run the coordinator FastAPI server (called in a separate process)."""
     import uvicorn
+
     # Import here to avoid circular imports
     import fedzk.coordinator.api as api
-    
+
     # Reset global state in the child process
-    from fedzk.coordinator.logic import current_version, pending_updates
+    from fedzk.coordinator.logic import pending_updates
     current_version = 1
     pending_updates.clear()
-    
+
     # Start the server
     logger.info(f"Starting coordinator API server at {host}:{port}")
     uvicorn.run(api.app, host=host, port=port)
@@ -302,12 +300,12 @@ class Client:
         fallback_mode (str): How to handle MPC server failures (strict, warn, silent)
         metrics (dict): Performance metrics collected during execution
     """
-    
+
     def __init__(
-        self, 
-        client_id: int, 
+        self,
+        client_id: int,
         input_size: int = 10,
-        secure: bool = False, 
+        secure: bool = False,
         mpc_server: Optional[str] = None,
         coordinator_url: str = "http://127.0.0.1:8000",
         fallback_mode: str = "warn"
@@ -330,7 +328,7 @@ class Client:
         self.coordinator_url = coordinator_url
         self.fallback_mode = fallback_mode
         self.metrics = {}
-        
+
     def run_training_round(self) -> Dict[str, Any]:
         """
         Run a complete training round: train, prove, submit.
@@ -344,18 +342,18 @@ class Client:
             "mpc_server": bool(self.mpc_server),
             "timestamp": datetime.now().isoformat(),
         }
-        
+
         # Step 1: Simulate training (generate random gradients)
         t_train_start = time.time()
         gradients = self._generate_gradients()
         metrics["train_time"] = time.time() - t_train_start
         metrics["gradient_size"] = len(gradients["weights"])
-        
+
         # Step 2: Generate proof
         t_proof_start = time.time()
         proof, public_inputs = self._generate_proof(gradients)
         metrics["proof_time"] = time.time() - t_proof_start
-        
+
         # Step 3: Submit update to coordinator
         t_submit_start = time.time()
         try:
@@ -369,21 +367,21 @@ class Client:
             metrics["status"] = "failed"
             metrics["error"] = str(e)
             metrics["succeeded"] = False
-        
+
         # Calculate total round time
         metrics["total_time"] = metrics["train_time"] + metrics["proof_time"] + metrics["submit_time"]
-        
+
         # Store metrics
         self.metrics = metrics
         return metrics
-        
+
     def _generate_gradients(self) -> Dict[str, List[float]]:
         """Generate synthetic gradient data for benchmarking."""
         # Create random tensor with normal distribution
         weights = torch.randn(self.input_size).tolist()
         bias = torch.randn(1).tolist()
         return {"weights": weights, "bias": bias}
-        
+
     def _generate_proof(self, gradients: Dict[str, List[float]]) -> Tuple[Dict, List]:
         """Generate ZK proof for the gradients."""
         if self.mpc_server:
@@ -391,7 +389,7 @@ class Client:
             try:
                 headers = {"x-api-key": "test-key"} if "x-api-key" in os.environ else {}
                 resp = requests.post(
-                    f"{self.mpc_server}/generate_proof", 
+                    f"{self.mpc_server}/generate_proof",
                     json={"gradients": gradients["weights"] + gradients["bias"], "secure": self.secure},
                     headers=headers,
                     timeout=10
@@ -402,20 +400,20 @@ class Client:
             except Exception as e:
                 if self.fallback_mode == "strict":
                     raise RuntimeError(f"MPC server error: {e}")
-                
+
                 # Fallback to local proof generation
                 if self.fallback_mode == "warn":
                     logger.warning(f"MPC server failed, falling back to local proof generation: {e}")
-                
+
                 # Continue with local proof
-        
+
         # MOCK implementation for benchmark only (no real circuit required)
         logger.info(f"Client {self.client_id}: Generating mock ZK proof (no real circuit)")
-        
+
         # Simulate proof generation time based on data size and secure mode
         gradient_flat = gradients["weights"] + gradients["bias"]
         data_size = len(gradient_flat)
-        
+
         # Add some artificial delay to simulate real proof time
         if self.secure:
             # Secure proofs take longer
@@ -427,13 +425,13 @@ class Client:
             time.sleep(0.02 + 0.001 * data_size)
             proof = {"type": "mock_proof", "client": self.client_id}
             public_inputs = [sum(gradient_flat)]
-        
+
         return proof, public_inputs
-        
+
     def _submit_update(
-        self, 
-        gradients: Dict[str, List[float]], 
-        proof: Dict, 
+        self,
+        gradients: Dict[str, List[float]],
+        proof: Dict,
         public_inputs: List
     ) -> Tuple[str, int, Optional[Dict]]:
         """Submit update to coordinator and return status."""
@@ -535,21 +533,21 @@ def run_benchmark(
     console.print(f"Mode: {'Secure' if secure else 'Standard'} ZK circuit")
     if mpc_server:
         console.print(f"MPC Server: {mpc_server} (Fallback: {fallback_mode})")
-    
+
     # Start local coordinator server
     coordinator = CoordinatorServer(host=coordinator_host, port=coordinator_port)
     try:
         coordinator.start_server()
         coordinator_url = f"http://{coordinator_host}:{coordinator_port}"
-        
+
         # Track metrics per client
         all_metrics = []
         start_time = time.time()
-        
+
         # Prepare progress display
         with Progress() as progress:
             task = progress.add_task("[green]Running client simulations...", total=num_clients)
-            
+
             # Execute clients in parallel
             with ThreadPoolExecutor(max_workers=min(num_clients, 10)) as executor:
                 # Create and submit client tasks
@@ -564,24 +562,24 @@ def run_benchmark(
                         fallback_mode=fallback_mode
                     )
                     futures.append(executor.submit(client.run_training_round))
-                
+
                 # Collect results as they complete
                 for future in as_completed(futures):
                     metrics = future.result()
                     all_metrics.append(metrics)
                     progress.update(task, advance=1)
-        
+
         # Calculate overall statistics
         total_duration = time.time() - start_time
         successful = sum(1 for m in all_metrics if m.get("succeeded", False))
         aggregated = sum(1 for m in all_metrics if m.get("status") == "aggregated")
-        
+
         # Calculate averages
         avg_train = sum(m["train_time"] for m in all_metrics) / num_clients
         avg_proof = sum(m["proof_time"] for m in all_metrics) / num_clients
         avg_submit = sum(m["submit_time"] for m in all_metrics) / num_clients
         avg_total = sum(m["total_time"] for m in all_metrics) / num_clients
-        
+
         # Display table of results
         table = Table(title="FedZK End-to-End Benchmark Results")
         table.add_column("Client", justify="right", style="cyan")
@@ -590,7 +588,7 @@ def run_benchmark(
         table.add_column("Submit(s)", justify="right")
         table.add_column("Total(s)", justify="right")
         table.add_column("Status", style="green")
-        
+
         for m in all_metrics:
             table.add_row(
                 f"#{m['client_id']}",
@@ -600,14 +598,14 @@ def run_benchmark(
                 f"{m['total_time']:.4f}",
                 m["status"]
             )
-            
+
         console.print(table)
-        
+
         # Summary statistics
         summary_table = Table(title="Benchmark Summary")
         summary_table.add_column("Metric", style="blue")
         summary_table.add_column("Value", style="green")
-        
+
         summary_table.add_row("Total Clients", str(num_clients))
         summary_table.add_row("Successful Clients", f"{successful} ({successful/num_clients:.0%})")
         summary_table.add_row("Clients Triggering Aggregation", str(aggregated))
@@ -618,9 +616,9 @@ def run_benchmark(
         summary_table.add_row("Avg. Submission Time", f"{avg_submit:.4f}s")
         summary_table.add_row("Avg. Total Client Time", f"{avg_total:.4f}s")
         summary_table.add_row("Total Benchmark Duration", f"{total_duration:.4f}s")
-        
+
         console.print(summary_table)
-        
+
         # Prepare report
         report = {
             "id": str(uuid.uuid4()),
@@ -643,17 +641,17 @@ def run_benchmark(
             },
             "client_metrics": all_metrics
         }
-        
+
         # Save JSON report
         with open(output_json, "w") as f:
             json.dump(report, f, indent=2)
         console.print(f"Report saved to {output_json}")
-        
+
         # Save CSV report if requested
         if output_csv:
             with open(output_csv, "w", newline="") as f:
                 # Get fields from first client metrics
-                fields = ["client_id", "train_time", "proof_time", "submit_time", 
+                fields = ["client_id", "train_time", "proof_time", "submit_time",
                           "total_time", "status", "succeeded", "model_version"]
                 writer = csv.DictWriter(f, fieldnames=fields)
                 writer.writeheader()
@@ -662,7 +660,7 @@ def run_benchmark(
                     row = {field: m.get(field, "") for field in fields}
                     writer.writerow(row)
             console.print(f"CSV report saved to {output_csv}")
-        
+
         # Send report to URL if specified
         if report_url:
             try:
@@ -672,9 +670,9 @@ def run_benchmark(
                 console.print(f"[green]Report successfully sent to {report_url}")
             except Exception as e:
                 console.print(f"[red]Failed to send report: {e}")
-        
+
         return report
-        
+
     finally:
         # Clean up coordinator
         coordinator.stop_server()
@@ -723,9 +721,9 @@ def main():
         "--coordinator-port", type=int, default=8000,
         help="Port for coordinator server"
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         run_benchmark(
             num_clients=args.clients,

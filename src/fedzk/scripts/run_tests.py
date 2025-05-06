@@ -5,18 +5,16 @@ Comprehensive test runner for FedZK.
 This script runs all tests and generates a comprehensive report.
 """
 
+import argparse
+import json
 import os
+import re
+import subprocess
 import sys
 import time
-import json
-import argparse
-import subprocess
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-import re
-
-import pytest
+from pathlib import Path
+from typing import Any, Dict
 
 # Ensure project root is in Python path for imports
 project_root = Path(__file__).resolve().parent.parent
@@ -25,7 +23,7 @@ sys.path.insert(0, str(project_root))
 
 class TestReporter:
     """Handles test reporting and visualization."""
-    
+
     def __init__(self, output_dir: str):
         """
         Initialize the test reporter.
@@ -39,7 +37,7 @@ class TestReporter:
             "timestamp": datetime.now().isoformat(),
             "results": {}
         }
-    
+
     def add_test_result(self, test_type: str, result: Dict[str, Any]) -> None:
         """
         Add test result to the report.
@@ -50,9 +48,9 @@ class TestReporter:
         """
         if test_type not in self.report_data["results"]:
             self.report_data["results"][test_type] = []
-        
+
         self.report_data["results"][test_type].append(result)
-    
+
     def save_report(self) -> str:
         """
         Save the test report to a JSON file.
@@ -62,12 +60,12 @@ class TestReporter:
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = self.output_dir / f"test_report_{timestamp}.json"
-        
+
         with open(report_file, "w") as f:
             json.dump(self.report_data, f, indent=2)
-        
+
         return str(report_file)
-    
+
     def generate_html_report(self) -> str:
         """
         Generate HTML report from test results.
@@ -77,7 +75,7 @@ class TestReporter:
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         html_file = self.output_dir / f"test_report_{timestamp}.html"
-        
+
         # Get summary statistics
         summary = {
             "total_tests": 0,
@@ -87,7 +85,7 @@ class TestReporter:
             "error_tests": 0,
             "duration": 0
         }
-        
+
         for test_type, results in self.report_data["results"].items():
             for result in results:
                 if "summary" in result:
@@ -97,7 +95,7 @@ class TestReporter:
                     summary["skipped_tests"] += result["summary"].get("skipped", 0)
                     summary["error_tests"] += result["summary"].get("error", 0)
                     summary["duration"] += result["summary"].get("duration", 0)
-        
+
         # Generate HTML
         with open(html_file, "w") as f:
             f.write("<!DOCTYPE html>\n")
@@ -121,10 +119,10 @@ class TestReporter:
             f.write("  </style>\n")
             f.write("</head>\n")
             f.write("<body>\n")
-            
-            f.write(f"  <h1>FedZK Test Report</h1>\n")
+
+            f.write("  <h1>FedZK Test Report</h1>\n")
             f.write(f"  <p>Generated on: {self.report_data['timestamp']}</p>\n")
-            
+
             # Summary section
             f.write("  <div class='summary'>\n")
             f.write("    <h2>Summary</h2>\n")
@@ -135,39 +133,39 @@ class TestReporter:
             f.write(f"    <p class='error'>Error: {summary['error_tests']}</p>\n")
             f.write(f"    <p>Total duration: {summary['duration']:.2f} seconds</p>\n")
             f.write("  </div>\n")
-            
+
             # Results by test type
             for test_type, results in self.report_data["results"].items():
                 f.write(f"  <h2>{test_type.title()} Tests</h2>\n")
-                
+
                 for i, result in enumerate(results):
                     f.write(f"  <h3>Run {i+1}</h3>\n")
-                    
+
                     if "summary" in result:
                         f.write("  <table>\n")
                         f.write("    <tr><th>Metric</th><th>Value</th></tr>\n")
                         for key, value in result["summary"].items():
                             f.write(f"    <tr><td>{key.title()}</td><td>{value}</td></tr>\n")
                         f.write("  </table>\n")
-                    
+
                     if "details" in result and result["details"]:
                         f.write("  <h4>Test Details</h4>\n")
                         f.write("  <table>\n")
                         f.write("    <tr><th>Name</th><th>Outcome</th><th>Duration</th></tr>\n")
-                        
+
                         for detail in result["details"]:
                             outcome_class = detail.get("outcome", "")
-                            f.write(f"    <tr>\n")
+                            f.write("    <tr>\n")
                             f.write(f"      <td>{detail.get('name', '')}</td>\n")
                             f.write(f"      <td class='{outcome_class}'>{outcome_class}</td>\n")
                             f.write(f"      <td>{detail.get('duration', 0):.3f}s</td>\n")
-                            f.write(f"    </tr>\n")
-                            
+                            f.write("    </tr>\n")
+
                         f.write("  </table>\n")
-            
+
             f.write("</body>\n")
             f.write("</html>\n")
-        
+
         return str(html_file)
 
 
@@ -182,7 +180,7 @@ def parse_pytest_output(output: str) -> Dict[str, Any]:
         Dictionary with test result data
     """
     lines = output.splitlines()
-    
+
     # Extract summary using regex for pytest final summary line
     summary = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "error": 0, "duration": 0.0}
     for line in lines:
@@ -198,12 +196,12 @@ def parse_pytest_output(output: str) -> Dict[str, Any]:
             if m:
                 summary["duration"] = float(m.group(1))
             break
-    
+
     # Extract details for each test
     details = []
     current_test = None
     capture_details = False
-    
+
     for line in lines:
         if line.startswith("test") and "::" in line:
             parts = line.split(" ")
@@ -212,7 +210,7 @@ def parse_pytest_output(output: str) -> Dict[str, Any]:
                 "outcome": "unknown"
             }
             capture_details = True
-            
+
             if "PASSED" in line:
                 current_test["outcome"] = "passed"
                 try:
@@ -240,7 +238,7 @@ def parse_pytest_output(output: str) -> Dict[str, Any]:
                 details.append(current_test)
                 current_test = None
                 capture_details = False
-    
+
     return {
         "summary": summary,
         "details": details
@@ -258,27 +256,27 @@ def run_unit_tests(args: argparse.Namespace) -> Dict[str, Any]:
         Dictionary with test results
     """
     print("Running unit tests...")
-    
+
     cmd = [sys.executable, "-m", "pytest", "-xvs"]
-    
+
     if args.test_pattern:
         cmd.append(args.test_pattern)
-    
+
     if args.coverage:
         cmd.extend(["--cov=fedzk", "--cov-report=term"])
-    
+
     start_time = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True)
     duration = time.time() - start_time
-    
+
     output = result.stdout + result.stderr
-    
+
     if args.verbose:
         print(output)
-    
+
     test_results = parse_pytest_output(output)
     test_results["summary"]["duration"] = duration
-    
+
     return test_results
 
 
@@ -293,24 +291,24 @@ def run_integration_tests(args: argparse.Namespace) -> Dict[str, Any]:
         Dictionary with test results
     """
     print("Running integration tests...")
-    
+
     cmd = [sys.executable, "-m", "pytest", "-xvs", "tests/test_integration.py"]
-    
+
     if args.coverage:
         cmd.extend(["--cov=fedzk", "--cov-report=term"])
-    
+
     start_time = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True)
     duration = time.time() - start_time
-    
+
     output = result.stdout + result.stderr
-    
+
     if args.verbose:
         print(output)
-    
+
     test_results = parse_pytest_output(output)
     test_results["summary"]["duration"] = duration
-    
+
     return test_results
 
 
@@ -318,8 +316,8 @@ def validate_circuits_compile() -> bool:
     # Check for pre-built circuit artifacts instead of compiling at runtime
     print("🛠️ Checking presence of pre-built circuit artifacts...")
     required = [
-        "circuits/build/model_update.r1cs",
-        "circuits/build/model_update_secure.r1cs"
+        "src/fedzk/zk/circuits/build/model_update.r1cs",
+        "src/fedzk/zk/circuits/build/model_update_secure.r1cs"
     ]
     missing = [path for path in required if not os.path.exists(path)]
     if missing:
@@ -340,9 +338,9 @@ def run_zk_benchmarks(args: argparse.Namespace) -> Dict[str, Any]:
         Dictionary with benchmark results
     """
     print("Running ZK benchmarks...")
-    
+
     from fedzk.benchmark.cli import run_zk_benchmark
-    
+
     # Prepare benchmark arguments namespace
     benchmark_args = argparse.Namespace(
         iterations=args.benchmark_iterations,
@@ -352,23 +350,25 @@ def run_zk_benchmarks(args: argparse.Namespace) -> Dict[str, Any]:
         output_dir=args.output_dir,
         report=True
     )
-    
+    benchmark_args.r1cs_file = "src/fedzk/zk/circuits/build/model_update.r1cs"
+    benchmark_args.secure_r1cs_file = "src/fedzk/zk/circuits/build/model_update_secure.r1cs"
+
     # Attempt to run ZK benchmarks, catch errors to prevent crashing
     try:
         run_zk_benchmark(benchmark_args)
     except Exception as e:
         return {"error": str(e)}
-    
+
     # Load the most recent benchmark result
     result_files = list(Path(args.output_dir).glob("zk_benchmark_*.json"))
     result_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-    
+
     if not result_files:
         return {"error": "No benchmark results found"}
-    
+
     with open(result_files[0], "r") as f:
         benchmark_data = json.load(f)
-    
+
     return {
         "benchmark_data": benchmark_data,
         "file_path": str(result_files[0])
@@ -387,11 +387,11 @@ def run_e2e_benchmarks(args: argparse.Namespace) -> Dict[str, Any]:
     """
     if not args.e2e:
         return {"skipped": True}
-    
+
     print("Running end-to-end benchmarks...")
-    
+
     from fedzk.benchmark.cli import run_e2e_benchmark
-    
+
     # Create a namespace with the benchmark arguments
     benchmark_args = argparse.Namespace(
         clients=3,
@@ -404,19 +404,19 @@ def run_e2e_benchmarks(args: argparse.Namespace) -> Dict[str, Any]:
         output_dir=args.output_dir,
         report=True
     )
-    
+
     run_e2e_benchmark(benchmark_args)
-    
+
     # Load the most recent benchmark result
     result_files = list(Path(args.output_dir).glob("e2e_benchmark_*.json"))
     result_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-    
+
     if not result_files:
         return {"error": "No benchmark results found"}
-    
+
     with open(result_files[0], "r") as f:
         benchmark_data = json.load(f)
-    
+
     return {
         "benchmark_data": benchmark_data,
         "file_path": str(result_files[0])
@@ -428,34 +428,36 @@ def setup_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run comprehensive tests and benchmarks for FedZK."
     )
-    
-    parser.add_argument("--unit", action="store_true", 
+
+    parser.add_argument("--unit", action="store_true",
                        help="Run unit tests")
-    parser.add_argument("--integration", action="store_true", 
+    parser.add_argument("--integration", action="store_true",
                        help="Run integration tests")
-    parser.add_argument("--benchmark", action="store_true", 
+    parser.add_argument("--benchmark", action="store_true",
                        help="Run ZK benchmarks")
-    parser.add_argument("--e2e", action="store_true", 
+    parser.add_argument("--e2e", action="store_true",
                        help="Run end-to-end benchmarks")
-    parser.add_argument("--all", action="store_true", 
+    parser.add_argument("--all", action="store_true",
                        help="Run all tests and benchmarks")
-    parser.add_argument("--test-pattern", type=str, 
+    parser.add_argument("--test-pattern", type=str,
                        help="Pattern for selecting test files")
-    parser.add_argument("--coverage", action="store_true", 
+    parser.add_argument("--coverage", action="store_true",
                        help="Generate coverage report")
-    parser.add_argument("--secure", action="store_true", 
+    parser.add_argument("--secure", action="store_true",
                        help="Use secure zero-knowledge circuit")
-    parser.add_argument("--memory-profile", action="store_true", 
+    parser.add_argument("--memory-profile", action="store_true",
                        help="Enable memory profiling")
-    parser.add_argument("--benchmark-iterations", type=int, default=3, 
+    parser.add_argument("--benchmark-iterations", type=int, default=3,
                        help="Number of iterations for benchmarks")
-    parser.add_argument("--output-dir", type=str, default="test_results", 
+    parser.add_argument("--output-dir", type=str, default="test_results",
                        help="Directory to save test results")
-    parser.add_argument("--report", action="store_true", 
+    parser.add_argument("--report", action="store_true",
                        help="Generate HTML report")
-    parser.add_argument("--verbose", action="store_true", 
+    parser.add_argument("--verbose", action="store_true",
                        help="Show verbose output")
-    
+    parser.add_argument("--check-circuits", action="store_true",
+                       help="Check circuit artifacts")
+
     return parser
 
 
@@ -463,22 +465,22 @@ def main() -> None:
     """Main function."""
     parser = setup_parser()
     args = parser.parse_args()
-    
+
     # If no tests specified, show help
     if not any([args.unit, args.integration, args.benchmark, args.e2e, args.all]):
         parser.print_help()
         sys.exit(1)
-    
+
     # If --all specified, run all tests
     if args.all:
         args.unit = True
         args.integration = True
         args.benchmark = True
         args.e2e = True
-    
+
     # Create reporter
     reporter = TestReporter(args.output_dir)
-    
+
     # Run tests and collect results
     if args.unit:
         unit_results = run_unit_tests(args)
@@ -486,14 +488,14 @@ def main() -> None:
         print(f"Unit tests complete: {unit_results['summary']['passed']} passed, "
               f"{unit_results['summary'].get('failed', 0)} failed, "
               f"{unit_results['summary'].get('skipped', 0)} skipped\n")
-    
+
     if args.integration:
         integration_results = run_integration_tests(args)
         reporter.add_test_result("integration", integration_results)
         print(f"Integration tests complete: {integration_results['summary']['passed']} passed, "
               f"{integration_results['summary'].get('failed', 0)} failed, "
               f"{integration_results['summary'].get('skipped', 0)} skipped\n")
-    
+
     if args.benchmark:
         zk_results = {}
         if validate_circuits_compile():
@@ -507,16 +509,16 @@ def main() -> None:
             }
             print("⚠️ ZK benchmarks skipped due to failed Circom compilation.\n")
         reporter.add_test_result("zk_benchmark", zk_results)
-    
+
     if args.e2e:
         e2e_results = run_e2e_benchmarks(args)
         reporter.add_test_result("e2e_benchmark", e2e_results)
         print("End-to-end benchmarks complete\n")
-    
+
     # Save report
     report_file = reporter.save_report()
     print(f"Test report saved to: {report_file}")
-    
+
     # Generate HTML report if requested
     if args.report:
         html_report = reporter.generate_html_report()

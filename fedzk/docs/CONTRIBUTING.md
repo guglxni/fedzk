@@ -193,7 +193,7 @@ def new_command(
 If you have questions or need help:
 
 1. Open an issue with the "question" label
-2. Discuss in the project's communication channels
-3. Reach out to maintainers
+2. For code-related questions, use inline comments in the PR
+3. Reach out to project maintainers through GitHub issues
 
 Thank you for contributing to FedZK! 

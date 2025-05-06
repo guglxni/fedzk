@@ -9,48 +9,46 @@ This example demonstrates how to set up a multi-node federated learning system
 with zero-knowledge proofs across distributed infrastructure.
 """
 
-import os
 import argparse
-import logging
-from typing import Dict, List, Optional
+from typing import Dict
 
 # Simulating FedZK imports
 try:
+    from fedzk.client import FedZKClient
     from fedzk.coordinator import FedZKCoordinator
-    from fedzk.client import FedZKClient 
     from fedzk.mpc import SecureMPCNode
 except ImportError:
     print("FedZK not installed. This is just an example file.")
-    
+
     # Mock classes for example purposes
     class FedZKCoordinator:
         def __init__(self, config):
             self.config = config
             self.clients = []
-            
+
         def start(self, host="0.0.0.0", port=8000):
             print(f"Starting coordinator on {host}:{port}")
             print(f"Configuration: {self.config}")
-            
+
         def register_client(self, client_id, client_url):
             self.clients.append({"id": client_id, "url": client_url})
             print(f"Registered client {client_id} at {client_url}")
-            
+
     class FedZKClient:
         def __init__(self, config):
             self.config = config
-            
+
         def start(self, host="0.0.0.0", port=8001):
             print(f"Starting client on {host}:{port}")
             print(f"Configuration: {self.config}")
-            
+
         def connect_to_coordinator(self, coordinator_url):
             print(f"Connected to coordinator at {coordinator_url}")
-            
+
     class SecureMPCNode:
         def __init__(self, config):
             self.config = config
-            
+
         def start(self, host="0.0.0.0", port=9000):
             print(f"Starting MPC node on {host}:{port}")
             print(f"Configuration: {self.config}")
@@ -133,28 +131,28 @@ def run_mpc_node(args):
 def main():
     parser = argparse.ArgumentParser(description="FedZK distributed deployment example")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
-    
+
     # Coordinator arguments
     coord_parser = subparsers.add_parser("coordinator", help="Run a coordinator node")
     coord_parser.add_argument("--host", default="0.0.0.0", help="Host to bind")
     coord_parser.add_argument("--port", type=int, default=8000, help="Port to bind")
-    
+
     # Client arguments
     client_parser = subparsers.add_parser("client", help="Run a client node")
     client_parser.add_argument("--client-id", required=True, help="Client ID")
     client_parser.add_argument("--host", default="0.0.0.0", help="Host to bind")
     client_parser.add_argument("--port", type=int, default=8001, help="Port to bind")
-    client_parser.add_argument("--coordinator", default="http://localhost:8000", 
+    client_parser.add_argument("--coordinator", default="http://localhost:8000",
                               help="Coordinator URL")
-    
+
     # MPC node arguments
     mpc_parser = subparsers.add_parser("mpc", help="Run an MPC node")
     mpc_parser.add_argument("--node-id", required=True, help="Node ID")
     mpc_parser.add_argument("--host", default="0.0.0.0", help="Host to bind")
     mpc_parser.add_argument("--port", type=int, default=9000, help="Port to bind")
-    
+
     args = parser.parse_args()
-    
+
     if args.command == "coordinator":
         run_coordinator(args)
     elif args.command == "client":
@@ -173,4 +171,4 @@ if __name__ == "__main__":
     print("\nExample commands:")
     print("  python distributed_deployment.py coordinator")
     print("  python distributed_deployment.py client --client-id client1")
-    print("  python distributed_deployment.py mpc --node-id mpc1") 
+    print("  python distributed_deployment.py mpc --node-id mpc1")

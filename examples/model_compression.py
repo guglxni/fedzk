@@ -9,8 +9,6 @@ This example demonstrates how to reduce communication overhead
 in federated learning through model compression techniques.
 """
 
-import numpy as np
-from typing import List, Dict, Tuple
 
 print("FedZK Model Compression Example")
 print("===============================")
@@ -22,4 +20,4 @@ print("1. Gradient quantization")
 print("2. Sparse updates")
 print("3. Knowledge distillation")
 print("4. Low-rank decomposition")
-print("5. Integration with zero-knowledge proofs") 
+print("5. Integration with zero-knowledge proofs")

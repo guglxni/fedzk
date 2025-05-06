@@ -5,8 +5,8 @@
 set -e
 
 # Define paths
-CIRCUIT_PATH="circuits/model_update.circom"
-SECURE_CIRCUIT_PATH="circuits/model_update_secure.circom"
+CIRCUIT_PATH="src/fedzk/zk/circuits/model_update.circom"
+SECURE_CIRCUIT_PATH="src/fedzk/zk/circuits/model_update_secure.circom"
 BUILD_DIR="build/zk"
 PTAU_PATH="$BUILD_DIR/pot12_final.ptau"
 CIRCUIT_NAME="model_update"
@@ -35,7 +35,7 @@ echo "Step 1: Compiling standard circuit..."
 circom $CIRCUIT_PATH --r1cs --wasm --sym -o $BUILD_DIR
 
 echo "Step 1b: Compiling secure circuit..."
-circom -l circuits/vendor $SECURE_CIRCUIT_PATH --r1cs --wasm --sym -o $BUILD_DIR
+circom -l src/fedzk/zk/circuits/vendor $SECURE_CIRCUIT_PATH --r1cs --wasm --sym -o $BUILD_DIR
 
 # Generate a small Powers of Tau file (sufficient for our test circuits)
 echo "Generating Powers of Tau file..."

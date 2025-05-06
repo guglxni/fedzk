@@ -7,6 +7,44 @@ on:
     branches: [ main, master ]
 
 jobs:
+  compile-circuits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install circom and snarkjs
+        run: |
+          npm install -g circom@2.1.9
+          npm install -g snarkjs@0.6.11
+
+      - name: Compile Circom circuits
+        run: |
+          echo "Compiling circuits..."
+          BUILD_DIR="src/fedzk/zk/circuits/build"
+          mkdir -p $BUILD_DIR
+          for c_file in $(git ls-files src/fedzk/zk/circuits/*.circom); do
+            echo "Compiling $c_file..."
+            circom "$c_file" --r1cs --wasm --sym --output "$BUILD_DIR"
+            if [ $? -ne 0 ]; then
+              echo "Error compiling $c_file"
+              exit 1
+            fi
+          done
+          echo "Circuit compilation complete."
+
+      - name: Cache Circom build artifacts
+        uses: actions/cache@v4
+        with:
+          path: src/fedzk/zk/circuits/build
+          key: ${{ runner.os }}-circom-build-${{ hashFiles('src/fedzk/zk/circuits/**/*.circom') }}
+          restore-keys: |
+            ${{ runner.os }}-circom-build-
+
   build-and-test:
     runs-on: ubuntu-latest
 

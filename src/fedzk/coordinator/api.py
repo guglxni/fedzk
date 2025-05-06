@@ -6,11 +6,12 @@ Coordinator API for FedZK.
 Defines REST endpoints for submitting updates and checking status.
 """
 
+from typing import Any, Dict, List, Optional
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-from typing import Dict, List, Any, Optional
 
-from fedzk.coordinator.logic import submit_update, get_status, ProofVerificationError
+from fedzk.coordinator.logic import ProofVerificationError, get_status, submit_update
 
 app = FastAPI(
     title="FedZK Coordinator API",
@@ -43,8 +44,7 @@ def submit_update_endpoint(request: UpdateRequest):
 @app.get("/status", response_model=StatusResponse)
 def get_status_endpoint():
     pending, version = get_status()
-    return StatusResponse(pending_updates=pending, model_version=version) 
- 
- 
- 
- 
+    return StatusResponse(pending_updates=pending, model_version=version)
+
+
+

@@ -1,1 +1,1 @@
-"""Test package for FedZK.""" 
+"""Test package for FedZK."""

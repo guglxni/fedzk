@@ -10,14 +10,10 @@ FedZK Benchmarking package.
 This package provides comprehensive benchmarking for FedZK components.
 """
 
-from fedzk.benchmark.utils import (
-    BenchmarkResults,
-    benchmark,
-    generate_random_gradients
-)
+from fedzk.benchmark.utils import BenchmarkResults, benchmark, generate_random_gradients
 
 __all__ = [
-    'BenchmarkResults',
-    'benchmark',
-    'generate_random_gradients'
+    "BenchmarkResults",
+    "benchmark",
+    "generate_random_gradients"
 ]
