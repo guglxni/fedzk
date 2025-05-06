@@ -18,7 +18,7 @@ jobs:
 
       - name: Install MkDocs deps
         run: |
-          pip install "mkdocs-material" pymdown-extensions mdx_include mkdocs-gen-files mkdocs-awesome-pages-plugin
+          pip install "mkdocs-material" pymdown-extensions mdx_include mkdocs-gen-files mkdocs-awesome-pages-plugin "mkdocstrings[python]" mkdocs-git-revision-date-localized-plugin
 
       - name: Build docs
         run: mkdocs build --config-file fedzk/scripts/ci/mkdocs.yml
