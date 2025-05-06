@@ -19,8 +19,12 @@ jobs:
 
       - name: Install circom and snarkjs
         run: |
-          npm install -g circom@2.1.9
+          # SnarkJS from npm
           npm install -g snarkjs@0.6.11
+          # Download Circom v2.1.5 binary (npm package deprecated)
+          CIRCOM_URL=https://github.com/iden3/circom/releases/download/v2.1.5/circom-linux-amd64
+          curl -L "$CIRCOM_URL" -o /usr/local/bin/circom
+          chmod +x /usr/local/bin/circom
 
       - name: Compile Circom circuits
         run: |

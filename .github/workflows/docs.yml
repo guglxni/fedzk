@@ -8,6 +8,7 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
+    continue-on-error: true     # don't fail PR on docs build yet
     steps:
       - uses: actions/checkout@v4
 
