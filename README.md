@@ -43,6 +43,9 @@
     <a href="https://github.com/guglxni/fedzk/issues">
       <img src="https://img.shields.io/github/issues/guglxni/fedzk?style=flat-square" alt="Issues">
     </a>
+    <a href="https://pypi.org/project/fedzk/">
+      <img src="https://img.shields.io/pypi/v/fedzk?style=flat-square" alt="PyPI">
+    </a>
     <img src="https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square" alt="Version">
   </p>
 </div>
@@ -160,7 +163,19 @@ The FEDzk framework consists of three main components:
 
 ## 💻 Installation
 
-### Standard Installation
+### From PyPI (Recommended)
+
+```bash
+# Install from PyPI
+pip install fedzk
+
+# With optional dependencies
+pip install fedzk[all]     # All dependencies
+pip install fedzk[dev]     # Development tools
+pip install fedzk[docs]    # Documentation generation
+```
+
+### From Source
 
 ```bash
 # Clone the repository
@@ -173,18 +188,6 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install the package
 pip install -e .
-```
-
-### Installation with Additional Features
-
-```bash
-# Install with all optional dependencies
-pip install -e ".[all]"
-
-# Install with specific feature sets
-pip install -e ".[benchmark]"  # For benchmarking tools
-pip install -e ".[dev]"        # For development tools
-pip install -e ".[docs]"       # For documentation generation
 ```
 
 ### Docker Installation

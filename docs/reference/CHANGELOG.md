@@ -5,6 +5,16 @@ All notable changes to FedZK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2025-05-10
+
+### Added
+- PyPI package available for production use
+- Full documentation with installation and usage guides
+
+### Changed
+- Upgraded from release candidate to general availability
+- Improved testing reliability
+
 ## [1.0.0-rc1] - 2025-05-06
 
 ### Added
@@ -39,3 +49,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.0.0-rc1]: https://github.com/guglxni/fedzk/compare/v0.1.0...v1.0.0-rc1
 [0.1.0]: https://github.com/guglxni/fedzk/releases/tag/v0.1.0
+[1.0.0]: https://github.com/guglxni/fedzk/compare/v1.0.0-rc1...v1.0.0 
