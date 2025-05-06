@@ -20,6 +20,7 @@ requests = ">=2.25.0"
 rich = ">=12.0.0"
 typer = ">=0.4.0"
 httpx = ">=0.21.0"
+torch = ">=1.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=6.2.0"
