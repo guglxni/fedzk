@@ -4,6 +4,7 @@ site_author: FedZK Team
 repo_url: https://github.com/username/fedzk
 repo_name: fedzk
 edit_uri: edit/main/docs/
+docs_dir: ../../../docs # Path to your markdown files from the project root, relative to this config file
 
 # Navigation
 nav:
