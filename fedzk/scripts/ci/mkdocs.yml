@@ -23,7 +23,7 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
-  custom_dir: docs/overrides
+  # custom_dir: docs/overrides
   logo: images/logo.png
   features:
     - navigation.instant
