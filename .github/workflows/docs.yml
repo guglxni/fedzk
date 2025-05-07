@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -18,7 +20,7 @@ jobs:
 
       - name: Install MkDocs deps
         run: |
-          pip install "mkdocs-material" pymdown-extensions mdx_include mkdocs-gen-files mkdocs-awesome-pages-plugin "mkdocstrings[python]" mkdocs-git-revision-date-localized-plugin
+          pip install "mkdocs-material[imaging]" pymdown-extensions mdx_include mkdocs-gen-files mkdocs-awesome-pages-plugin "mkdocstrings[python]" mkdocs-git-revision-date-localized-plugin
           pip install .
 
       - name: Build docs

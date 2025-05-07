@@ -88,11 +88,11 @@ extra:
       link: https://github.com/username/fedzk
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/fedzk/
-  version:
-    provider: mike
+  # version: # Temporarily disable mike for versioning
+  #   provider: mike # Temporarily disable mike for versioning
 
-extra_css:
-  - assets/stylesheets/extra.css
+# extra_css: # Temporarily disable extra_css as the file doesn't exist
+#   - assets/stylesheets/extra.css # Temporarily disable extra_css as the file doesn't exist
 
 # Additional JavaScript for Mermaid diagrams
 extra_javascript:
