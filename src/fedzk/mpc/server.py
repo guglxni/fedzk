@@ -31,11 +31,15 @@ STD_WASM_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "model_update.wasm")
 STD_ZKEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "proving_key.zkey")
 SEC_WASM_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "model_update_secure.wasm")
 SEC_ZKEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "proving_key_secure.zkey")
+STD_VER_KEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "verification_key.json")
+SEC_VER_KEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "verification_key_secure.json")
 
 STD_WASM = os.getenv("MPC_STD_WASM_PATH", STD_WASM_DEFAULT)
 STD_ZKEY = os.getenv("MPC_STD_ZKEY_PATH", STD_ZKEY_DEFAULT)
 SEC_WASM = os.getenv("MPC_SEC_WASM_PATH", SEC_WASM_DEFAULT)
 SEC_ZKEY = os.getenv("MPC_SEC_ZKEY_PATH", SEC_ZKEY_DEFAULT)
+STD_VER_KEY = os.getenv("MPC_STD_VER_KEY_PATH", STD_VER_KEY_DEFAULT)
+SEC_VER_KEY = os.getenv("MPC_SEC_VER_KEY_PATH", SEC_VER_KEY_DEFAULT)
 
 app = FastAPI(
     title="FedZK MPC Proof Server",
@@ -107,8 +111,10 @@ async def generate_proof_endpoint(req: GenerateRequest, api_key: str = Depends(v
 async def verify_proof_endpoint(req: VerifyRequest, api_key: str = Depends(verify_api_key)):
     try:
         logger.info(f"Verify request received (secure={req.secure})")
-        verifier = ZKVerifier(secure=req.secure)
-        is_valid = verifier.verify_proof(req.proof, req.public_inputs)
+        # Use correct verification key path based on secure parameter
+        vkey_path = SEC_VER_KEY if req.secure else STD_VER_KEY
+        verifier = ZKVerifier(verification_key_path=vkey_path)
+        is_valid = verifier.verify_real_proof(req.proof, req.public_inputs)
         return VerifyResponse(valid=is_valid)
     except Exception as e:
         logger.exception("Error in verify_proof")

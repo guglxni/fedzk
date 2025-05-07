@@ -193,7 +193,11 @@ def verify_command(
         from fedzk.prover.batch_zkgenerator import BatchZKVerifier
         verifier = BatchZKVerifier(secure=secure)
     else:
-        verifier = ZKVerifier(secure=secure)
+        # Determine the verification key path based on the secure flag
+        from pathlib import Path
+        ASSET_DIR = Path(__file__).resolve().parent / "zk"
+        vkey_path = str(ASSET_DIR / "verification_key_secure.json" if secure else "verification_key.json")
+        verifier = ZKVerifier(verification_key_path=vkey_path)
 
     # Verify the proof
     try:
@@ -213,7 +217,20 @@ def verify_command(
             )
         else:
             # Verify proof locally
-            is_valid = verifier.verify_proof(proof_data)
+            if batch:
+                is_valid = verifier.verify_proof(proof_data)
+            else:
+                # The ZKVerifier from verifier.py takes proof and public_inputs separately
+                if isinstance(proof_data, list) and len(proof_data) >= 2:
+                    # Handle tuple-like format: [proof_dict, public_inputs_list]
+                    proof, public_inputs = proof_data[0], proof_data[1]
+                    is_valid = verifier.verify_real_proof(proof, public_inputs)
+                elif isinstance(proof_data, dict) and "proof" in proof_data and "public_inputs" in proof_data:
+                    # Handle object format: {"proof": {...}, "public_inputs": [...]}
+                    is_valid = verifier.verify_real_proof(proof_data["proof"], proof_data["public_inputs"])
+                else:
+                    typer.echo("Error: Unrecognized proof data format")
+                    raise typer.Exit(code=1)
 
         if is_valid:
             typer.echo("✅ Proof verification succeeded!")

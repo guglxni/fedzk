@@ -10,8 +10,9 @@ from fastapi.testclient import TestClient
 
 import fedzk.mpc.server as mpc_server # Keep for monkeypatching os.path.exists
 from fedzk.mpc.server import app # Import the FastAPI app directly
-from fedzk.prover.zkgenerator import ZKProver, ZKVerifier
+from fedzk.prover.zkgenerator import ZKProver
 from fedzk.prover.batch_zkgenerator import BatchZKProver # Added import
+from fedzk.prover.verifier import ZKVerifier
 
 
 @pytest.fixture(autouse=True)
@@ -79,7 +80,7 @@ def test_generate_proof_missing_files(monkeypatch):
 
 
 def test_verify_proof_standard(monkeypatch):
-    monkeypatch.setattr(ZKVerifier, "verify_proof", lambda self, proof, inputs: True)
+    monkeypatch.setattr(ZKVerifier, "verify_real_proof", lambda self, proof, inputs: True)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof",
@@ -91,7 +92,7 @@ def test_verify_proof_standard(monkeypatch):
 
 
 def test_verify_proof_secure(monkeypatch):
-    monkeypatch.setattr(ZKVerifier, "verify_proof", lambda self, proof, inputs: False)
+    monkeypatch.setattr(ZKVerifier, "verify_real_proof", lambda self, proof, inputs: False)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof",
@@ -112,21 +113,8 @@ def test_verify_proof_validation_error():
 
 
 def test_verify_proof_missing_key(monkeypatch):
-    # This test's premise changes if ZKVerifier loads keys in __init__ using ASSET_DIR
-    # If ASSET_DIR points to non-existent files, ZKVerifier init might fail.
-    # If verify_proof is mocked, the os.path.exists on key files won't be hit by ZKVerifier directly.
-    # The server-side `verify_proof_endpoint` needs to correctly instantiate ZKVerifier first.
-    
-    # Forcing a scenario where the server itself tries to check key existence (which it shouldn't do anymore)
-    # monkeypatch.setattr(mpc_server.os.path, "exists", lambda path: False if "verification_key" in path else True)
-    
-    # More robust: Assume ZKVerifier handles its own key loading. If server passes control to it,
-    # and ZKVerifier.verify_proof is mocked, this test becomes less about server logic for missing keys.
-    # Let's assume the server correctly calls ZKVerifier. If ZKVerifier.verify_proof is mocked, this test becomes less about server logic for missing keys.
-    # If the server tries to pre-check keys (which it was doing with STD_VER_KEY), that was the bug.
-
     # Let's test the scenario where ZKVerifier.verify_proof is successfully called but returns False
-    monkeypatch.setattr(ZKVerifier, "verify_proof", lambda self, proof, inputs: False)
+    monkeypatch.setattr(ZKVerifier, "verify_real_proof", lambda self, proof, inputs: False)
     headers = {"x-api-key": "testkey"}
     response = client.post(
         "/verify_proof", json={"proof": {"pi_a":[]}, "public_inputs": [], "secure": False}, headers=headers
@@ -157,7 +145,7 @@ def test_verify_proof_unauthorized_bad_key():
         headers={"x-api-key": "bad"}
     )
     assert response.status_code == 401
-    assert "Invalid or missing API key" in response.json().get("detail", "")
+    assert "Invalid API key" in response.json().get("detail", "")
 
 def test_generate_proof_batch(monkeypatch):
     def dummy_batch_gen(self, gradient_dict_tensors):
