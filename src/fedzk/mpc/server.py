@@ -9,25 +9,37 @@ Exposes /generate_proof and /verify_proof endpoints.
 import logging
 import os
 from typing import Any, Dict, List, Optional
+from pathlib import Path
 
 import torch
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends, Header
 from pydantic import BaseModel, Field
 
 from fedzk.prover.verifier import ZKVerifier
 from fedzk.prover.zkgenerator import ZKProver
+from fedzk.prover.batch_zkgenerator import BatchZKProver
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mpc_server")
 
-# Load circuit and key paths from environment or defaults
-STD_WASM = os.getenv("ZK_WASM", "zk/model_update.wasm")
-STD_ZKEY = os.getenv("ZK_ZKEY", "zk/proving_key.zkey")
-SEC_WASM = os.getenv("ZK_SEC_WASM", "zk/model_update_secure.wasm")
-SEC_ZKEY = os.getenv("ZK_SEC_ZKEY", "zk/proving_key_secure.zkey")
-STD_VER_KEY = os.getenv("ZK_VER_KEY", "zk/verification_key.json")
-SEC_VER_KEY = os.getenv("ZK_SEC_VER_KEY", "zk/verification_key_secure.json")
+# Attempt to get asset paths from environment or use defaults
+# These defaults assume the server is run from the project root
+# and assets are in src/fedzk/zk/
+PROJ_ROOT = Path(__file__).resolve().parent.parent.parent # Assuming src/fedzk/mpc/server.py
+STD_WASM_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "model_update.wasm")
+STD_ZKEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "proving_key.zkey")
+SEC_WASM_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "model_update_secure.wasm")
+SEC_ZKEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "proving_key_secure.zkey")
+STD_VER_KEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "verification_key.json")
+SEC_VER_KEY_DEFAULT = str(PROJ_ROOT / "src" / "fedzk" / "zk" / "verification_key_secure.json")
+
+STD_WASM = os.getenv("MPC_STD_WASM_PATH", STD_WASM_DEFAULT)
+STD_ZKEY = os.getenv("MPC_STD_ZKEY_PATH", STD_ZKEY_DEFAULT)
+SEC_WASM = os.getenv("MPC_SEC_WASM_PATH", SEC_WASM_DEFAULT)
+SEC_ZKEY = os.getenv("MPC_SEC_ZKEY_PATH", SEC_ZKEY_DEFAULT)
+STD_VER_KEY = os.getenv("MPC_STD_VER_KEY_PATH", STD_VER_KEY_DEFAULT)
+SEC_VER_KEY = os.getenv("MPC_SEC_VER_KEY_PATH", SEC_VER_KEY_DEFAULT)
 
 app = FastAPI(
     title="FedZK MPC Proof Server",
@@ -37,130 +49,73 @@ app = FastAPI(
 
 # Load allowed API keys from environment variable (comma-separated)
 raw_keys = os.getenv("MPC_API_KEYS", "")
-ALLOWED_API_KEYS = [k.strip() for k in raw_keys.split(",") if k.strip()]
+ALLOWED_API_KEYS = set(os.getenv("MPC_ALLOWED_API_KEYS", "testkey,anotherkey").split(","))
+
+# Stub for API key verification dependency
+async def verify_api_key(x_api_key: Optional[str] = Header(None, alias="x-api-key")):
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="Missing API key")
+    if x_api_key not in ALLOWED_API_KEYS:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return x_api_key
 
 class GenerateRequest(BaseModel):
-    gradients: Optional[List[float]] = Field(None, description="Flattened gradient vector")
+    gradients: Dict[str, List[float]]
     batch: bool = Field(False, description="Enable batch processing of multiple gradient sets")
-    gradient_batches: Optional[List[List[float]]] = Field(None, description="List of gradient lists for batch processing")
     secure: bool = Field(False, description="Use secure circuit with constraints")
-    max_norm: float = Field(100.0, description="Maximum allowed L2 norm for secure circuit")
-    min_active: int = Field(3, description="Minimum required non-zero elements for secure circuit")
+    max_norm_squared: Optional[float] = Field(None, alias="maxNorm")
+    min_active: Optional[int] = Field(None, alias="minNonZero")
+    chunk_size: Optional[int] = Field(None, description="Chunk size for batch processing")
 
 class GenerateResponse(BaseModel):
     proof: Any = Field(..., description="Generated proof object")
     public_inputs: Any = Field(..., description="Public signals for proof verification")
 
 class VerifyRequest(BaseModel):
-    proof: Any = Field(..., description="Proof object to verify")
-    public_inputs: Any = Field(..., description="Public signals for verification")
-    secure: bool = Field(False, description="Use secure circuit verification")
+    proof: Dict[str, Any]
+    public_inputs: List[Any]
+    secure: bool = False
 
 class VerifyResponse(BaseModel):
-    valid: bool = Field(..., description="Whether the proof is valid")
+    valid: bool
 
-@app.post("/generate_proof")
-def generate_proof_endpoint(req: GenerateRequest, request: Request):
-    logger.info(f"Generate request received (secure={req.secure})")
-    # Authenticate API key
-    api_key = request.headers.get("x-api-key")
-    if api_key not in ALLOWED_API_KEYS:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-    # Validate request: gradients or gradient_batches must be provided
-    if not req.batch and req.gradients is None:
-        raise HTTPException(status_code=422, detail="Missing 'gradients' for proof generation")
+@app.post("/generate_proof", summary="Generate ZK Proof Remotely")
+async def generate_proof_endpoint(req: GenerateRequest, api_key: str = Depends(verify_api_key)):
     try:
-        # Handle batch requests
+        gradient_dict_tensors = {k: torch.tensor(v) for k, v in req.gradients.items()}
+        
         if req.batch:
-            if not req.gradient_batches:
-                raise HTTPException(status_code=422, detail="Missing gradient_batches for batch processing")
-            results = []
-            for grads in req.gradient_batches:
-                # Convert float gradients to integers for the circuit
-                integer_grads = [int(g) if isinstance(g, int) else int(g * 10) for g in grads]
-                gradient_tensor = torch.tensor(integer_grads)
-                gradient_dict: Dict[str, torch.Tensor] = {"gradients": gradient_tensor}
-                # Generate proof per batch item
-                if req.secure:
-                    proof, public_inputs = ZKProver(SEC_WASM, SEC_ZKEY).generate_real_proof_secure(gradient_dict)
-                else:
-                    proof, public_inputs = ZKProver(STD_WASM, STD_ZKEY).generate_real_proof(gradient_dict)
-                results.append({"proof": proof, "public_inputs": public_inputs})
-            return {"batch_proofs": results}
-        # Choose circuit and key based on secure flag
-        secure = req.secure
-        circuit_path = SEC_WASM if secure else STD_WASM
-        key_path = SEC_ZKEY if secure else STD_ZKEY
-
-        # Validate existence of files
-        if not os.path.exists(circuit_path) or not os.path.exists(key_path):
-            msg = f"Circuit or key not found: {circuit_path}, {key_path}"
-            logger.error(msg)
-            raise HTTPException(status_code=500, detail=msg)
-
-        # Convert float gradients to integers for the circuit
-        integer_gradients = [int(g) if isinstance(g, int) else int(g * 10) for g in req.gradients]
-
-        # Prepare gradient dict for prover
-        gradient_tensor = torch.tensor(integer_gradients)
-        gradient_dict: Dict[str, torch.Tensor] = {"gradients": gradient_tensor}
-
-        prover = ZKProver(circuit_path, key_path)
-        if secure:
-            # For secure circuits, ensure we have integer values for maxNorm and minNonZero
-            max_norm = getattr(req, "max_norm", 100)
-            min_active = getattr(req, "min_active", 3)
-
-            # Convert to integers if they're floats
-            if isinstance(max_norm, float):
-                max_norm = int(max_norm * 100)  # Scale appropriately
-            if isinstance(min_active, float):
-                min_active = int(min_active)
-
-            proof, public_inputs = prover.generate_real_proof_secure(
-                gradient_dict,
-                max_norm=max_norm,
-                min_active=min_active
+            logger.info(f"Batch proof request, chunk_size={req.chunk_size}")
+            prover = BatchZKProver(
+                chunk_size=req.chunk_size,
+                secure=req.secure,
+                max_norm_squared=req.max_norm_squared,
+                min_active=req.min_active
             )
+            proof, public_inputs = prover.generate_proof(gradient_dict_tensors)
         else:
-            proof, public_inputs = prover.generate_real_proof(gradient_dict)
+            logger.info(f"Single proof request: secure={req.secure}")
+            prover = ZKProver(
+                secure=req.secure, 
+                max_norm_squared=req.max_norm_squared, 
+                min_active=req.min_active
+            )
+            proof, public_inputs = prover.generate_proof(gradient_dict_tensors)
 
-        # Single-proof response
-        return {"proof": proof, "public_inputs": public_inputs}
-
-    except HTTPException:
-        raise
+        return {"proof": proof, "public_inputs": public_inputs, "status": "success"}
     except Exception as e:
         logger.exception("Error in generate_proof")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/verify_proof", response_model=VerifyResponse)
-def verify_proof_endpoint(req: VerifyRequest, request: Request):
-    logger.info(f"Verify request received (secure={req.secure})")
-    # Authenticate API key
-    api_key = request.headers.get("x-api-key")
-    if api_key not in ALLOWED_API_KEYS:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+@app.post("/verify_proof", response_model=VerifyResponse, summary="Verify ZK Proof Remotely")
+async def verify_proof_endpoint(req: VerifyRequest, api_key: str = Depends(verify_api_key)):
     try:
-        # Choose verification key
-        secure = req.secure
-        ver_key = SEC_VER_KEY if secure else STD_VER_KEY
-
-        if not os.path.exists(ver_key):
-            msg = f"Verification key not found: {ver_key}"
-            logger.error(msg)
-            raise HTTPException(status_code=500, detail=msg)
-
-        verifier = ZKVerifier(ver_key)
-        if secure:
-            valid = verifier.verify_real_proof_secure(req.proof, req.public_inputs)
-        else:
-            valid = verifier.verify_real_proof(req.proof, req.public_inputs)
-
-        return VerifyResponse(valid=valid)
-
-    except HTTPException:
-        raise
+        logger.info(f"Verify request received (secure={req.secure})")
+        # Use correct verification key path based on secure parameter
+        vkey_path = SEC_VER_KEY if req.secure else STD_VER_KEY
+        verifier = ZKVerifier(verification_key_path=vkey_path)
+        is_valid = verifier.verify_real_proof(req.proof, req.public_inputs)
+        return VerifyResponse(valid=is_valid)
     except Exception as e:
         logger.exception("Error in verify_proof")
         raise HTTPException(status_code=500, detail=str(e))
