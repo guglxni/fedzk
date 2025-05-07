@@ -12,7 +12,7 @@ nav:
   - Getting Started: getting_started.md
   - Architecture: architecture.md
   - API Reference: api_reference.md
-  - Benchmarking: benchmarking.md
+  # - Benchmarking: benchmarking.md # Temporarily remove as file is missing
   - Zero-Knowledge Proofs: zk_proofs.md
 
 # Theme

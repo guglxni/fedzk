@@ -4,6 +4,6 @@ arrange:
   - getting_started.md
   - architecture.md
   - api_reference.md
-  - benchmarking.md
+  # - benchmarking.md # Temporarily remove as file is missing
   - zk_proofs.md
   - ... 
