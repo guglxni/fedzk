@@ -21,10 +21,10 @@ from fedzk.prover.verifier import ZKVerifier
 from fedzk.prover.zkgenerator import ZKProver
 
 # Create Typer app
-app = typer.Typer(help="FedZK: Zero-Knowledge Proofs for Federated Learning")
+app = typer.Typer(help="FEDzk: Zero-Knowledge Proofs for Federated Learning")
 client_app = typer.Typer(help="Client commands for local training and proof generation")
 mpc_app = typer.Typer(help="MPC proof server commands")
-benchmark_app = typer.Typer(help="Benchmark commands for FedZK")
+benchmark_app = typer.Typer(help="Benchmark commands for FEDzk")
 
 # Register sub-apps
 app.add_typer(client_app, name="client")

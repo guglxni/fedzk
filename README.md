@@ -1,4 +1,4 @@
-# FedZK: Secure Federated Learning with Zero-Knowledge Proofs
+# FEDzk: Secure Federated Learning with Zero-Knowledge Proofs
 
 <div align="center">
   <!-- Logo image refreshed -->
@@ -344,7 +344,7 @@ The [examples](examples) directory contains sample code and deployment configura
 
 ## 📊 Benchmarks
 
-FedZK has been benchmarked on multiple datasets:
+FEDzk has been benchmarked on multiple datasets:
 
 | Dataset  | Clients | Rounds | Accuracy | Proof Generation Time | Verification Time |
 |----------|---------|--------|----------|----------------------|-------------------|
@@ -487,7 +487,7 @@ We welcome contributions from the community! Please check out our [contributing 
 
 ## Project Structure
 
-The FedZK project follows a standard Python package structure:
+The FEDzk project follows a standard Python package structure:
 
 - `src/fedzk/` - Main Python package
 - `tests/` - Test suite
