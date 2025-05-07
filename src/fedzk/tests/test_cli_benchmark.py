@@ -36,14 +36,19 @@ def test_cli_no_command():
     # Typer usually exits with code 1 or 2 for no command and prints help to stdout or stderr
     assert "Usage:" in result.stdout or "Usage:" in result.stderr
 
-@pytest.mark.parametrize("cmd", ["benchmark", "benchmark run"])
+@pytest.mark.parametrize("cmd", ["benchmark"])
 def test_invalid_benchmark_command(cmd):
-    """Invalid benchmark subcommands should show help and exit code 1."""
+    """Invalid benchmark subcommands (not providing a runnable command) should show help and exit non-zero."""
     args = cmd.split()
     result = run_cli_command(args)
-    assert result.returncode != 0
-    # Typer usually exits with code 1 or 2 for bad subcommands and prints help to stdout or stderr
+    assert result.returncode != 0 # Top-level 'benchmark' with no subcommand should error
     assert "Usage:" in result.stdout or "Usage:" in result.stderr
+
+# It might be useful to add a new test for 'benchmark run' specifically to check its successful execution with defaults.
+# def test_benchmark_run_default_success():
+#     result = run_cli_command(["benchmark", "run"])
+#     assert result.returncode == 0
+#     assert "Benchmark report saved to benchmark_report.json" in result.stdout # Or similar success message
 
 
 

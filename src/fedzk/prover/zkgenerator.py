@@ -13,6 +13,8 @@ import json
 import os
 import subprocess
 import tempfile
+import time
+import pathlib
 from collections import defaultdict
 
 # Add these imports
@@ -21,7 +23,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import torch
+import numpy as np
 
+# Define base directory for ZK assets relative to this file
+# Assumes zk assets are in src/fedzk/zk/
+ASSET_DIR = pathlib.Path(__file__).resolve().parent.parent / "zk"
 
 class ZKProver:
     """
@@ -31,16 +37,19 @@ class ZKProver:
     proofs using snarkjs and Circom circuits.
     """
 
-    def __init__(self, circuit_path: str, proving_key_path: str):
-        """
-        Initialize a ZKProver with paths to ZK circuit and proving key.
+    def __init__(self, secure: bool = False, max_norm_squared: float = 100.0, min_active: int = 1):
+        self.secure = secure
+        self.max_norm_squared = max_norm_squared
+        self.min_active = min_active
+
+        # Paths to ZK circuit files, relative to the project root or an accessible location
+        self.wasm_path = str(ASSET_DIR / "model_update.wasm")
+        self.r1cs_path = str(ASSET_DIR / "model_update.r1cs") # Not directly used in prover, but good to define
+        self.zkey_path = str(ASSET_DIR / "proving_key.zkey")
         
-        Args:
-            circuit_path: Path to the ZK circuit definition or WASM file
-            proving_key_path: Path to the proving key for the circuit
-        """
-        self.circuit_path = circuit_path
-        self.proving_key_path = proving_key_path
+        self.secure_wasm_path = str(ASSET_DIR / "model_update_secure.wasm")
+        self.secure_r1cs_path = str(ASSET_DIR / "model_update_secure.r1cs") # Not directly used, but good to define
+        self.secure_zkey_path = str(ASSET_DIR / "proving_key_secure.zkey")
 
     def _hash_tensor(self, tensor: torch.Tensor) -> str:
         """
@@ -71,166 +80,70 @@ class ZKProver:
         """
         return float(torch.sum(tensor * tensor).item())
 
-    def generate_proof(self, gradient_dict: Dict[str, torch.Tensor]) -> Tuple[str, List[Any]]:
-        """
-        Simulates generating a zero-knowledge proof from a model update.
-        
-        This method:
-        1. Flattens and hashes gradient tensors
-        2. Computes norms for public signals
-        3. Generates a dummy proof (to be replaced with real ZK proof later)
-        
-        Args:
-            gradient_dict: Dictionary mapping parameter names to gradient tensors
-            
-        Returns:
-            Tuple of (proof_string, public_signals_list) where:
-            - proof_string is a placeholder hash representing the proof
-            - public_signals_list contains metadata about the gradients
-        """
-        # Generate parameter hashes and norms
-        param_hashes = {}
-        param_norms = {}
+    def generate_proof(self, gradient_dict: Dict[str, torch.Tensor]) -> Tuple[Dict, List]:
+        """Generate a ZK proof for the given gradients."""
+        if self.secure:
+            return self.generate_real_proof_secure(gradient_dict, self.max_norm_squared, self.min_active)
+        else:
+            return self.generate_real_proof_standard(gradient_dict)
 
-        for param_name, gradient in gradient_dict.items():
-            param_hashes[param_name] = self._hash_tensor(gradient)
-            param_norms[param_name] = self._compute_tensor_norm(gradient)
+    def generate_real_proof_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 10):
+        """Generate a standard ZK proof (no constraints)."""
+        input_data = self._prepare_input_standard(gradient_dict, max_inputs=max_inputs)
+        return self._run_snarkjs_proof(input_data, self.wasm_path, self.zkey_path)
 
-        # Create public signals (this would be actual public inputs to the ZK proof)
-        public_signals = []
-        for param_name in sorted(gradient_dict.keys()):
-            public_signals.append({
-                "param_name": param_name,
-                "norm": param_norms[param_name],
-                "hash_prefix": param_hashes[param_name][:8]  # First 8 chars of hash
-            })
+    def generate_real_proof_secure(self, gradient_dict: Dict[str, torch.Tensor], max_norm_sq: float, min_active_elements: int, max_inputs: int = 10):
+        """Generate a secure ZK proof with constraints."""
+        input_data = self._prepare_input_secure(gradient_dict, max_norm_sq, min_active_elements, max_inputs=max_inputs)
+        return self._run_snarkjs_proof(input_data, self.secure_wasm_path, self.secure_zkey_path)
 
-        # Dummy proof generation (in a real implementation, this would call snarkjs or similar)
-        # Concatenate all hashes and hash them to simulate a proof
-        all_hashes = "".join(param_hashes.values())
-        proof_hash = hashlib.sha256(all_hashes.encode()).hexdigest()
+    def _run_snarkjs_proof(self, input_data: Dict, wasm_path: str, zkey_path: str) -> Tuple[Dict, List]:
+        """Helper to run SNARKjs commands for proof generation."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_json_path = os.path.join(tmpdir, "input.json")
+            witness_path = os.path.join(tmpdir, "witness.wtns")
+            proof_path = os.path.join(tmpdir, "proof.json")
+            public_inputs_path = os.path.join(tmpdir, "public.json")
 
-        # Mock proof object (would be replaced with actual ZK proof)
-        proof = f"dummy_proof_{proof_hash[:16]}"
+            with open(input_json_path, "w") as f:
+                json.dump(input_data, f)
 
-        return proof, public_signals
-
-    def generate_real_proof(self, gradient_dict: Dict[str, torch.Tensor],
-                           max_inputs: int = 4) -> Tuple[Dict[str, Any], List[Any]]:
-        """
-        Generate a real zero-knowledge proof using snarkjs and Circom.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            # Flatten and pad gradients
-            all_grads = []
-            for gradient in gradient_dict.values():
-                all_grads.extend(gradient.flatten().tolist())
-            selected_grads = all_grads[:max_inputs]
-            selected_grads += [0] * (max_inputs - len(selected_grads))
-            # Create witness input
-            input_json = {"gradients": selected_grads}
-            input_path = temp_path / "input.json"
-            with open(input_path, "w") as f:
-                json.dump(input_json, f)
-            witness_path = temp_path / "witness.wtns"
-            proof_path = temp_path / "proof.json"
-            public_path = temp_path / "public.json"
-            # Generate witness and proof
-            subprocess.run(["snarkjs", "wtns", "calculate", self.circuit_path, str(input_path), str(witness_path)], check=True)
-            subprocess.run(["snarkjs", "groth16", "prove", self.proving_key_path, str(witness_path), str(proof_path), str(public_path)], check=True)
-            proof = json.load(open(proof_path))
-            public_inputs = json.load(open(public_path))
-            # Return proof and public inputs
-            return proof, public_inputs
-
-    def generate_real_proof_secure(self, gradient_dict: Dict[str, torch.Tensor],
-                                  max_inputs: int = 4,
-                                  max_norm: float = 100.0,
-                                  min_active: int = 3) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-        """
-        Generate a real zero-knowledge proof for secure gradients using snarkjs and Circom.
-        
-        Enforces the constraints:
-        - L2 norm of gradients must be <= max_norm
-        - At least min_active elements must be non-zero
-        
-        Args:
-            gradient_dict: Dictionary mapping parameter names to gradient tensors
-            max_inputs: Maximum number of gradient elements to include
-            max_norm: Maximum allowed L2 norm for the gradients
-            min_active: Minimum number of non-zero gradient elements required
-            
-        Returns:
-            Tuple of (proof, public_inputs) where:
-            - proof is the zero-knowledge proof from snarkjs
-            - public_inputs contains the public inputs and metadata
-            
-        Raises:
-            ValueError: If the gradients do not satisfy the constraints
-        """
-        # Flatten and pad gradients
-        flat = []
-        for gradient in gradient_dict.values():
-            flat.extend(gradient.flatten().tolist())
-        selected = (flat[:max_inputs] + [0]*max_inputs)[:max_inputs]
-
-        # Compute norm and non-zero count
-        sum_sq = sum(x*x for x in selected)
-        norm_val = sum_sq  # Use sum of squares directly, not square root
-        nz_count = sum(1 for x in selected if x != 0)
-
-        # Enforce constraints
-        if norm_val > max_norm:
-            raise ValueError(f"Gradient norm {norm_val:.2f} exceeds maximum allowed value {max_norm}")
-        if nz_count < min_active:
-            raise ValueError(f"Only {nz_count} non-zero gradients, minimum required {min_active}")
-
-        # Prepare input for the secure circuit
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-
-            # Create input JSON with secure circuit parameters
-            input_json = {
-                "gradients": selected,
-                "maxNorm": float(max_norm),
-                "minNonZero": int(min_active)
-            }
-
-            input_path = temp_path / "input.json"
-            with open(input_path, "w") as f:
-                json.dump(input_json, f)
-
-            witness_path = temp_path / "witness.wtns"
-            proof_path = temp_path / "proof.json"
-            public_path = temp_path / "public.json"
-
-            # Generate witness and proof
+            # Generate witness
             subprocess.run(["snarkjs", "wtns", "calculate",
-                           self.circuit_path, str(input_path), str(witness_path)],
-                           check=True)
+                            wasm_path,
+                            input_json_path,
+                            witness_path], check=True, capture_output=True, text=True)
 
+            # Generate proof
             subprocess.run(["snarkjs", "groth16", "prove",
-                           self.proving_key_path, str(witness_path),
-                           str(proof_path), str(public_path)],
-                           check=True)
+                            zkey_path,
+                            witness_path,
+                            proof_path,
+                            public_inputs_path], check=True, capture_output=True, text=True)
 
-            # Load proof and public inputs
             with open(proof_path, "r") as f:
                 proof = json.load(f)
-            with open(public_path, "r") as f:
+            with open(public_inputs_path, "r") as f:
                 public_inputs = json.load(f)
 
-            # Return proof and public inputs with metadata
-            return proof, {
-                "public_inputs": public_inputs,
-                "metadata": {
-                    "norm": norm_val,
-                    "nonzero_count": nz_count,
-                    "max_norm": max_norm,
-                    "min_active": min_active
-                }
-            }
+        return proof, public_inputs
+
+    def _prepare_input_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 10):
+        # Placeholder - actual implementation needed if not present
+        flat_grads = []
+        for grad_tensor in gradient_dict.values():
+            flat_grads.extend(grad_tensor.flatten().tolist())
+        padded_grads = (flat_grads + [0] * max_inputs)[:max_inputs]
+        return {"gradients": padded_grads}
+
+    def _prepare_input_secure(self, gradient_dict: Dict[str, torch.Tensor], max_norm_sq: float, min_active_elements: int, max_inputs: int = 10):
+        # Placeholder - actual implementation needed if not present
+        flat_grads = []
+        for grad_tensor in gradient_dict.values():
+            flat_grads.extend(grad_tensor.flatten().tolist())
+        padded_grads = (flat_grads + [0] * max_inputs)[:max_inputs]
+        # Add constraint checks here if necessary before returning input_data
+        return {"gradients": padded_grads, "maxNorm": float(max_norm_sq), "minNonZero": int(min_active_elements)}
 
     def batch_generate_proof_secure(self, gradient_dict: Dict[str, torch.Tensor],
                                    chunk_size: int = 4,
@@ -343,7 +256,7 @@ class ZKProver:
                         "snarkjs",
                         "wtns",
                         "calculate",
-                        self.circuit_path,
+                        self.wasm_path,
                         str(input_path),
                         str(witness_path)
                     ], check=True, capture_output=True)
@@ -353,7 +266,7 @@ class ZKProver:
                         "snarkjs",
                         "groth16",
                         "prove",
-                        self.proving_key_path,
+                        self.zkey_path,
                         str(witness_path),
                         str(proof_path),
                         str(public_path)
@@ -462,15 +375,15 @@ class ZKProver:
 
     def _generate_real_proof_helper(self, gradient_dict, input_path, witness_path, proof_path, public_path):
         # Get directory of circuit WASM file
-        circuit_dir = os.path.dirname(self.circuit_path)
-        circuit_name = os.path.splitext(os.path.basename(self.circuit_path))[0]
+        circuit_dir = os.path.dirname(self.wasm_path)
+        circuit_name = os.path.splitext(os.path.basename(self.wasm_path))[0]
 
         # Calculate witness
         subprocess.run([
             "snarkjs",
             "wtns",
             "calculate",
-            self.circuit_path,  # WASM file path
+            self.wasm_path,  # WASM file path
             str(input_path),
             str(witness_path)
         ], check=True)
@@ -480,7 +393,7 @@ class ZKProver:
             "snarkjs",
             "groth16",
             "prove",
-            self.proving_key_path,  # Proving key path
+            self.zkey_path,  # Proving key path
             str(witness_path),
             str(proof_path),
             str(public_path)
@@ -504,3 +417,33 @@ class ZKProver:
 
         # Combine proof with metadata
         return proof, param_info
+
+class ZKVerifier:
+    def __init__(self, secure: bool = False):
+        self.secure = secure
+        self.vkey_path = str(ASSET_DIR / "verification_key.json")
+        self.secure_vkey_path = str(ASSET_DIR / "verification_key_secure.json")
+
+    def verify_proof(self, proof: Dict, public_inputs: List) -> bool:
+        """Verify a ZK proof."""
+        vkey_to_use = self.secure_vkey_path if self.secure else self.vkey_path
+        with tempfile.TemporaryDirectory() as tmpdir:
+            proof_path = os.path.join(tmpdir, "proof.json")
+            public_inputs_path = os.path.join(tmpdir, "public.json")
+
+            with open(proof_path, "w") as f:
+                json.dump(proof, f)
+            with open(public_inputs_path, "w") as f:
+                json.dump(public_inputs, f)
+
+            # Verify the proof
+            result = subprocess.run(["snarkjs", "groth16", "verify",
+                                     vkey_to_use,
+                                     public_inputs_path,
+                                     proof_path], capture_output=True, text=True, check=False)
+            
+            return "OK!" in result.stdout
+
+# Utility functions (if any were previously in this file and used by the classes, keep them)
+# Example: _flatten_gradients, etc.
+#// ... existing code ... from line 279 to 507

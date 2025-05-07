@@ -248,7 +248,7 @@ def serve_mpc_command(
 @benchmark_app.command("run")
 def benchmark_run_command(
     clients: int = typer.Option(5, "--clients", "-c", help="Number of clients to simulate"),
-    secure: bool = typer.Option(False, "--secure", "-s", help="Use secure circuit generation and verification"),
+    secure: bool = typer.Option(False, "--secure", "-s", help="Use secure ZK circuits with constraints"),
     mpc_server: Optional[str] = typer.Option(None, "--mpc-server", help="URL of MPC proof server"),
     output: str = typer.Option("benchmark_report.json", "--output", "-o", help="Output JSON report path"),
     csv: Optional[str] = typer.Option(None, "--csv", help="Output CSV report path"),
@@ -258,50 +258,31 @@ def benchmark_run_command(
     coordinator_host: str = typer.Option("127.0.0.1", "--coordinator-host", help="Hostname for coordinator server"),
     coordinator_port: int = typer.Option(8000, "--coordinator-port", help="Port for coordinator server")
 ):
-    """Run end-to-end benchmark."""
+    """Run end-to-end benchmarks."""
     typer.echo(f"Running benchmark with {clients} clients...")
 
     try:
-        from fedzk.benchmark.runner import run_benchmark
-
-        results = run_benchmark(
+        from fedzk.benchmark.end_to_end import run_benchmark
+        run_benchmark(
             num_clients=clients,
             secure=secure,
             mpc_server=mpc_server,
-            input_size=input_size,
-            fallback_mode=fallback_mode,
+            output_json=output,
+            output_csv=csv,
+            report_url=report_url,
             coordinator_host=coordinator_host,
-            coordinator_port=coordinator_port
+            coordinator_port=coordinator_port,
+            fallback_mode=fallback_mode,
+            input_size=input_size
         )
-
-        # Save results to JSON
-        with open(output, "w") as f:
-            json.dump(results, f, indent=2)
-
-        typer.echo(f"Benchmark results saved to {output}")
-
-        # Save to CSV if requested
+        typer.echo(f"Benchmark report saved to {output}")
         if csv:
-            from fedzk.benchmark.reporter import save_to_csv
-            save_to_csv(results, csv)
-            typer.echo(f"CSV report saved to {csv}")
+            typer.echo(f"Benchmark CSV report saved to {csv}")
 
-        # Send to report URL if provided
-        if report_url:
-            import requests
-            try:
-                response = requests.post(
-                    report_url,
-                    json=results,
-                    headers={"Content-Type": "application/json"}
-                )
-                if response.status_code == 200:
-                    typer.echo(f"Results successfully reported to {report_url}")
-                else:
-                    typer.echo(f"Error reporting results: HTTP {response.status_code}")
-            except Exception as e:
-                typer.echo(f"Error reporting results: {e}")
-
+    except ImportError as e:
+        typer.echo(f"Error importing benchmark runner: {e}")
+        typer.echo("Ensure benchmark dependencies are installed correctly.")
+        raise typer.Exit(code=1)
     except Exception as e:
         typer.echo(f"Error running benchmark: {e}")
         raise typer.Exit(code=1)
