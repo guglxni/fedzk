@@ -21,10 +21,11 @@ def test_benchmark_help():
     """CLI should display help for 'benchmark run' without errors."""
     result = run_cli_command(["benchmark", "run", "--help"])
     assert result.returncode == 0
-    assert "usage:" in result.stdout
+    # Check for Typer's help output, which usually includes 'Usage:'
+    assert "Usage:" in result.stdout or "Usage:" in result.stderr # Typer might use stderr for help on error
     # Check that relevant options are listed
     for opt in ["--clients", "--secure", "--mpc-server", "--output", "--csv"]:
-        assert opt in result.stdout
+        assert opt in result.stdout or opt in result.stderr
 
 
 def test_cli_no_command():
@@ -32,7 +33,8 @@ def test_cli_no_command():
     result = run_cli_command([])
     # expecting non-zero exit code (no command provided)
     assert result.returncode != 0
-    assert "usage:" in result.stdout
+    # Typer usually exits with code 1 or 2 for no command and prints help to stdout or stderr
+    assert "Usage:" in result.stdout or "Usage:" in result.stderr
 
 @pytest.mark.parametrize("cmd", ["benchmark", "benchmark run"])
 def test_invalid_benchmark_command(cmd):
@@ -40,7 +42,8 @@ def test_invalid_benchmark_command(cmd):
     args = cmd.split()
     result = run_cli_command(args)
     assert result.returncode != 0
-    assert "usage:" in result.stdout
+    # Typer usually exits with code 1 or 2 for bad subcommands and prints help to stdout or stderr
+    assert "Usage:" in result.stdout or "Usage:" in result.stderr
 
 
 
