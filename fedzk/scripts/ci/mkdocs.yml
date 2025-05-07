@@ -1,7 +1,8 @@
 site_name: FedZK
 site_description: Privacy-Preserving Verifiable Federated Learning Protocol
 site_author: FedZK Team
-repo_url: https://github.com/username/fedzk
+site_url: https://guglxni.github.io/fedzk/
+repo_url: https://github.com/guglxni/fedzk
 repo_name: fedzk
 edit_uri: edit/main/docs/
 docs_dir: ../../../docs # Path to your markdown files from the project root, relative to this config file
@@ -25,7 +26,7 @@ theme:
     text: Roboto
     code: Roboto Mono
   # custom_dir: docs/overrides
-  logo: ../../../docs/images/logo.png
+  logo: images/logo.png
   features:
     - navigation.instant
     - navigation.tracking
