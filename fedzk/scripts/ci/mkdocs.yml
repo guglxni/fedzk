@@ -80,7 +80,7 @@ plugins:
             show_source: true
   - git-revision-date-localized:
       enable_creation_date: true
-  - social
+  # - social  # Temporarily disabled due to logo file issues
 
 # Extra
 extra:
