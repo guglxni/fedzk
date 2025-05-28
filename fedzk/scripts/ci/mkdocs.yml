@@ -1,0 +1,65 @@
+site_name: FedZK Documentation
+site_url: https://fedzk.github.io/
+site_description: Federated Learning with Zero-Knowledge Proofs
+repo_url: https://github.com/yourusername/fedzk
+repo_name: yourusername/fedzk
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: blue
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+docs_dir: ../../../docs
+
+plugins:
+  - search
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - admonition
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Architecture: architecture.md
+  - Implementation Details: implementation_details.md
+  - ZK Proofs: zk_proofs.md
+  - API Reference: api_reference.md
+  - Performance: performance.md
+  - Deployment Guide: deployment_guide.md
+  - Project Structure: project_structure.md
+  - Publishing: publishing.md
+  - Troubleshooting: troubleshooting.md
+  - Contributing: CONTRIBUTING.md
+  - Examples: examples/
+  - Reference:
+    - Changelog: reference/CHANGELOG.md
+    - Deprecated Structure: reference/DEPRECATED_STRUCTURE.md
+  - Legal:
+    - Code of Conduct: legal/CODE_OF_CONDUCT.md
+    - Security: legal/SECURITY.md 
