@@ -1,11 +1,9 @@
-# Copyright (c) 2025 Aaryan Guglani and FedZK Contributors
-# SPDX-License-Identifier: MIT
-
-# Copyright (c) 2025 Aaryan Guglani and FedZK Contributors
-# SPDX-License-Identifier: MIT
+# Functional Source License 1.1 with Apache-2.0 Future Grant (FSL-1.1-Apache-2.0)
+# Copyright (c) 2025 Aaryan Guglani and FEDzk Contributors
+# Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Main entry point for the FedZK package.
+Main entry point for the FEDzk package.
 
 This module redirects to the CLI implementation in cli.py.
 """

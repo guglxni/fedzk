@@ -1,9 +1,0 @@
-title: FedZK Documentation
-arrange:
-  - index.md
-  - getting_started.md
-  - architecture.md
-  - api_reference.md
-  # - benchmarking.md # Temporarily remove as file is missing
-  - zk_proofs.md
-  - ... 

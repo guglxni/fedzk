@@ -1,21 +1,42 @@
-MIT License
+Functional Source License 1.1 with Apache-2.0 Future Grant
 
-Copyright (c) 2025 Aaryan Guglani and FedZK Contributors
+Version: FSL 1.1-Apache-2.0
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Date: 2025-06-28
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Copyright (c) 2025 Aaryan Guglani and FEDzk Contributors
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. 
+This license lets you use and share this software for free, but you can’t sell a competing product with it. After two years, this license automatically turns into the Apache License 2.0, a standard open-source license.
+
+***
+
+### License Terms
+
+**1. Definitions**
+
+- **“Software”**: This copyrighted work, including its source code and documentation.
+- **“Author”**: The copyright holder(s) of the Software.
+- **“You”**: Any person or entity using the Software.
+- **“Compete”**: To offer a commercial product or service that provides the same primary functionality as the Software, or that is marketed as a replacement for the Software.
+- **“Change Date”**: Two years after the first public release of the Software.
+
+**2. License Grant**
+
+The Author grants you a non-exclusive, worldwide, royalty-free license to:
+- Use, copy, modify, and distribute the Software.
+- Create derivative works of the Software.
+
+**3. Restrictions**
+
+This license is subject to the following conditions:
+
+- **No Competing Services**: You may not use the Software to Compete with the Software.
+- **Attribution**: You must include the original copyright notice and this license in any copy of the Software you distribute.
+
+**4. Future Grant of Apache License 2.0**
+
+On the Change Date, this license automatically becomes the Apache License 2.0, found here: https://www.apache.org/licenses/LICENSE-2.0. From that date forward, your use of the Software will be governed by the terms of the Apache License 2.0.
+
+**5. Disclaimer of Warranty and Limitation of Liability**
+
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

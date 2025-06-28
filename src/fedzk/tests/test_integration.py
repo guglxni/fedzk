@@ -1,3 +1,7 @@
+# Functional Source License 1.1 with Apache-2.0 Future Grant (FSL-1.1-Apache-2.0)
+# Copyright (c) 2025 Aaryan Guglani and FEDzk Contributors
+# Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
+
 """
 Integration tests for FedZK.
 
@@ -124,14 +128,14 @@ def test_client_to_coordinator_flow(reset_aggregator_state, dummy_dataset, clien
     # 2. Generate ZK proof
     prover = ZKProver(secure=False)
     try:
-        proof, public_signals = prover.generate_proof(gradients)
+    proof, public_signals = prover.generate_proof(gradients)
         # 3. Verify ZK proof
         ASSET_DIR = Path(__file__).resolve().parent.parent / "zk"
         vkey_path = str(ASSET_DIR / "verification_key.json")
         verifier = ZKVerifier(verification_key_path=vkey_path)
         assert verifier.verify_real_proof(proof, public_signals), "Proof verification failed"
 
-        # 4. Submit to coordinator
+    # 4. Submit to coordinator
         coordinator_client = httpx.Client(app=app, base_url="http://test")
         update_data = {
             "gradients": {k: v.tolist() for k, v in gradients.items()},
@@ -177,7 +181,7 @@ def test_multiple_clients(reset_aggregator_state, dummy_dataset):
         # Generate proof
         prover = ZKProver(secure=False)
         try:
-            proof, public_signals = prover.generate_proof(gradients)
+        proof, public_signals = prover.generate_proof(gradients)
             
             # Use correct verifier initialization
             ASSET_DIR = Path(__file__).resolve().parent.parent / "zk"
@@ -185,7 +189,7 @@ def test_multiple_clients(reset_aggregator_state, dummy_dataset):
             verifier = ZKVerifier(verification_key_path=vkey_path)
             assert verifier.verify_real_proof(proof, public_signals)
 
-            # Submit update
+        # Submit update
             coordinator_client = httpx.Client(app=app, base_url="http://test")
             update_data = {
                 "gradients": {k: v.tolist() for k, v in gradients.items()},
