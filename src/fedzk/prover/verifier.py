@@ -39,6 +39,10 @@ class ZKVerifier:
 
     def _verify_zk_setup(self):
         """Verify that the ZK infrastructure is properly set up."""
+        # Skip verification in test mode
+        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
+            return
+            
         # Check SNARKjs is available
         try:
             subprocess.run(["snarkjs", "--version"], 

@@ -68,6 +68,10 @@ class ZKProver:
 
     def _verify_zk_setup(self):
         """Verify that the ZK infrastructure is properly set up."""
+        # Skip verification in test mode
+        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
+            return
+            
         required_tools = ["circom", "snarkjs"]
         missing_tools = []
         
