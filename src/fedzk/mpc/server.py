@@ -111,7 +111,7 @@ async def generate_proof_endpoint(req: GenerateRequest, api_key: str = Depends(v
 @app.post("/verify_proof", response_model=VerifyResponse, summary="Verify ZK Proof Remotely")
 async def verify_proof_endpoint(req: VerifyRequest, api_key: str = Depends(verify_api_key)):
     try:
-    logger.info(f"Verify request received (secure={req.secure})")
+        logger.info(f"Verify request received (secure={req.secure})")
         # Use correct verification key path based on secure parameter
         vkey_path = SEC_VER_KEY if req.secure else STD_VER_KEY
         verifier = ZKVerifier(verification_key_path=vkey_path)
