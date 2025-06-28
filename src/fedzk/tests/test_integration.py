@@ -155,9 +155,8 @@ def test_client_to_coordinator_flow(reset_aggregator_state, dummy_dataset, clien
         assert response.status_code == 200
         assert response.json()["status"] == "pending"
 
-    except subprocess.CalledProcessError as e:
-        print(f"SNARKjs execution failed during client_to_coordinator_flow: {e}")
-        pytest.skip("Skipping due to SNARKjs execution failure")
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        pytest.skip(f"Skipping due to missing ZK tools (snarkjs): {e}")
     except ValueError as e:
         if "could not convert string to float" in str(e):
             print(f"ValueError during ZKProver init or call (likely due to old constructor style if not fully updated): {e}")
@@ -210,8 +209,8 @@ def test_multiple_clients(reset_aggregator_state, dummy_dataset):
             assert response.json()["status"] == "pending"
             successful_submissions += 1
 
-        except subprocess.CalledProcessError as e:
-            print(f"SNARKjs execution failed during multiple_clients test for client {i}: {e}")
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            print(f"ZK tools not available during multiple_clients test for client {i}: {e}")
             continue
         except ValueError as e:
             if "could not convert string to float" in str(e):
