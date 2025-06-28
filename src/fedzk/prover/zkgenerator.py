@@ -32,25 +32,70 @@ ASSET_DIR = pathlib.Path(__file__).resolve().parent.parent / "zk"
 
 class ZKProver:
     """
-    Generates zero-knowledge proofs for model updates in federated learning.
+    Production Zero-Knowledge Proof Generator for FedZK.
     
-    This class can generate either dummy proofs (for testing) or real zero-knowledge
-    proofs using snarkjs and Circom circuits.
+    This class generates real zero-knowledge proofs using Circom circuits and SNARKjs.
+    It requires a complete ZK toolchain installation (run scripts/setup_zk.sh).
     """
 
     def __init__(self, secure: bool = False, max_norm_squared: float = 100.0, min_active: int = 1):
+        """
+        Initialize the ZK prover.
+        
+        Args:
+            secure: If True, uses secure circuit with constraints
+            max_norm_squared: Maximum allowed squared L2 norm for gradients
+            min_active: Minimum number of non-zero gradient elements required
+        """
         self.secure = secure
         self.max_norm_squared = max_norm_squared
         self.min_active = min_active
 
-        # Paths to ZK circuit files, relative to the project root or an accessible location
+        # Paths to ZK circuit files
         self.wasm_path = str(ASSET_DIR / "model_update.wasm")
-        self.r1cs_path = str(ASSET_DIR / "model_update.r1cs") # Not directly used in prover, but good to define
+        self.r1cs_path = str(ASSET_DIR / "model_update.r1cs")
         self.zkey_path = str(ASSET_DIR / "proving_key.zkey")
+        self.vkey_path = str(ASSET_DIR / "verification_key.json")
         
+        # Secure circuit paths
         self.secure_wasm_path = str(ASSET_DIR / "model_update_secure.wasm")
-        self.secure_r1cs_path = str(ASSET_DIR / "model_update_secure.r1cs") # Not directly used, but good to define
+        self.secure_r1cs_path = str(ASSET_DIR / "model_update_secure.r1cs")
         self.secure_zkey_path = str(ASSET_DIR / "proving_key_secure.zkey")
+        self.secure_vkey_path = str(ASSET_DIR / "verification_key_secure.json")
+        
+        # Verify ZK infrastructure is available
+        self._verify_zk_setup()
+
+    def _verify_zk_setup(self):
+        """Verify that the ZK infrastructure is properly set up."""
+        required_tools = ["circom", "snarkjs"]
+        missing_tools = []
+        
+        for tool in required_tools:
+            try:
+                subprocess.run([tool, "--version"], 
+                             capture_output=True, check=True)
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                missing_tools.append(tool)
+        
+        if missing_tools:
+            raise RuntimeError(
+                f"Missing ZK tools: {missing_tools}. "
+                f"Please run 'scripts/setup_zk.sh' to install the complete ZK toolchain."
+            )
+        
+        # Check circuit files exist
+        required_files = [
+            self.wasm_path, self.zkey_path, self.vkey_path,
+            self.secure_wasm_path, self.secure_zkey_path, self.secure_vkey_path
+        ]
+        
+        missing_files = [f for f in required_files if not pathlib.Path(f).exists()]
+        if missing_files:
+            raise RuntimeError(
+                f"Missing ZK circuit files: {missing_files}. "
+                f"Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
+            )
 
     def _hash_tensor(self, tensor: torch.Tensor) -> str:
         """
@@ -88,13 +133,14 @@ class ZKProver:
         else:
             return self.generate_real_proof_standard(gradient_dict)
 
-    def generate_real_proof_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 10):
-        """Generate a standard ZK proof (no constraints)."""
+    def generate_real_proof_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 4):
+        """Generate a standard ZK proof (basic constraints)."""
         input_data = self._prepare_input_standard(gradient_dict, max_inputs=max_inputs)
         return self._run_snarkjs_proof(input_data, self.wasm_path, self.zkey_path)
 
-    def generate_real_proof_secure(self, gradient_dict: Dict[str, torch.Tensor], max_norm_sq: float, min_active_elements: int, max_inputs: int = 10):
-        """Generate a secure ZK proof with constraints."""
+    def generate_real_proof_secure(self, gradient_dict: Dict[str, torch.Tensor], 
+                                 max_norm_sq: float, min_active_elements: int, max_inputs: int = 4):
+        """Generate a secure ZK proof with privacy constraints."""
         input_data = self._prepare_input_secure(gradient_dict, max_norm_sq, min_active_elements, max_inputs=max_inputs)
         return self._run_snarkjs_proof(input_data, self.secure_wasm_path, self.secure_zkey_path)
 
@@ -129,22 +175,60 @@ class ZKProver:
 
         return proof, public_inputs
 
-    def _prepare_input_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 10):
-        # Placeholder - actual implementation needed if not present
+    def _prepare_input_standard(self, gradient_dict: Dict[str, torch.Tensor], max_inputs: int = 4):
+        """
+        Prepare input data for the standard (basic) circuit.
+        
+        Args:
+            gradient_dict: Dictionary of gradient tensors
+            max_inputs: Maximum number of gradient values (must match circuit)
+            
+        Returns:
+            Dictionary with input data for the circuit
+        """
+        # Flatten all gradients and take first max_inputs values
         flat_grads = []
         for grad_tensor in gradient_dict.values():
             flat_grads.extend(grad_tensor.flatten().tolist())
-        padded_grads = (flat_grads + [0] * max_inputs)[:max_inputs]
-        return {"gradients": padded_grads}
+        
+        # Pad or truncate to exactly max_inputs values
+        if len(flat_grads) > max_inputs:
+            gradients = flat_grads[:max_inputs]
+        else:
+            gradients = flat_grads + [0] * (max_inputs - len(flat_grads))
+        
+        return {"gradients": [str(g) for g in gradients]}
 
-    def _prepare_input_secure(self, gradient_dict: Dict[str, torch.Tensor], max_norm_sq: float, min_active_elements: int, max_inputs: int = 10):
-        # Placeholder - actual implementation needed if not present
+    def _prepare_input_secure(self, gradient_dict: Dict[str, torch.Tensor], 
+                            max_norm_sq: float, min_active_elements: int, max_inputs: int = 4):
+        """
+        Prepare input data for the secure circuit with constraints.
+        
+        Args:
+            gradient_dict: Dictionary of gradient tensors
+            max_norm_sq: Maximum allowed squared norm
+            min_active_elements: Minimum required non-zero elements
+            max_inputs: Maximum number of gradient values (must match circuit)
+            
+        Returns:
+            Dictionary with input data for the secure circuit
+        """
+        # Flatten all gradients and take first max_inputs values
         flat_grads = []
         for grad_tensor in gradient_dict.values():
             flat_grads.extend(grad_tensor.flatten().tolist())
-        padded_grads = (flat_grads + [0] * max_inputs)[:max_inputs]
-        # Add constraint checks here if necessary before returning input_data
-        return {"gradients": padded_grads, "maxNorm": float(max_norm_sq), "minNonZero": int(min_active_elements)}
+        
+        # Pad or truncate to exactly max_inputs values
+        if len(flat_grads) > max_inputs:
+            gradients = flat_grads[:max_inputs]
+        else:
+            gradients = flat_grads + [0] * (max_inputs - len(flat_grads))
+        
+        return {
+            "gradients": [str(g) for g in gradients],
+            "maxNorm": str(int(max_norm_sq)),
+            "minNonZero": str(min_active_elements)
+        }
 
     def batch_generate_proof_secure(self, gradient_dict: Dict[str, torch.Tensor],
                                    chunk_size: int = 4,
