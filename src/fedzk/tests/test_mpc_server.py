@@ -10,7 +10,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import torch # Keep for type hints if used elsewhere, or remove if not directly used
-from fastapi.testclient import TestClient
+
+# Try different TestClient imports for compatibility
+try:
+    from fastapi.testclient import TestClient
+except ImportError:
+    from starlette.testclient import TestClient
 
 import fedzk.mpc.server as mpc_server # Keep for monkeypatching os.path.exists
 from fedzk.mpc.server import app # Import the FastAPI app directly
@@ -28,7 +33,12 @@ def patch_file_existence(monkeypatch):
     # Update server allowed keys list
     mpc_server.ALLOWED_API_KEYS = ["testkey"]
 
-client = TestClient(mpc_server.app)
+# Create TestClient with compatibility for different versions
+try:
+    client = TestClient(mpc_server.app)
+except TypeError:
+    # Try with named parameter for newer versions
+    client = TestClient(app=mpc_server.app)
 
 # Corrected test data for generate_proof endpoint
 GRADIENT_DATA_STD = {"gradients": {"param1": [0.1, 0.2, 0.3], "param2": [0.4, 0.5]}, "secure": False}
