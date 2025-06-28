@@ -307,19 +307,185 @@ def benchmark_run_command(
 
 
 @client_app.command("train")
-def client_train_command():
-    """Train a model locally."""
-    typer.echo("Training model locally...")
-    # Placeholder for actual training logic
-    typer.echo("Model training completed.")
+def client_train_command(
+    data_path: str = typer.Option(..., help="Path to training data"),
+    model_type: str = typer.Option("linear", help="Model type (linear, cnn, transformer)"),
+    epochs: int = typer.Option(10, help="Number of training epochs"),
+    learning_rate: float = typer.Option(0.01, help="Learning rate"),
+    output_dir: str = typer.Option("./models", help="Output directory for model"),
+    secure: bool = typer.Option(False, help="Use secure aggregation"),
+    verbose: bool = typer.Option(False, help="Verbose output")
+):
+    """Train a model locally with federated learning."""
+    import os
+    import json
+    import logging
+    from pathlib import Path
+    from fedzk.client.trainer import LocalTrainer
+    from fedzk.prover.zkgenerator import ZKProver
+    
+    # Setup logging
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Validate inputs
+        if not os.path.exists(data_path):
+            typer.echo(f"❌ Error: Data path {data_path} does not exist", err=True)
+            raise typer.Exit(1)
+        
+        if epochs <= 0 or learning_rate <= 0:
+            typer.echo("❌ Error: Epochs and learning rate must be positive", err=True)
+            raise typer.Exit(1)
+            
+        # Create output directory
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        typer.echo(f"🚀 Starting federated training...")
+        typer.echo(f"📊 Data path: {data_path}")
+        typer.echo(f"🧠 Model type: {model_type}")
+        typer.echo(f"🔄 Epochs: {epochs}")
+        typer.echo(f"📈 Learning rate: {learning_rate}")
+        typer.echo(f"🔒 Secure mode: {secure}")
+        
+        # Initialize trainer
+        trainer = LocalTrainer(
+            model_type=model_type,
+            learning_rate=learning_rate,
+            secure=secure
+        )
+        
+        # Load and train
+        logger.info("Loading training data...")
+        trainer.load_data(data_path)
+        
+        logger.info("Starting training...")
+        metrics = trainer.train(epochs=epochs)
+        
+        # Save model and metrics
+        model_path = output_path / f"model_{model_type}_epoch_{epochs}.pt"
+        metrics_path = output_path / f"metrics_{model_type}_epoch_{epochs}.json"
+        
+        trainer.save_model(str(model_path))
+        
+        with open(metrics_path, 'w') as f:
+            json.dump(metrics, f, indent=2)
+        
+        typer.echo(f"✅ Training completed successfully!")
+        typer.echo(f"📁 Model saved to: {model_path}")
+        typer.echo(f"📊 Metrics saved to: {metrics_path}")
+        typer.echo(f"📈 Final accuracy: {metrics.get('accuracy', 'N/A'):.4f}")
+        typer.echo(f"📉 Final loss: {metrics.get('loss', 'N/A'):.4f}")
+        
+    except Exception as e:
+        logger.error(f"Training failed: {e}")
+        typer.echo(f"❌ Training failed: {e}", err=True)
+        raise typer.Exit(1)
 
 
 @client_app.command("prove")
-def client_prove_command():
+def client_prove_command(
+    gradients_path: str = typer.Option(..., help="Path to gradients file (.json or .pt)"),
+    circuit_type: str = typer.Option("standard", help="Circuit type (standard, secure, batch)"),
+    output_path: str = typer.Option("./proof.json", help="Output path for proof"),
+    batch_size: int = typer.Option(1, help="Batch size for batch proving"),
+    secure: bool = typer.Option(False, help="Use secure constraints"),
+    gpu: bool = typer.Option(False, help="Enable GPU acceleration"),
+    verbose: bool = typer.Option(False, help="Verbose output")
+):
     """Generate zero-knowledge proof for model updates."""
-    typer.echo("Generating zero-knowledge proof for model updates...")
-    # Placeholder for proof generation logic
-    typer.echo("Proof generation completed.")
+    import os
+    import json
+    import torch
+    import logging
+    from pathlib import Path
+    from fedzk.prover.zkgenerator import ZKProver
+    from fedzk.prover.batch_zkgenerator import BatchZKProver
+    
+    # Setup logging
+    log_level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(level=log_level, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Validate inputs
+        if not os.path.exists(gradients_path):
+            typer.echo(f"❌ Error: Gradients path {gradients_path} does not exist", err=True)
+            raise typer.Exit(1)
+            
+        if batch_size <= 0:
+            typer.echo("❌ Error: Batch size must be positive", err=True)
+            raise typer.Exit(1)
+        
+        typer.echo(f"🔐 Generating zero-knowledge proof...")
+        typer.echo(f"📊 Gradients: {gradients_path}")
+        typer.echo(f"🔧 Circuit type: {circuit_type}")
+        typer.echo(f"📦 Batch size: {batch_size}")
+        typer.echo(f"🔒 Secure mode: {secure}")
+        typer.echo(f"🚀 GPU acceleration: {gpu}")
+        
+        # Load gradients
+        logger.info("Loading gradients...")
+        if gradients_path.endswith('.json'):
+            with open(gradients_path, 'r') as f:
+                gradients_data = json.load(f)
+                # Convert lists back to tensors
+                gradients = {k: torch.tensor(v) for k, v in gradients_data.items()}
+        elif gradients_path.endswith('.pt'):
+            gradients = torch.load(gradients_path)
+        else:
+            typer.echo("❌ Error: Gradients file must be .json or .pt format", err=True)
+            raise typer.Exit(1)
+        
+        # Initialize prover based on circuit type
+        if circuit_type == "batch" or batch_size > 1:
+            logger.info("Using batch ZK prover...")
+            prover = BatchZKProver(
+                secure=secure,
+                chunk_size=batch_size,
+                enable_gpu=gpu
+            )
+            proof_result = prover.generate_proof(gradients)
+        else:
+            logger.info("Using standard ZK prover...")
+            prover = ZKProver(
+                secure=secure,
+                enable_gpu=gpu
+            )
+            proof, public_signals = prover.generate_proof(gradients)
+            proof_result = {
+                "proof": proof,
+                "public_signals": public_signals,
+                "circuit_type": circuit_type,
+                "secure": secure
+            }
+        
+        # Add metadata
+        proof_result.update({
+            "gradients_source": gradients_path,
+            "timestamp": str(torch.tensor(0).new_empty(0).device),  # Get current timestamp
+            "prover_version": "1.0.0",
+            "gpu_used": gpu
+        })
+        
+        # Save proof
+        output_dir = Path(output_path).parent
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, 'w') as f:
+            json.dump(proof_result, f, indent=2)
+        
+        typer.echo(f"✅ Proof generation completed successfully!")
+        typer.echo(f"📁 Proof saved to: {output_path}")
+        typer.echo(f"🔐 Proof type: {circuit_type}")
+        typer.echo(f"📊 Public signals count: {len(proof_result.get('public_signals', []))}")
+        
+    except Exception as e:
+        logger.error(f"Proof generation failed: {e}")
+        typer.echo(f"❌ Proof generation failed: {e}", err=True)
+        raise typer.Exit(1)
 
 
 def main():
