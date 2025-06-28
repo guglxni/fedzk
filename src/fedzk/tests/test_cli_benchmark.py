@@ -27,9 +27,13 @@ def test_benchmark_help():
     assert result.returncode == 0
     # Check for Typer's help output, which usually includes 'Usage:'
     assert "Usage:" in result.stdout or "Usage:" in result.stderr # Typer might use stderr for help on error
-    # Check that relevant options are listed
+    # Check that relevant options are listed - strip ANSI codes for better matching
+    combined_output = result.stdout + result.stderr
+    # Remove ANSI escape codes for cleaner string matching
+    import re
+    clean_output = re.sub(r'\x1b\[[0-9;]*m', '', combined_output)
     for opt in ["--clients", "--secure", "--mpc-server", "--output", "--csv"]:
-        assert opt in result.stdout or opt in result.stderr
+        assert opt in clean_output, f"Option {opt} not found in help output"
 
 
 def test_cli_no_command():
