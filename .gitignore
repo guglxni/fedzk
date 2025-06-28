@@ -118,8 +118,6 @@ debug_witness.wtns
 debug_witness_secure.wtns
 dist/
 docker-compose.yml
-docs/
-examples/
 fedzk/
 fedzk_zk_benchmark.py
 model_update.sym

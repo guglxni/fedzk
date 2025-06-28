@@ -41,5 +41,5 @@ warn_return_any = true
 warn_unused_configs = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-v --cov=fedzk --cov-report=term-missing"
+testpaths = ["src/tests", "tests"]
+addopts = "-v --cov=src/fedzk --cov-report=term-missing"

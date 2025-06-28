@@ -1,0 +1,51 @@
+site_name: FEDzk Documentation
+site_description: Secure Federated Learning with Zero-Knowledge Proofs
+site_url: https://guglxni.github.io/fedzk/
+repo_url: https://github.com/guglxni/fedzk
+repo_name: guglxni/fedzk
+
+nav:
+  - Home: index.md
+  - Getting Started: getting_started.md
+  - Contributing: CONTRIBUTING.md
+  - Security: SECURITY.md
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - md_in_html
+
+docs_dir: docs
+site_dir: site
