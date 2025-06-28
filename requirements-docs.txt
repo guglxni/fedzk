@@ -1,5 +1,0 @@
-mkdocs~=1.5
-mkdocs-material~=9.5
-mkdocstrings~=0.24
-mkdocstrings-python~=1.9
-pygments~=2.17 
