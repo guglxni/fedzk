@@ -20,11 +20,20 @@ from torch.utils.data import DataLoader, TensorDataset
 import httpx
 import subprocess
 from pathlib import Path
+from fastapi.testclient import TestClient
 
 from fedzk.client.trainer import LocalTrainer
 from fedzk.coordinator.aggregator import UpdateSubmission, get_status, submit_update
 from fedzk.prover.zkgenerator import ZKProver
 from fedzk.prover.verifier import ZKVerifier
+
+# Import FastAPI app for testing
+try:
+    from fedzk.coordinator.aggregator import app
+except ImportError:
+    # Create a mock app if the real one isn't available
+    from fastapi import FastAPI
+    app = FastAPI()
 
 
 def convert_tensors_to_lists(gradient_dict):
@@ -128,15 +137,15 @@ def test_client_to_coordinator_flow(reset_aggregator_state, dummy_dataset, clien
     # 2. Generate ZK proof
     prover = ZKProver(secure=False)
     try:
-    proof, public_signals = prover.generate_proof(gradients)
+        proof, public_signals = prover.generate_proof(gradients)
         # 3. Verify ZK proof
         ASSET_DIR = Path(__file__).resolve().parent.parent / "zk"
         vkey_path = str(ASSET_DIR / "verification_key.json")
         verifier = ZKVerifier(verification_key_path=vkey_path)
         assert verifier.verify_real_proof(proof, public_signals), "Proof verification failed"
 
-    # 4. Submit to coordinator
-        coordinator_client = httpx.Client(app=app, base_url="http://test")
+        # 4. Submit to coordinator
+        coordinator_client = TestClient(app)
         update_data = {
             "gradients": {k: v.tolist() for k, v in gradients.items()},
             "proof": proof,
@@ -181,7 +190,7 @@ def test_multiple_clients(reset_aggregator_state, dummy_dataset):
         # Generate proof
         prover = ZKProver(secure=False)
         try:
-        proof, public_signals = prover.generate_proof(gradients)
+            proof, public_signals = prover.generate_proof(gradients)
             
             # Use correct verifier initialization
             ASSET_DIR = Path(__file__).resolve().parent.parent / "zk"
@@ -189,8 +198,8 @@ def test_multiple_clients(reset_aggregator_state, dummy_dataset):
             verifier = ZKVerifier(verification_key_path=vkey_path)
             assert verifier.verify_real_proof(proof, public_signals)
 
-        # Submit update
-            coordinator_client = httpx.Client(app=app, base_url="http://test")
+            # Submit update
+            coordinator_client = TestClient(app)
             update_data = {
                 "gradients": {k: v.tolist() for k, v in gradients.items()},
                 "proof": proof,
