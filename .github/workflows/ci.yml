@@ -1,4 +1,4 @@
-name: FedZK CI
+name: FEDzk CI
 
 on:
   push:
@@ -63,75 +63,22 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install torch numpy click
+        pip install torch numpy click pytest pytest-cov
         pip install -e .
-        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
     
-    - name: Check for deprecated structure usage
+    - name: Check project structure
       run: |
-        echo "Checking for imports from deprecated fedzk/ directory..."
-        if grep -r "from fedzk.prover" --include="*.py" fedzk/ || \
-           grep -r "from fedzk.client" --include="*.py" fedzk/ || \
-           grep -r "from fedzk.coordinator" --include="*.py" fedzk/ || \
-           grep -r "from fedzk.mpc" --include="*.py" fedzk/; then
-          echo "⚠️ WARNING: Found imports using deprecated path structure."
-          echo "Please update code to use src/fedzk/ directory structure."
+        echo "Verifying project structure..."
+        ls -la src/fedzk/
+        if [ ! -d "src/fedzk" ]; then
+          echo "❌ ERROR: src/fedzk/ directory not found"
+          exit 1
         fi
-    
-    - name: Run module structure migration
-      run: |
-        # Check if we need to migrate any modules
-        echo "Checking for modules needing migration..."
-        
-        # Create src structure if needed
-        mkdir -p src/fedzk/prover src/fedzk/mpc src/fedzk/client src/fedzk/coordinator
-        
-        # Only copy missing files, don't overwrite existing ones in src/
-        if [ -d "fedzk/prover" ] && [ "$(ls -A fedzk/prover 2>/dev/null)" ]; then
-          echo "Migrating prover modules not yet in src/"
-          for file in fedzk/prover/*; do
-            basename=$(basename "$file")
-            if [ ! -f "src/fedzk/prover/$basename" ]; then
-              cp -v "$file" "src/fedzk/prover/$basename"
-            fi
-          done
-        fi
-        
-        if [ -d "fedzk/mpc" ] && [ "$(ls -A fedzk/mpc 2>/dev/null)" ]; then
-          echo "Migrating mpc modules not yet in src/"
-          for file in fedzk/mpc/*; do
-            basename=$(basename "$file")
-            if [ ! -f "src/fedzk/mpc/$basename" ]; then
-              cp -v "$file" "src/fedzk/mpc/$basename"
-            fi
-          done
-        fi
-        
-        if [ -d "fedzk/client" ] && [ "$(ls -A fedzk/client 2>/dev/null)" ]; then
-          echo "Migrating client modules not yet in src/"
-          for file in fedzk/client/*; do
-            basename=$(basename "$file")
-            if [ ! -f "src/fedzk/client/$basename" ]; then
-              cp -v "$file" "src/fedzk/client/$basename"
-            fi
-          done
-        fi
-        
-        if [ -d "fedzk/coordinator" ] && [ "$(ls -A fedzk/coordinator 2>/dev/null)" ]; then
-          echo "Migrating coordinator modules not yet in src/"
-          for file in fedzk/coordinator/*; do
-            basename=$(basename "$file")
-            if [ ! -f "src/fedzk/coordinator/$basename" ]; then
-              cp -v "$file" "src/fedzk/coordinator/$basename"
-            fi
-          done
-        fi
-        
-        echo "Migration check complete."
+        echo "✅ Project structure verified"
         
     - name: Run tests with coverage
       run: |
-        pytest -v --cov=fedzk --cov-report=xml
+        pytest -v --cov=src/fedzk --cov-report=xml
         
     - name: Test client functionality
       run: |

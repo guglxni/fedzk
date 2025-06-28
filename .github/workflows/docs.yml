@@ -24,4 +24,4 @@ jobs:
           pip install .
 
       - name: Build docs
-        run: mkdocs build --config-file fedzk/scripts/ci/mkdocs.yml
+        run: mkdocs build
