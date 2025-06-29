@@ -94,9 +94,10 @@ class LocalTrainer:
 
     def __init__(
         self,
-        model_type: str = "linear",
+        model_or_model_type=None,
+        dataloader_or_learning_rate=None,
         learning_rate: float = 0.01,
-        optimizer_type: str = "adam",
+        optimizer_type: str = "adam", 
         secure: bool = False,
         device: Optional[str] = None,
         **model_kwargs
@@ -104,14 +105,67 @@ class LocalTrainer:
         """
         Initialize the LocalTrainer.
         
+        Supports both new and legacy constructor signatures:
+        - New: LocalTrainer(model_type="linear", learning_rate=0.01, ...)
+        - Legacy: LocalTrainer(model, dataloader)
+        
         Args:
-            model_type: Type of model ('linear', 'cnn', 'transformer')
-            learning_rate: Learning rate for optimization
+            model_or_model_type: Model instance (legacy) or model type string (new)
+            dataloader_or_learning_rate: DataLoader (legacy) or learning rate (new)
+            learning_rate: Learning rate for optimization (new API)
             optimizer_type: Type of optimizer ('adam', 'sgd', 'rmsprop')
             secure: Whether to use secure training protocols
             device: Device to train on ('cpu', 'cuda', 'auto')
             **model_kwargs: Additional arguments for model initialization
         """
+        
+        # Detect legacy vs new API usage
+        if (model_or_model_type is not None and 
+            hasattr(model_or_model_type, 'parameters') and 
+            dataloader_or_learning_rate is not None and
+            hasattr(dataloader_or_learning_rate, '__len__') and
+            hasattr(dataloader_or_learning_rate, '__iter__')):
+            # Legacy API: LocalTrainer(model, dataloader)
+            self._init_legacy(model_or_model_type, dataloader_or_learning_rate, 
+                            learning_rate, optimizer_type, secure, device, **model_kwargs)
+        else:
+            # New API: LocalTrainer(model_type="linear", ...)
+            model_type = model_or_model_type or "linear"
+            if dataloader_or_learning_rate is not None and isinstance(dataloader_or_learning_rate, (int, float)):
+                learning_rate = dataloader_or_learning_rate
+            self._init_new(model_type, learning_rate, optimizer_type, secure, device, **model_kwargs)
+    
+    def _init_legacy(self, model, dataloader, learning_rate, optimizer_type, secure, device, **model_kwargs):
+        """Initialize with legacy API."""
+        self.model_type = "legacy"
+        self.learning_rate = learning_rate
+        self.optimizer_type = optimizer_type
+        self.secure = secure
+        self.model_kwargs = model_kwargs
+        
+        # Set device
+        if device == "auto" or device is None:
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        else:
+            self.device = torch.device(device)
+        
+        # Use provided model and dataloader
+        self.model = model.to(self.device)
+        self.dataloader = dataloader
+        
+        # Handle custom loss function
+        if "loss_fn" in model_kwargs:
+            self.criterion = model_kwargs["loss_fn"]
+        else:
+            self.criterion = nn.CrossEntropyLoss()
+            
+        self.optimizer = self.create_optimizer(self.model)
+        self.input_size = None  # Not needed for legacy API
+        
+        logger.info(f"LocalTrainer initialized (legacy mode): device={self.device}")
+    
+    def _init_new(self, model_type, learning_rate, optimizer_type, secure, device, **model_kwargs):
+        """Initialize with new API."""
         self.model_type = model_type
         self.learning_rate = learning_rate
         self.optimizer_type = optimizer_type
@@ -402,3 +456,49 @@ class LocalTrainer:
         self.criterion = nn.CrossEntropyLoss()
         
         logger.info(f"Model loaded from {path}")
+
+    # Backward compatibility methods for tests
+    @property
+    def loss_fn(self):
+        """Backward compatibility: return the criterion as loss_fn."""
+        return self.criterion
+    
+    @loss_fn.setter
+    def loss_fn(self, value):
+        """Backward compatibility: allow setting criterion via loss_fn."""
+        self.criterion = value
+    
+    def train_one_epoch(self) -> Dict[str, torch.Tensor]:
+        """
+        Backward compatibility: train for one epoch and return gradients.
+        
+        Returns:
+            Dictionary of parameter gradients
+        """
+        if self.model is None or self.dataloader is None:
+            raise RuntimeError("Model and data must be loaded before training")
+        
+        self.model.train()
+        total_loss = 0.0
+        
+        for batch_idx, (data, target) in enumerate(self.dataloader):
+            data, target = data.to(self.device), target.to(self.device)
+            
+            self.optimizer.zero_grad()
+            output = self.model(data)
+            loss = self.criterion(output, target)
+            loss.backward()
+            
+            total_loss += loss.item()
+            self.optimizer.step()
+        
+        # Extract gradients
+        gradients = {}
+        for name, param in self.model.named_parameters():
+            if param.grad is not None:
+                gradients[name] = param.grad.clone()
+        
+        avg_loss = total_loss / len(self.dataloader)
+        logger.info(f"Epoch completed - Average loss: {avg_loss:.4f}")
+        
+        return gradients
