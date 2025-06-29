@@ -45,9 +45,12 @@ class ZKVerifier:
             
         # Check SNARKjs is available
         try:
-            subprocess.run(["snarkjs", "--version"], 
-                         capture_output=True, check=True)
-        except (subprocess.CalledProcessError, FileNotFoundError):
+            result = subprocess.run(["snarkjs", "--version"], 
+                                  capture_output=True, text=True)
+            # SNARKjs may return non-zero exit code but still work
+            if result.returncode not in [0, 99]:  # 99 is a known SNARKjs exit code
+                raise subprocess.CalledProcessError(result.returncode, ["snarkjs", "--version"])
+        except FileNotFoundError:
             raise RuntimeError(
                 "SNARKjs not found. Please run 'scripts/setup_zk.sh' to install the ZK toolchain."
             )

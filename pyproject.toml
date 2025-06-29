@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "fedzk"
-version = "1.0.1"
+version = "1.0.0-rc1"
 description = "FEDzk: Secure Federated Learning with Zero-Knowledge Proofs"
 authors = ["Aaryan Guglani <aaryan@fedzkproject.org>"]
 license = "FSL-1.1-Apache-2.0"

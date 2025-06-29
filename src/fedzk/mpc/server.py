@@ -11,6 +11,7 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 import torch
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
@@ -71,6 +72,32 @@ SEC_ZKEY = os.getenv("MPC_SEC_ZKEY_PATH", SEC_ZKEY_DEFAULT)
 STD_VER_KEY = os.getenv("MPC_STD_VER_KEY_PATH", STD_VER_KEY_DEFAULT)
 SEC_VER_KEY = os.getenv("MPC_SEC_VER_KEY_PATH", SEC_VER_KEY_DEFAULT)
 
+# Lifespan event handling (modern FastAPI approach)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan management."""
+    # Startup
+    logger.info("FedZK MPC Proof Server starting up...")
+    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
+    logger.info(f"Test mode: {os.getenv('FEDZK_TEST_MODE', 'false')}")
+    
+    # Validate configuration
+    if os.getenv("FEDZK_TEST_MODE", "false").lower() != "true":
+        missing_files = []
+        for file_path in [STD_WASM, STD_ZKEY, STD_VER_KEY, SEC_WASM, SEC_ZKEY, SEC_VER_KEY]:
+            if not os.path.exists(file_path):
+                missing_files.append(file_path)
+        
+        if missing_files:
+            logger.warning(f"Missing ZK circuit files: {missing_files}")
+            logger.warning("Some functionality may be limited. Run 'scripts/setup_zk.sh' to compile circuits.")
+    
+    yield  # Application runs here
+    
+    # Shutdown
+    logger.info("FedZK MPC Proof Server shutting down...")
+    logger.info(f"Final metrics: {dict(metrics['requests_total'])}")
+
 # Production-grade FastAPI configuration
 app = FastAPI(
     title="FedZK MPC Proof Server",
@@ -78,7 +105,8 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs" if os.getenv("ENVIRONMENT", "development") == "development" else None,
     redoc_url="/redoc" if os.getenv("ENVIRONMENT", "development") == "development" else None,
-    openapi_url="/openapi.json" if os.getenv("ENVIRONMENT", "development") == "development" else None
+    openapi_url="/openapi.json" if os.getenv("ENVIRONMENT", "development") == "development" else None,
+    lifespan=lifespan
 )
 
 # Add security middleware
@@ -486,31 +514,6 @@ async def readiness_check():
     except Exception as e:
         logger.error(f"Readiness check failed: {e}")
         raise HTTPException(status_code=503, detail="Service not ready")
-
-# Startup and shutdown events
-@app.on_event("startup")
-async def startup_event():
-    """Application startup tasks."""
-    logger.info("FedZK MPC Proof Server starting up...")
-    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    logger.info(f"Test mode: {os.getenv('FEDZK_TEST_MODE', 'false')}")
-    
-    # Validate configuration
-    if os.getenv("FEDZK_TEST_MODE", "false").lower() != "true":
-        missing_files = []
-        for file_path in [STD_WASM, STD_ZKEY, STD_VER_KEY, SEC_WASM, SEC_ZKEY, SEC_VER_KEY]:
-            if not os.path.exists(file_path):
-                missing_files.append(file_path)
-        
-        if missing_files:
-            logger.warning(f"Missing ZK circuit files: {missing_files}")
-            logger.warning("Some functionality may be limited. Run 'scripts/setup_zk.sh' to compile circuits.")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Application shutdown tasks."""
-    logger.info("FedZK MPC Proof Server shutting down...")
-    logger.info(f"Final metrics: {dict(metrics['requests_total'])}")
 
 if __name__ == "__main__":
     import uvicorn
