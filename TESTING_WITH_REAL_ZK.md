@@ -1,6 +1,27 @@
 # Testing FEDzk with Real Zero-Knowledge Proofs
 
-This guide explains how to set up and run tests with real, production-grade ZK proofs instead of mocks or simulations.
+This guide explains how to set up and run tests with real, production-grade ZK proofs instead of mocks or simulations, following Ian Sommerville's software engineering best practices.
+
+## Comprehensive Testing Strategy
+
+We follow Ian Sommerville's recommended testing levels to ensure thorough coverage while using real ZK infrastructure:
+
+1. **Unit Testing**: Testing individual ZK components with real cryptographic operations
+2. **Integration Testing**: Testing interactions between components using real ZK proofs
+3. **System Testing**: Testing complete workflows with end-to-end real ZK infrastructure
+4. **Acceptance Testing**: Validating against user requirements with real cryptography
+5. **Performance Testing**: Measuring real ZK proof generation/verification times
+6. **Security Testing**: Validating security features with cryptographic guarantees 
+7. **Regression Testing**: Ensuring changes don't break existing functionalities
+8. **Real Environment Testing**: Using actual production-grade ZK infrastructure
+
+## Key Features of Our Testing Approach
+
+- **No Mocking or Simulation**: All tests use real ZK infrastructure
+- **Real Cryptographic Operations**: Actual Groth16 proof generation and verification
+- **End-to-End Workflows**: Complete federated learning with real ZK proofs
+- **Production-Grade Circuits**: All 6 circuits tested with real constraints
+- **Performance Benchmarking**: Real-world performance metrics
 
 ## Prerequisites
 
@@ -121,7 +142,48 @@ If tests fail with "ZK toolchain unavailable":
    npm install -g circom snarkjs
    ```
 
+## Key Test Files
+
+We've completed a comprehensive audit of all test files to ensure they use real ZK infrastructure:
+
+1. **test_mpc_server.py**: MPC server endpoints with real proof verification
+2. **test_aggregator.py**: Federation logic with real gradient aggregation
+3. **test_zkgenerator.py**: ZK proof generation with real Circom circuits
+4. **test_coordinator_api.py**: API testing with real ZK workflows
+5. **test_zkgenerator_real.py**: Specialized real ZK testing suite
+
+## Comprehensive Testing Suite
+
+For running the full test suite following Ian Sommerville's approach:
+
+```bash
+# Run the comprehensive test suite
+./scripts/comprehensive_testing_suite.sh
+```
+
+This script implements all testing levels:
+
+1. Unit tests for individual components
+2. Integration tests for component interactions
+3. System tests for complete workflows
+4. Performance benchmarks with real ZK proofs
+5. Security tests for authentication and validation
+6. Regression tests across the entire codebase
+
+## ZK Circuit Validation
+
+All tests validate the full ZK circuit stack:
+
+- **Model Update**: Basic gradient verification
+- **Secure Model Update**: Enhanced verification with constraints
+- **Batch Verification**: Multi-gradient processing
+- **Differential Privacy**: Privacy budget tracking
+- **Sparse Gradients**: Optimization verification
+- **Custom Constraints**: Domain-specific rules
+
 ## References
 
 - [Circom Documentation](https://docs.circom.io/)
 - [SNARKjs GitHub Repository](https://github.com/iden3/snarkjs)
+- [Sommerville's Software Engineering](https://www.pearson.com/en-us/subject-catalog/p/software-engineering/P200000003315)
+- [Zero-Knowledge Proofs: An illustrated primer](https://blog.cryptographyengineering.com/2014/11/27/zero-knowledge-proofs-illustrated-primer/)
