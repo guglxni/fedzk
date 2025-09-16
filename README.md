@@ -259,56 +259,86 @@ The FEDzk framework consists of three main components:
 2.  **Coordinator**: The coordinator aggregates model updates from multiple clients and updates the global model
 3.  **Prover**: The prover is a service that generates ZK proofs for the model updates, which can be run locally or on a remote server
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                           FEDzk Architecture Overview                          │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                 │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
-│  │   Client 1  │    │   Client 2  │    │   Client 3  │    │   Client N  │     │
-│  │             │    │             │    │             │    │             │     │
-│  │ ┌─────────┐ │    │ ┌─────────┐ │    │ ┌─────────┐ │    │ ┌─────────┐ │     │
-│  │ │ Trainer │ │    │ │ Trainer │ │    │ │ Trainer │ │    │ │ Trainer │ │     │
-│  │ └─────────┘ │    │ └─────────┘ │    │ └─────────┘ │    │ └─────────┘ │     │
-│  │ ┌─────────┐ │    │ ┌─────────┐ │    │ ┌─────────┐ │    │ ┌─────────┐ │     │
-│  │ │ ZK Gen  │ │    │ │ ZK Gen  │ │    │ │ ZK Gen  │ │    │ │ ZK Gen  │ │     │
-│  │ └─────────┘ │    │ └─────────┘ │    │ └─────────┘ │    │ └─────────┘ │     │
-│  └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘     │
-│           │                 │                 │                 │             │
-│           │                 │                 │                 │             │
-│           └─────────────────┼─────────────────┼─────────────────┘             │
-│                             │                 │                               │
-│                             ▼                 ▼                               │
-│                    ┌─────────────────────────────────┐                        │
-│                    │         Coordinator             │                        │
-│                    │                                 │                        │
-│                    │  ┌─────────────┐ ┌───────────┐  │                        │
-│                    │  │ Aggregator  │ │ Validator │  │                        │
-│                    │  └─────────────┘ └───────────┘  │                        │
-│                    │  ┌─────────────┐ ┌───────────┐  │                        │
-│                    │  │   API       │ │  Storage  │  │                        │
-│                    │  └─────────────┘ └───────────┘  │                        │
-│                    └─────────────────────────────────┘                        │
-│                                     │                                         │
-│                                     ▼                                         │
-│                    ┌─────────────────────────────────┐                        │
-│                    │      ZK Proof Verification      │                        │
-│                    │                                 │                        │
-│                    │   ┌─────────────────────────┐   │                        │
-│                    │   │    Circom Circuits      │   │                        │
-│                    │   │   - Model Updates       │   │                        │
-│                    │   │   - Gradient Validation │   │                        │
-│                    │   │   - Privacy Preserving  │   │                        │
-│                    │   └─────────────────────────┘   │                        │
-│                    └─────────────────────────────────┘                        │
-└─────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "FEDzk Architecture Overview"
+        subgraph "Federated Learning Clients"
+            C1[Client 1<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
+            C2[Client 2<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]  
+            C3[Client 3<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
+            CN[Client N<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
+        end
+        
+        subgraph "Central Coordinator"
+            COORD[🎯 Coordinator<br/>Secure Aggregation]
+            AGG[📊 Aggregator<br/>Model Updates]
+            VAL[✅ Validator<br/>Proof Verification]
+            API[🌐 API Gateway<br/>Client Interface]
+            STORE[💾 Storage<br/>Global Model]
+        end
+        
+        subgraph "Zero-Knowledge Infrastructure"
+            ZK[🔐 ZK Proof System]
+            CIRC1[📐 Model Update Circuit<br/>Circom/SnarkJS]
+            CIRC2[🔍 Gradient Validation<br/>Range Proofs]
+            CIRC3[🛡️ Privacy Preserving<br/>Differential Privacy]
+        end
+        
+        subgraph "Security & Monitoring"
+            SEC[🔒 Security Layer<br/>TLS 1.3 + mTLS]
+            MON[📈 Monitoring<br/>Prometheus/Grafana]
+            LOG[📝 Logging<br/>Structured JSON]
+        end
+    end
+    
+    %% Client connections
+    C1 -->|Encrypted Updates + Proofs| COORD
+    C2 -->|Encrypted Updates + Proofs| COORD
+    C3 -->|Encrypted Updates + Proofs| COORD
+    CN -->|Encrypted Updates + Proofs| COORD
+    
+    %% Coordinator internal flow
+    COORD --> AGG
+    COORD --> VAL
+    COORD --> API
+    COORD --> STORE
+    
+    %% ZK verification flow
+    VAL --> ZK
+    ZK --> CIRC1
+    ZK --> CIRC2
+    ZK --> CIRC3
+    
+    %% Security and monitoring
+    SEC -.->|Protects| COORD
+    MON -.->|Observes| COORD
+    LOG -.->|Audits| COORD
+    
+    %% Global model distribution
+    STORE -->|Updated Model| C1
+    STORE -->|Updated Model| C2
+    STORE -->|Updated Model| C3
+    STORE -->|Updated Model| CN
+
+    %% Styling
+    classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef coordinator fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef zk fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef security fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class C1,C2,C3,CN client
+    class COORD,AGG,VAL,API,STORE coordinator
+    class ZK,CIRC1,CIRC2,CIRC3 zk
+    class SEC,MON,LOG security
 ```
 
-**Architecture Components:**
-- **Clients**: Federated learning participants with local training and ZK proof generation
-- **Coordinator**: Central aggregation service with API and validation
-- **ZK Circuits**: Circom-based zero-knowledge proof verification for model updates
-- **Security**: End-to-end encryption, secure aggregation, and privacy preservation
+**🏗️ Architecture Components:**
+
+- **🖥️ Federated Clients**: Distributed participants performing local training with privacy-preserving ZK proof generation
+- **🎯 Central Coordinator**: Secure aggregation service managing global model updates and client coordination  
+- **🔐 Zero-Knowledge System**: Cryptographic proof verification using Circom circuits for model integrity
+- **🔒 Security Infrastructure**: End-to-end encryption, monitoring, and comprehensive audit logging
+- **📊 Model Lifecycle**: Secure model distribution, local training, proof generation, and verified aggregation
 
 ## Getting Started
 
