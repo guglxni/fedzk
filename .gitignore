@@ -152,4 +152,4 @@ mpc_server.log
 benchmark_results.json
 performance_*.json
 integration_*.json
-test_results_*.xml
+test_results_*.xml.cursorindexingignore
