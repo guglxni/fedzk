@@ -175,8 +175,7 @@ setup(
         ],
     },
     data_files=[
-        ('config', ['config/fedzk.yaml.example']),
-        ('docs', ['README.md', 'CHANGELOG.md']),
+        ('docs', ['README.md']),
     ],
     zip_safe=False,
     platforms=['any'],

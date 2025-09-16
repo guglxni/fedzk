@@ -3,16 +3,13 @@
 
 # Include documentation
 include README.md
-include CHANGELOG.md
 include LICENSE
-include VERSION
 include CONTRIBUTING.md
 
 # Include configuration files
 include pyproject.toml
 include setup.py
 include MANIFEST.in
-include .pre-commit-config.yaml
 
 # Include CI/CD configuration
 recursive-include .github *.yml
@@ -21,8 +18,7 @@ recursive-include .github *.md
 
 # Include Docker files
 include Dockerfile
-include docker-compose.yml
-include .dockerignore
+include docker/docker-compose.yml
 
 # Include Helm charts
 recursive-include helm *.yaml
@@ -33,10 +29,6 @@ recursive-include helm *.md
 recursive-include tools *.py
 recursive-include scripts *.py
 recursive-include scripts *.sh
-
-# Include examples
-recursive-include docs/examples *.py
-recursive-include docs/examples *.md
 
 # Include quality gates
 recursive-include quality-gates *.yaml

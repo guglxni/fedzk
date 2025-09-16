@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fedzk"
-version = "1.0.1"
+version = "1.1.0"
 description = "Federated Learning with Zero-Knowledge Proofs"
 readme = "README.md"
 license = {text = "MIT"}
