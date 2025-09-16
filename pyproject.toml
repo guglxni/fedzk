@@ -1,48 +1,237 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "fedzk"
-version = "1.0.0-rc1"
-description = "FEDzk: Secure Federated Learning with Zero-Knowledge Proofs"
-authors = ["Aaryan Guglani <aaryan@fedzkproject.org>"]
-license = "FSL-1.1-Apache-2.0"
+version = "1.0.1"
+description = "Federated Learning with Zero-Knowledge Proofs"
 readme = "README.md"
-packages = [
-    { include = "fedzk", from = "src" }
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "scikit-learn>=1.0.0",
+    "cryptography>=3.4.0",
+    "pydantic>=1.8.0",
+    "fastapi>=0.68.0",
+    "uvicorn>=0.15.0",
+    "requests>=2.25.0",
+    "aiofiles>=0.7.0",
+    "python-multipart>=0.0.5",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.0",
+    "sqlalchemy>=1.4.0",
+    "alembic>=1.7.0",
+    "redis>=4.0.0",
+    "celery>=5.2.0",
+    "prometheus-client>=0.12.0",
+    "opentelemetry-distro>=0.23b0",
+    "opentelemetry-instrumentation-fastapi>=0.23b0",
+    "structlog>=21.5.0",
+    "rich>=10.0.0",
+    "typer>=0.4.0",
+    "pymongo>=4.0.0",
 ]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-numpy = "<2"
-requests = ">=2.25.0"
-rich = ">=12.0.0"
-typer = ">=0.4.0"
-httpx = ">=0.21.0"
-torch = "^2.2.1"
-fastapi = ">=0.68.0"
-uvicorn = ">=0.15.0"
-pydantic = ">=1.8.0"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "pytest-asyncio>=0.18.0",
+    "pytest-mock>=3.7.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=4.0.0",
+    "mypy>=0.950",
+    "pre-commit>=2.17.0",
+    "sphinx>=4.5.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.18.0",
+    "bandit>=1.7.0",
+    "safety>=2.0.0",
+    "coverage[toml]>=6.0.0",
+]
+gpu = [
+    "torch>=1.12.0",
+    "torchvision>=0.13.0",
+    "torchaudio>=0.12.0",
+    "tensorflow>=2.9.0",
+    "xgboost>=1.6.0",
+    "lightgbm>=3.3.0",
+    "catboost>=1.0.0",
+]
+docs = [
+    "sphinx>=4.5.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.18.0",
+    "myst-parser>=0.17.0",
+    "sphinx-copybutton>=0.5.0",
+    "sphinx-design>=0.2.0",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=6.2.0"
-pytest-cov = ">=2.12.0"
-black = ">=22.6.0"
-mypy = ">=0.81.0"
+[project.urls]
+Homepage = "https://fedzk.io"
+Documentation = "https://docs.fedzk.io"
+Repository = "https://github.com/fedzk/fedzk"
+Issues = "https://github.com/fedzk/fedzk/issues"
+Changelog = "https://github.com/fedzk/fedzk/blob/main/CHANGELOG.md"
 
-[tool.poetry.scripts]
-fedzk = "fedzk.cli:main"
+[project.scripts]
+fedzk = "fedzk.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
-line-length = 100
-target-version = ['py38']
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["fedzk"]
+known_third_party = [
+    "numpy",
+    "pandas",
+    "sklearn",
+    "cryptography",
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy",
+    "redis",
+    "celery",
+    "prometheus_client",
+    "opentelemetry",
+]
 
 [tool.mypy]
 python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "numpy.*",
+    "pandas.*",
+    "sklearn.*",
+    "torch.*",
+    "tensorflow.*",
+    "xgboost.*",
+    "lightgbm.*",
+    "catboost.*",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["src/fedzk/tests"]
-addopts = "-v --cov=src/fedzk --cov-report=term-missing"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=fedzk",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+    "-v",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "performance: Performance tests",
+    "security: Security tests",
+    "slow: Slow running tests",
+    "gpu: GPU-dependent tests",
+    "compliance: Compliance-related tests",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/fedzk"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/conftest.py",
+    "*/__pycache__/*",
+    "*/.tox/*",
+    "*/.venv/*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "docs"]
+skips = ["B101", "B601"]
+
+[tool.safety]
+ignore = [
+    "12345",  # Example vulnerability ID to ignore
+]

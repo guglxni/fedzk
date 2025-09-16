@@ -1,0 +1,79 @@
+{
+  "title": "FEDZK Threat Model",
+  "version": "1.0",
+  "threat_actors": {
+    "external_attacker": {
+      "description": "External malicious actor",
+      "motivation": "Data theft, system disruption, financial gain",
+      "capabilities": "Network attacks, social engineering, malware",
+      "likelihood": "High"
+    },
+    "insider_threat": {
+      "description": "Malicious or compromised insider",
+      "motivation": "Data exfiltration, sabotage",
+      "capabilities": "Authorized access, internal knowledge",
+      "likelihood": "Medium"
+    },
+    "nation_state_actor": {
+      "description": "Nation-state sponsored attacker",
+      "motivation": "Intelligence gathering, strategic advantage",
+      "capabilities": "Advanced persistent threats, zero-day exploits",
+      "likelihood": "Low"
+    }
+  },
+  "threat_scenarios": {
+    "data_poisoning": {
+      "description": "Malicious data injection into federated learning",
+      "impact": "High",
+      "likelihood": "Medium",
+      "mitigations": [
+        "Input validation and sanitization",
+        "Zero-knowledge proof verification",
+        "Anomaly detection algorithms",
+        "Secure aggregation protocols"
+      ]
+    },
+    "model_inversion": {
+      "description": "Reconstructing training data from model parameters",
+      "impact": "High",
+      "likelihood": "Medium",
+      "mitigations": [
+        "Differential privacy mechanisms",
+        "Model output perturbation",
+        "Secure multi-party computation",
+        "Federated learning with privacy guarantees"
+      ]
+    },
+    "denial_of_service": {
+      "description": "Overwhelming system resources",
+      "impact": "Medium",
+      "likelihood": "High",
+      "mitigations": [
+        "Rate limiting and throttling",
+        "DDoS protection services",
+        "Resource monitoring and auto-scaling",
+        "Circuit breaker patterns"
+      ]
+    }
+  },
+  "security_controls": {
+    "preventive": [
+      "Multi-factor authentication",
+      "Input validation and sanitization",
+      "Network segmentation",
+      "Access control policies"
+    ],
+    "detective": [
+      "Security monitoring and alerting",
+      "Intrusion detection systems",
+      "Log analysis and correlation",
+      "Regular security assessments"
+    ],
+    "corrective": [
+      "Incident response procedures",
+      "Backup and recovery processes",
+      "Security patch management",
+      "Configuration management"
+    ]
+  }
+}

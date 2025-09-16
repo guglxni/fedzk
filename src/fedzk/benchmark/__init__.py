@@ -3,9 +3,9 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-FedZK Benchmarking package.
+FEDzk Benchmarking package.
 
-This package provides comprehensive benchmarking for FedZK components.
+This package provides comprehensive benchmarking for FEDzk components.
 """
 
 from fedzk.benchmark.utils import BenchmarkResults, benchmark, generate_random_gradients

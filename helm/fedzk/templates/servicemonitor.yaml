@@ -1,0 +1,115 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled .Values.monitoring.prometheus.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator-servicemonitor
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: coordinator
+    {{- with .Values.monitoring.prometheus.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+spec:
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout }}
+      relabelings:
+        - action: replace
+          replacement: {{ .Release.Namespace }}
+          targetLabel: namespace
+        - action: replace
+          replacement: {{ include "fedzk.fullname" . }}
+          targetLabel: app
+        - action: replace
+          replacement: "coordinator"
+          targetLabel: component
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.coordinator.selectorLabels" . | nindent 6 }}
+---
+{{- if .Values.mpc.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc-servicemonitor
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mpc
+    {{- with .Values.monitoring.prometheus.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+spec:
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout }}
+      relabelings:
+        - action: replace
+          replacement: {{ .Release.Namespace }}
+          targetLabel: namespace
+        - action: replace
+          replacement: {{ include "fedzk.fullname" . }}
+          targetLabel: mpc
+        - action: replace
+          replacement: "mpc"
+          targetLabel: component
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.mpc.selectorLabels" . | nindent 6 }}
+---
+{{- end }}
+{{- if .Values.zk.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk-servicemonitor
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: zk
+    {{- with .Values.monitoring.prometheus.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.monitoring.prometheus.serviceMonitor.namespace }}
+  namespace: {{ . }}
+  {{- end }}
+spec:
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.monitoring.prometheus.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.monitoring.prometheus.serviceMonitor.scrapeTimeout }}
+      relabelings:
+        - action: replace
+          replacement: {{ .Release.Namespace }}
+          targetLabel: namespace
+        - action: replace
+          replacement: {{ include "fedzk.fullname" . }}
+          targetLabel: zk
+        - action: replace
+          replacement: "zk"
+          targetLabel: component
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.zk.selectorLabels" . | nindent 6 }}
+---
+{{- end }}
+{{- end }}
+

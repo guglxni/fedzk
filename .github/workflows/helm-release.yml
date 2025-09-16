@@ -1,0 +1,191 @@
+name: Helm Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      chart_version:
+        description: 'Helm chart version'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  release-helm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.11.0
+
+    - name: Configure Git
+      run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.5.0
+      with:
+        charts_repo_url: https://fedzk.github.io/helm-charts
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        CR_SKIP_EXISTING: true
+
+    - name: Update Helm repository index
+      run: |
+        # Clone the helm-charts repository
+        git clone https://github.com/fedzk/helm-charts.git helm-charts-repo
+        cd helm-charts-repo
+
+        # Update index with new chart
+        helm repo index .
+
+        # Commit and push changes
+        git add .
+        git commit -m "Update Helm repository index for FEDZK ${GITHUB_REF#refs/tags/v}"
+        git push
+
+    - name: Validate Helm chart
+      run: |
+        # Lint the chart
+        helm lint helm/fedzk
+
+        # Template the chart to verify syntax
+        helm template test-release helm/fedzk
+
+        # Check for deprecated APIs
+        helm template test-release helm/fedzk --validate
+
+    - name: Test Helm chart installation
+      run: |
+        # Create a kind cluster for testing
+        kind create cluster --name helm-test
+
+        # Install the chart
+        helm install test-release helm/fedzk
+
+        # Wait for pods to be ready
+        kubectl wait --for=condition=available --timeout=300s deployment/test-release-fedzk-coordinator
+        kubectl wait --for=condition=available --timeout=300s deployment/test-release-fedzk-worker
+
+        # Run basic tests
+        kubectl get pods
+        kubectl logs deployment/test-release-fedzk-coordinator
+
+        # Clean up
+        helm uninstall test-release
+        kind delete cluster --name helm-test
+
+  publish-helm-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.11.0
+
+    - name: Generate Helm documentation
+      run: |
+        # Install helm-docs
+        curl -L https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz | tar xz
+        sudo mv helm-docs /usr/local/bin/
+
+        # Generate documentation for all charts
+        helm-docs
+
+        # Check if documentation was generated
+        find . -name "README.md" -path "*/helm/*"
+
+    - name: Update Helm chart documentation
+      run: |
+        # Copy generated docs to charts
+        cp helm/README.md docs/helm/
+        cp helm/fedzk/README.md docs/helm/fedzk/
+
+        # Commit documentation updates
+        git add docs/helm/
+        git commit -m "Update Helm chart documentation" || echo "No documentation changes"
+
+  helm-security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.11.0
+
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+
+    - name: Scan Helm chart for vulnerabilities
+      run: |
+        # Scan the Helm chart directory
+        trivy config helm/fedzk
+
+        # Scan container images referenced in the chart
+        trivy image --format json --output trivy-results.json fedzk/fedzk:latest
+
+        # Check for secrets in chart files
+        find helm/ -type f -name "*.yaml" -o -name "*.yml" | xargs grep -l "password\|secret\|token\|key" || echo "No secrets found in chart files"
+
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v3
+      with:
+        name: helm-security-scan
+        path: |
+          trivy-results.json
+        retention-days: 30
+
+  update-helm-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.11.0
+
+    - name: Update Helm dependencies
+      run: |
+        # Update dependencies for all charts
+        find helm/ -name "Chart.yaml" -exec helm dependency update {} \;
+
+        # Check for outdated dependencies
+        find helm/ -name "Chart.yaml" -exec helm dependency list {} \;
+
+    - name: Validate updated dependencies
+      run: |
+        # Lint charts after dependency updates
+        helm lint helm/fedzk
+
+        # Check for any breaking changes
+        helm template test-release helm/fedzk --dry-run
+
+    - name: Commit dependency updates
+      run: |
+        # Check if there are any changes
+        if git diff --quiet; then
+          echo "No dependency changes to commit"
+        else
+          git add helm/
+          git commit -m "Update Helm chart dependencies"
+          git push
+        fi

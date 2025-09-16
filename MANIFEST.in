@@ -1,0 +1,73 @@
+# FEDZK Package Manifest
+# Include additional files in the distribution
+
+# Include documentation
+include README.md
+include CHANGELOG.md
+include LICENSE
+include VERSION
+include CONTRIBUTING.md
+
+# Include configuration files
+include pyproject.toml
+include setup.py
+include MANIFEST.in
+include .pre-commit-config.yaml
+
+# Include CI/CD configuration
+recursive-include .github *.yml
+recursive-include .github *.yaml
+recursive-include .github *.md
+
+# Include Docker files
+include Dockerfile
+include docker-compose.yml
+include .dockerignore
+
+# Include Helm charts
+recursive-include helm *.yaml
+recursive-include helm *.yml
+recursive-include helm *.md
+
+# Include tools and scripts
+recursive-include tools *.py
+recursive-include scripts *.py
+recursive-include scripts *.sh
+
+# Include examples
+recursive-include docs/examples *.py
+recursive-include docs/examples *.md
+
+# Include quality gates
+recursive-include quality-gates *.yaml
+recursive-include quality-gates *.yml
+
+# Include test data (if any)
+# recursive-include tests/data *
+
+# Exclude development files
+exclude .gitignore
+exclude .gitattributes
+exclude .pre-commit-config.yaml
+exclude pytest.ini
+exclude mypy.ini
+exclude .coverage
+exclude coverage.xml
+exclude htmlcov/
+exclude .tox/
+exclude .venv/
+exclude __pycache__/
+exclude *.pyc
+exclude *.pyo
+exclude *.pyd
+exclude .Python
+exclude env/
+exclude venv/
+exclude ENV/
+exclude .env
+
+# Global excludes
+global-exclude *.log
+global-exclude .DS_Store
+global-exclude Thumbs.db
+global-exclude desktop.ini

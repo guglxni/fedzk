@@ -1,0 +1,98 @@
+{{- if and .Values.hpa.enabled .Values.coordinator.enabled .Values.coordinator.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator-hpa
+  labels:
+    {{- include "fedzk.coordinator.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "fedzk.fullname" . }}-coordinator
+  minReplicas: {{ .Values.coordinator.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.coordinator.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.coordinator.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.coordinator.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.coordinator.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.coordinator.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+---
+{{- end }}
+
+{{- if and .Values.hpa.enabled .Values.mpc.enabled .Values.mpc.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc-hpa
+  labels:
+    {{- include "fedzk.mpc.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "fedzk.fullname" . }}-mpc
+  minReplicas: {{ .Values.mpc.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.mpc.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.mpc.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.mpc.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.mpc.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.mpc.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+---
+{{- end }}
+
+{{- if and .Values.hpa.enabled .Values.zk.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk-hpa
+  labels:
+    {{- include "fedzk.zk.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "fedzk.fullname" . }}-zk
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+{{- end }}
+

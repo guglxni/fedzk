@@ -1,0 +1,191 @@
+# FEDZK Docker Compose Configuration
+# Multi-environment deployment configuration
+
+version: '3.8'
+
+services:
+  # FEDZK Coordinator Service
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: fedzk/fedzk:latest
+    container_name: fedzk-coordinator
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Metrics port
+    environment:
+      - FEDZK_ENV=production
+      - FEDZK_ROLE=coordinator
+      - FEDZK_DATABASE_URL=postgresql://fedzk:secure_password@postgres:5432/fedzk
+      - FEDZK_REDIS_URL=redis://redis:6379
+      - FEDZK_SECRET_KEY=${FEDZK_SECRET_KEY:-change-me-in-production}
+      - FEDZK_CORS_ORIGINS=["http://localhost:3000", "https://fedzk.io"]
+    volumes:
+      - fedzk_data:/app/data
+      - fedzk_logs:/app/logs
+      - ./config/production.yaml:/app/config/production.yaml:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # FEDZK Worker Service
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: fedzk/fedzk:latest
+    container_name: fedzk-worker
+    environment:
+      - FEDZK_ENV=production
+      - FEDZK_ROLE=worker
+      - FEDZK_COORDINATOR_URL=http://coordinator:8000
+      - FEDZK_WORKER_ID=${FEDZK_WORKER_ID:-worker-1}
+      - FEDZK_GPU_ENABLED=${FEDZK_GPU_ENABLED:-false}
+    volumes:
+      - fedzk_worker_data:/app/data
+      - fedzk_logs:/app/logs
+    depends_on:
+      - coordinator
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: fedzk-postgres
+    environment:
+      - POSTGRES_DB=fedzk
+      - POSTGRES_USER=fedzk
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secure_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fedzk -d fedzk"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fedzk-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-secure_redis_password}
+    volumes:
+      - redis_data:/data
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:1.23-alpine
+    container_name: fedzk-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - coordinator
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fedzk-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fedzk-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - fedzk_network
+    restart: unless-stopped
+
+volumes:
+  fedzk_data:
+    driver: local
+  fedzk_worker_data:
+    driver: local
+  fedzk_logs:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  fedzk_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,463 @@
+# Default values for FEDzk Helm chart
+# This file contains all configurable values for the FEDzk deployment
+
+# Global settings
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# FEDzk Coordinator settings
+coordinator:
+  enabled: true
+  replicaCount: 3
+  image:
+    repository: fedzk
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - fedzk-coordinator
+          topologyKey: kubernetes.io/hostname
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+      - ALL
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  pdb:
+    enabled: true
+    minAvailable: 2
+
+# MPC Server settings
+mpc:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: fedzk
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8001
+    targetPort: 8000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  nodeSelector: {}
+  tolerations: []
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - fedzk-mpc
+          topologyKey: kubernetes.io/hostname
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+      - ALL
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+# ZK Toolchain settings
+zk:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: fedzk/zk-toolchain
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    annotations: {}
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    fsGroup: 1001
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+      - ALL
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+# PostgreSQL settings (when using embedded PostgreSQL)
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "fedzk-postgres-password"
+    username: "fedzk_user"
+    password: "fedzk_password_prod"
+    database: "fedzk_prod"
+  architecture: standalone
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+# Redis settings (when using embedded Redis)
+redis:
+  enabled: true
+  auth:
+    password: "fedzk-redis-password"
+  architecture: standalone
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      limits:
+        cpu: 300m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+# External database settings (when not using embedded PostgreSQL)
+externalDatabase:
+  host: ""
+  port: 5432
+  database: ""
+  username: ""
+  password: ""
+  sslMode: "require"
+
+# External Redis settings (when not using embedded Redis)
+externalRedis:
+  host: ""
+  port: 6379
+  password: ""
+  ssl: false
+
+# Ingress settings
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: fedzk.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: fedzk-tls
+      hosts:
+        - fedzk.example.com
+
+# TLS settings
+tls:
+  enabled: true
+  secretName: "fedzk-tls"
+  issuerName: "letsencrypt-prod"
+
+# Monitoring settings
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
+      interval: 30s
+      scrapeTimeout: 10s
+  grafana:
+    enabled: true
+    dashboards:
+      enabled: true
+  loki:
+    enabled: true
+
+# Logging settings
+logging:
+  level: "INFO"
+  format: "json"
+  loki:
+    enabled: true
+    serviceName: "loki.loki.svc.cluster.local"
+    port: 3100
+
+# Security settings
+security:
+  networkPolicy:
+    enabled: true
+  podSecurityStandards:
+    enabled: true
+    level: "restricted"
+  secrets:
+    encryption: true
+    rotation:
+      enabled: true
+      interval: "30d"
+
+# Resource quotas
+resourceQuota:
+  enabled: true
+  requests:
+    cpu: "4"
+    memory: "8Gi"
+  limits:
+    cpu: "8"
+    memory: "16Gi"
+
+# Horizontal Pod Autoscaling
+hpa:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Rolling update strategy
+rollingUpdate:
+  enabled: true
+  maxUnavailable: "25%"
+  maxSurge: "25%"
+  timeout: 600
+
+# Configuration settings
+config:
+  fedzk:
+    env: "production"
+    zkVerified: true
+    logLevel: "INFO"
+    port: 8000
+  mpc:
+    apiKeys: []
+    timeout: 30
+    maxRetries: 3
+  database:
+    poolSize: 10
+    maxConnections: 100
+    connectionTimeout: 30
+  redis:
+    poolSize: 10
+    maxConnections: 100
+    connectionTimeout: 30
+
+# Service account settings
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "fedzk-service-account"
+
+# RBAC settings
+rbac:
+  create: true
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "services", "endpoints", "configmaps", "secrets"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiGroups: ["apps"]
+      resources: ["deployments", "replicasets"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiGroups: ["networking.k8s.io"]
+      resources: ["ingresses"]
+      verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Backup settings
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: "30d"
+  storage:
+    size: "100Gi"
+    className: "standard"
+
+# High availability settings
+highAvailability:
+  enabled: true
+  zoneDistribution: true
+  antiAffinity: true
+
+# Persistence settings for data backup and recovery
+persistence:
+  enabled: true
+  storageClassName: "standard"
+  coordinator:
+    size: "10Gi"
+  mpc:
+    size: "20Gi"
+  zk:
+    size: "50Gi"
+
+# Monitoring and Observability
+monitoring:
+  enabled: true
+
+  # Prometheus configuration
+  prometheus:
+    enabled: true
+    scrapeInterval: "30s"
+    evaluationInterval: "30s"
+
+    # ServiceMonitor configuration
+    serviceMonitor:
+      enabled: true
+      interval: "30s"
+      scrapeTimeout: "10s"
+      additionalLabels: {}
+      namespace: ""
+
+  # Grafana configuration
+  grafana:
+    enabled: true
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+
+  # Distributed tracing
+  tracing:
+    enabled: true
+    jaeger:
+      enabled: true
+      host: "jaeger-collector"
+      port: 6831
+
+  # Alerting
+  alerting:
+    enabled: true
+    rules:
+      enabled: true
+
+# Logging Configuration
+logging:
+  enabled: true
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  # File logging
+  file:
+    enabled: true
+    path: "/var/log/fedzk/app.log"
+    maxSize: 10485760  # 10MB
+    backupCount: 5
+
+  # Structured logging
+  structured:
+    enabled: true
+    serviceName: "fedzk"
+
+  # Log aggregation
+  aggregation:
+    enabled: true
+    bufferSize: 10000
+    flushInterval: 30
+
+  # Security logging
+  security:
+    enabled: true
+    auditTrail: true
+    complianceCheck: true
+
+  # External systems
+  elasticsearch:
+    enabled: false
+    host: "elasticsearch-master"
+    port: 9200
+    username: ""
+    password: ""
+    ssl: true
+    indexPrefix: "fedzk-logs"
+
+  fluentbit:
+    enabled: false
+    image:
+      repository: fluent/fluent-bit
+      tag: "1.9"
+      pullPolicy: IfNotPresent
+
+  filebeat:
+    enabled: false
+    image:
+      repository: elastic/filebeat
+      tag: "8.5.0"
+      pullPolicy: IfNotPresent
+
+  # Log retention
+  retention:
+    enabled: true
+    days: 30
+    compressed: true
+

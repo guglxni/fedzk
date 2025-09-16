@@ -1,0 +1,203 @@
+{{- if .Values.coordinator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator
+  labels:
+    {{- include "fedzk.coordinator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.coordinator.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.coordinator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fedzk.coordinator.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.coordinator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.coordinator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.coordinator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "fedzk.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.coordinator.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fedzk-coordinator
+          securityContext:
+            {{- toYaml .Values.coordinator.securityContext | nindent 12 }}
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.coordinator.image.repository }}:{{ .Values.coordinator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.coordinator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.coordinator.service.port }}
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          env:
+            - name: FEDZK_ENV
+              value: {{ .Values.config.fedzk.env | quote }}
+            - name: FEDZK_ZK_VERIFIED
+              value: {{ .Values.config.fedzk.zkVerified | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.fedzk.logLevel | quote }}
+            - name: PORT
+              value: {{ .Values.config.fedzk.port | quote }}
+            - name: COORDINATOR_HOST
+              value: "0.0.0.0"
+            - name: COORDINATOR_PORT
+              value: {{ .Values.config.fedzk.port | quote }}
+            - name: PYTHONPATH
+              value: "/app"
+            {{- if .Values.monitoring.enabled }}
+            - name: FEDZK_METRICS_ENABLED
+              value: "true"
+            - name: FEDZK_METRICS_PORT
+              value: "{{ .Values.coordinator.service.port }}"
+            - name: FEDZK_TRACING_ENABLED
+              value: "{{ .Values.monitoring.tracing.enabled }}"
+            - name: JAEGER_HOST
+              value: "{{ .Values.monitoring.tracing.jaeger.host }}"
+            - name: JAEGER_PORT
+              value: "{{ .Values.monitoring.tracing.jaeger.port }}"
+            {{- end }}
+            {{- if .Values.logging.enabled }}
+            - name: FEDZK_LOG_LEVEL
+              value: "{{ .Values.logging.level }}"
+            - name: FEDZK_LOG_STRUCTURED
+              value: "{{ .Values.logging.structured.enabled }}"
+            - name: FEDZK_LOG_SECURITY
+              value: "{{ .Values.logging.security.enabled }}"
+            - name: FEDZK_LOG_AGGREGATION
+              value: "{{ .Values.logging.aggregation.enabled }}"
+            - name: FEDZK_LOG_ELASTICSEARCH_ENABLED
+              value: "{{ .Values.logging.elasticsearch.enabled }}"
+            - name: FEDZK_LOG_ELASTICSEARCH_HOST
+              value: "{{ .Values.logging.elasticsearch.host }}"
+            - name: FEDZK_LOG_ELASTICSEARCH_PORT
+              value: "{{ .Values.logging.elasticsearch.port }}"
+            {{- end }}
+            {{- if .Values.mpc.enabled }}
+            - name: MPC_SERVER_HOST
+              value: "{{ include "fedzk.fullname" . }}-mpc"
+            - name: MPC_SERVER_PORT
+              value: {{ .Values.mpc.service.port | quote }}
+            {{- end }}
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_HOST
+              value: "{{ include "fedzk.fullname" . }}-redis-master"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fedzk.fullname" . }}-redis
+                  key: redis-password
+            {{- else if .Values.externalRedis.host }}
+            - name: REDIS_HOST
+              value: {{ .Values.externalRedis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.externalRedis.port | quote }}
+            - name: REDIS_PASSWORD
+              value: {{ .Values.externalRedis.password | quote }}
+            {{- end }}
+            {{- if or .Values.postgresql.enabled .Values.externalDatabase.host }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fedzk.fullname" . }}-db
+                  key: database-url
+            {{- end }}
+            {{- range .Values.config.mpc.apiKeys }}
+            - name: MPC_API_KEYS
+              value: {{ . | quote }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "fedzk.fullname" . }}-config
+          resources:
+            {{- toYaml .Values.coordinator.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+              readOnly: false
+            - name: cache-volume
+              mountPath: /app/.cache
+              readOnly: false
+            {{- if .Values.persistence.enabled }}
+            - name: coordinator-data
+              mountPath: /app/data
+              readOnly: false
+            {{- end }}
+            {{- if and .Values.logging.enabled .Values.logging.file.enabled }}
+            - name: log-volume
+              mountPath: /var/log/fedzk
+              readOnly: false
+            {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        - name: cache-volume
+          emptyDir: {}
+        {{- if .Values.persistence.enabled }}
+        - name: coordinator-data
+          persistentVolumeClaim:
+            claimName: {{ include "fedzk.fullname" . }}-coordinator-data
+        {{- end }}
+        {{- if and .Values.logging.enabled .Values.logging.file.enabled }}
+        - name: log-volume
+          emptyDir: {}
+        {{- end }}
+      {{- with .Values.coordinator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.coordinator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.coordinator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+

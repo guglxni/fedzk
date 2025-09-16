@@ -1,0 +1,40 @@
+{
+  "title": "FEDZK Encryption Documentation",
+  "version": "1.0",
+  "encryption_standards": {
+    "data_at_rest": {
+      "algorithm": "AES-256-GCM",
+      "key_management": "AWS KMS / HashiCorp Vault",
+      "key_rotation": "90 days",
+      "backup_encryption": "Same as primary data"
+    },
+    "data_in_transit": {
+      "protocol": "TLS 1.3",
+      "cipher_suites": [
+        "TLS_AES_256_GCM_SHA384",
+        "TLS_AES_128_GCM_SHA256"
+      ],
+      "certificate_authority": "DigiCert / Let's Encrypt",
+      "hsts_policy": "max-age=31536000; includeSubDomains"
+    },
+    "federated_computation": {
+      "zk_proofs": "Groth16 / PLONK",
+      "multi_party_computation": "Secure multi-party computation protocols",
+      "homomorphic_encryption": "Available for specific use cases",
+      "differential_privacy": "Implemented for privacy preservation"
+    }
+  },
+  "key_management": {
+    "key_generation": "Cryptographically secure random generation",
+    "key_storage": "Hardware Security Modules (HSM)",
+    "key_rotation": "Automated rotation every 90 days",
+    "key_backup": "Encrypted backups with dual control",
+    "key_destruction": "Secure deletion using NIST guidelines"
+  },
+  "cryptographic_protocols": {
+    "authentication": "Mutual TLS / JWT with RS256",
+    "api_security": "OAuth 2.0 / OpenID Connect",
+    "federated_learning": "Zero-knowledge proofs for model updates",
+    "secure_aggregation": "Secure multi-party computation"
+  }
+}

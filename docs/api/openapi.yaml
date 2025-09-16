@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: FEDZK Federated Learning API
+  description: |
+    FEDZK (Federated Learning with Zero-Knowledge Proofs) provides a comprehensive API for
+    secure federated learning with privacy-preserving zero-knowledge proofs.
+
+    ## Overview
+    FEDZK enables organizations to train machine learning models collaboratively while maintaining
+    data privacy through advanced cryptographic techniques including zero-knowledge proofs.
+
+    ## Key Features
+    - **Privacy-Preserving ML**: Train models without sharing raw data
+    - **Zero-Knowledge Proofs**: Cryptographically verifiable computations
+    - **Multi-Party Computation**: Secure distributed training
+    - **Compliance Ready**: GDPR, CCPA, and industry standard compliance
+    - **Enterprise Security**: Advanced encryption and access controls
+
+    ## Authentication
+    All API endpoints require authentication via JWT tokens or API keys.
+
+    ## Rate Limiting
+    API requests are rate-limited to prevent abuse. Contact support for higher limits.
+
+    ## Versioning
+    API versioning follows semantic versioning. Current version: v1.0.0
+  version: "1.0.0"
+  contact:
+    name: FEDZK Team
+    email: support@fedzk.io
+    url: https://fedzk.io
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.fedzk.io/v1
+    description: Production server
+  - url: https://staging.api.fedzk.io/v1
+    description: Staging server
+  - url: http://localhost:8000/v1
+    description: Local development server
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Check the health status of the FEDZK API service
+      tags:
+        - System
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+
+  /federation:
+    post:
+      summary: Create a new federation
+      description: Initialize a new federated learning federation with specified parameters
+      tags:
+        - Federation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - model_config
+                - privacy_config
+              properties:
+                name:
+                  type: string
+                  description: Name of the federation
+                  example: "Healthcare Research Network"
+                description:
+                  type: string
+                  description: Optional description of the federation
+                model_config:
+                  type: object
+                  description: Machine learning model configuration
+                  properties:
+                    model_type:
+                      type: string
+                      enum: [neural_network, linear_regression, decision_tree]
+                    input_shape:
+                      type: array
+                      items:
+                        type: integer
+                    output_shape:
+                      type: array
+                      items:
+                        type: integer
+                privacy_config:
+                  type: object
+                  description: Privacy and security configuration
+                  properties:
+                    zk_circuit:
+                      type: string
+                      description: Zero-knowledge circuit identifier
+                    differential_privacy:
+                      type: object
+                      properties:
+                        epsilon:
+                          type: number
+                          minimum: 0.1
+                          maximum: 10.0
+                          default: 1.0
+                    encryption:
+                      type: string
+                      enum: [AES-256, ChaCha20, homomorphic]
+                      default: AES-256
+      responses:
+        '201':
+          description: Federation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Federation'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /federation/{federation_id}/join:
+    post:
+      summary: Join a federation
+      description: Request to join an existing federation as a participant
+      tags:
+        - Federation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: federation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the federation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - participant_id
+                - public_key
+              properties:
+                participant_id:
+                  type: string
+                  description: Unique identifier for the participant
+                participant_info:
+                  type: object
+                  description: Additional information about the participant
+                  properties:
+                    organization:
+                      type: string
+                    data_size:
+                      type: integer
+                      description: Approximate size of training data
+                    capabilities:
+                      type: array
+                      items:
+                        type: string
+                        enum: [cpu, gpu, tpu]
+                public_key:
+                  type: string
+                  description: Public key for secure communication
+                signature:
+                  type: string
+                  description: Digital signature to verify authenticity
+      responses:
+        '200':
+          description: Successfully joined federation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [joined]
+                  participant_id:
+                    type: string
+                  session_token:
+                    type: string
+                    description: Token for federation session
+        '403':
+          description: Federation is full or participant not authorized
+        '404':
+          description: Federation not found
+
+  /federation/{federation_id}/train:
+    post:
+      summary: Start federated training
+      description: Initiate federated learning training session
+      tags:
+        - Training
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: federation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - training_config
+              properties:
+                training_config:
+                  type: object
+                  properties:
+                    epochs:
+                      type: integer
+                      minimum: 1
+                      maximum: 1000
+                      default: 100
+                    batch_size:
+                      type: integer
+                      minimum: 1
+                      maximum: 10000
+                      default: 32
+                    learning_rate:
+                      type: number
+                      minimum: 0.0001
+                      maximum: 1.0
+                      default: 0.001
+                    aggregation_method:
+                      type: string
+                      enum: [fedavg, fedprox, fednova]
+                      default: fedavg
+                    early_stopping:
+                      type: object
+                      properties:
+                        patience:
+                          type: integer
+                          minimum: 1
+                          maximum: 100
+                        min_delta:
+                          type: number
+                          minimum: 0.0
+                          default: 0.001
+                privacy_parameters:
+                  type: object
+                  properties:
+                    noise_multiplier:
+                      type: number
+                      minimum: 0.0
+                      default: 1.0
+                    clipping_norm:
+                      type: number
+                      minimum: 0.1
+                      default: 1.0
+      responses:
+        '202':
+          description: Training session initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  training_session_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [initiated]
+                  estimated_duration:
+                    type: string
+                    description: Estimated training time
+                  participants_count:
+                    type: integer
+        '400':
+          description: Invalid training configuration
+        '403':
+          description: Not authorized to start training
+
+  /federation/{federation_id}/model:
+    get:
+      summary: Get federated model
+      description: Retrieve the current state of the federated model
+      tags:
+        - Model
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: federation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: version
+          in: query
+          schema:
+            type: string
+            description: Specific model version (latest if not specified)
+      responses:
+        '200':
+          description: Model retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  model_id:
+                    type: string
+                  version:
+                    type: string
+                  parameters:
+                    type: object
+                    description: Model parameters/weights
+                  metadata:
+                    type: object
+                    properties:
+                      training_rounds:
+                        type: integer
+                      participants:
+                        type: integer
+                      accuracy:
+                        type: number
+                      loss:
+                        type: number
+                      created_at:
+                        type: string
+                        format: date-time
+        '404':
+          description: Model not found
+
+  /federation/{federation_id}/compliance:
+    get:
+      summary: Get compliance report
+      description: Retrieve compliance and audit information for the federation
+      tags:
+        - Compliance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: federation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: report_type
+          in: query
+          schema:
+            type: string
+            enum: [gdpr, ccpa, nist, iso27001, soc2]
+            description: Type of compliance report
+      responses:
+        '200':
+          description: Compliance report retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  federation_id:
+                    type: string
+                  report_type:
+                    type: string
+                  generated_at:
+                    type: string
+                    format: date-time
+                  compliance_score:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  findings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        severity:
+                          type: string
+                          enum: [critical, high, medium, low]
+                        category:
+                          type: string
+                        description:
+                          type: string
+                        recommendation:
+                          type: string
+                  recommendations:
+                    type: array
+                    items:
+                      type: string
+        '403':
+          description: Not authorized to view compliance reports
+
+  /federation/{federation_id}/participants:
+    get:
+      summary: List federation participants
+      description: Get list of participants in the federation
+      tags:
+        - Federation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: federation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Participants list retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  federation_id:
+                    type: string
+                  total_participants:
+                    type: integer
+                  active_participants:
+                    type: integer
+                  participants:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        participant_id:
+                          type: string
+                        status:
+                          type: string
+                          enum: [active, inactive, suspended]
+                        joined_at:
+                          type: string
+                          format: date-time
+                        last_activity:
+                          type: string
+                          format: date-time
+                        contribution_score:
+                          type: number
+                          description: Participant's contribution to the model
+
+components:
+  schemas:
+    Federation:
+      type: object
+      properties:
+        federation_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the federation
+        name:
+          type: string
+          description: Federation name
+        description:
+          type: string
+          description: Federation description
+        status:
+          type: string
+          enum: [active, paused, completed, terminated]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        participants_count:
+          type: integer
+        model_config:
+          type: object
+          description: Current model configuration
+        privacy_config:
+          type: object
+          description: Privacy and security configuration
+        owner:
+          type: string
+          description: Federation owner's identifier
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Error code
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+tags:
+  - name: Federation
+    description: Federation management endpoints
+  - name: Training
+    description: Federated training operations
+  - name: Model
+    description: Model management and retrieval
+  - name: Compliance
+    description: Compliance reporting and auditing
+  - name: System
+    description: System health and monitoring

@@ -3,9 +3,9 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Benchmark utilities for FedZK.
+Benchmark utilities for FEDzk.
 
-This module provides utilities for benchmarking performance of FedZK components.
+This module provides utilities for benchmarking performance of FEDzk components.
 """
 
 import datetime

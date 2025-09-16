@@ -3,7 +3,7 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Visualization utilities for FedZK benchmark results.
+Visualization utilities for FEDzk benchmark results.
 
 This module provides tools to visualize and compare benchmark results.
 """
@@ -582,7 +582,7 @@ def compare_multiple_benchmarks(result_dirs: List[Union[str, Path]],
     <!DOCTYPE html>
     <html>
     <head>
-        <title>FedZK Benchmark Comparison</title>
+        <title>FEDzk Benchmark Comparison</title>
         <style>
             body {{ font-family: Arial, sans-serif; margin: 20px; }}
             h1, h2, h3 {{ color: #333; }}
@@ -594,7 +594,7 @@ def compare_multiple_benchmarks(result_dirs: List[Union[str, Path]],
         </style>
     </head>
     <body>
-        <h1>FedZK Benchmark Comparison</h1>
+        <h1>FEDzk Benchmark Comparison</h1>
         <p><strong>Generated:</strong> {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
         <p><strong>Configurations Compared:</strong> {', '.join(dir_labels)}</p>
         

@@ -3,9 +3,9 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Command Line Interface for FedZK.
+Command Line Interface for FEDzk.
 
-This module provides a CLI for interacting with the FedZK system, 
+This module provides a CLI for interacting with the FEDzk system, 
 allowing users to generate and verify zero-knowledge proofs.
 """
 
@@ -95,8 +95,7 @@ def generate_command(
     min_active: int = typer.Option(1, "--min-active", "-a", help="Minimum non-zero elements (for secure circuit)"),
     mpc_server: Optional[str] = typer.Option(None, "--mpc-server", help="URL of MPC proof server to offload proof generation"),
     api_key: Optional[str] = typer.Option(None, "--api-key", help="API key for authenticating with the MPC proof server"),
-    fallback_disabled: bool = typer.Option(False, "--fallback-disabled", help="Disable fallback to local proof when MPC server fails"),
-    fallback_mode: str = typer.Option(os.getenv("FALLBACK_MODE", "silent"), "--fallback-mode", help="Fallback mode for MPC generate_proof")
+
 ):
     """Generate ZK proof for gradients."""
     typer.echo(f"Generating proof from {input_file}...")
@@ -137,9 +136,7 @@ def generate_command(
 
             mpc_client = MPCClient(
                 server_url=mpc_server,
-                api_key=api_key,
-                fallback_disabled=fallback_disabled,
-                fallback_mode=fallback_mode
+                api_key=api_key
             )
 
             result = mpc_client.generate_proof(
@@ -271,7 +268,7 @@ def benchmark_run_command(
     output: str = typer.Option("benchmark_report.json", "--output", "-o", help="Output JSON report path"),
     csv: Optional[str] = typer.Option(None, "--csv", help="Output CSV report path"),
     report_url: Optional[str] = typer.Option(None, "--report-url", help="URL to post benchmark report"),
-    fallback_mode: str = typer.Option("warn", "--fallback-mode", help="MPC fallback mode if server is unavailable"),
+
     input_size: int = typer.Option(10, "--input-size", help="Size of gradient tensor for benchmarking"),
     coordinator_host: str = typer.Option("127.0.0.1", "--coordinator-host", help="Hostname for coordinator server"),
     coordinator_port: int = typer.Option(8000, "--coordinator-port", help="Port for coordinator server")
@@ -290,7 +287,7 @@ def benchmark_run_command(
             report_url=report_url,
             coordinator_host=coordinator_host,
             coordinator_port=coordinator_port,
-            fallback_mode=fallback_mode,
+
             input_size=input_size
         )
         typer.echo(f"Benchmark report saved to {output}")

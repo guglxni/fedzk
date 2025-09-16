@@ -1,0 +1,85 @@
+{
+  "title": "FEDZK Code Review Checklist",
+  "version": "1.0",
+  "categories": {
+    "security": {
+      "description": "Security-related code review items",
+      "items": [
+        {
+          "item": "Input validation and sanitization",
+          "required": true
+        },
+        {
+          "item": "Authentication and authorization checks",
+          "required": true
+        },
+        {
+          "item": "Secure handling of sensitive data",
+          "required": true
+        },
+        {
+          "item": "Proper error handling without information leakage",
+          "required": true
+        },
+        {
+          "item": "Secure cryptographic implementations",
+          "required": true
+        },
+        {
+          "item": "No hardcoded secrets or credentials",
+          "required": true
+        }
+      ]
+    },
+    "cryptography": {
+      "description": "Cryptographic implementation review",
+      "items": [
+        {
+          "item": "Use of approved cryptographic algorithms",
+          "required": true
+        },
+        {
+          "item": "Proper key generation and management",
+          "required": true
+        },
+        {
+          "item": "Secure random number generation",
+          "required": true
+        },
+        {
+          "item": "Zero-knowledge proof correctness",
+          "required": true
+        },
+        {
+          "item": "Secure multi-party computation implementation",
+          "required": true
+        }
+      ]
+    },
+    "privacy": {
+      "description": "Privacy and data protection review",
+      "items": [
+        {
+          "item": "Data minimization principles applied",
+          "required": true
+        },
+        {
+          "item": "Privacy-preserving computation techniques",
+          "required": true
+        },
+        {
+          "item": "GDPR/CCPA compliance considerations",
+          "required": true
+        },
+        {
+          "item": "Audit logging of data access",
+          "required": true
+        },
+        {
+          "item": "Data retention policies implemented",
+          "required": true
+        }
+      ]
+    }
+  }
+}

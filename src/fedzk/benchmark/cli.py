@@ -3,10 +3,10 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Command-line interface for running FedZK benchmarks.
+Command-line interface for running FEDzk benchmarks.
 
 This module provides a simple command-line interface for running various
-benchmark suites for FedZK.
+benchmark suites for FEDzk.
 """
 
 import argparse
@@ -14,14 +14,14 @@ import sys
 from pathlib import Path
 
 from fedzk.benchmark.benchmark_zk import ZKBenchmark
-from fedzk.benchmark.end_to_end import FedZKBenchmark as EndToEndBenchmark
+from fedzk.benchmark.end_to_end import FEDzkBenchmark as EndToEndBenchmark
 from fedzk.benchmark.visualization import BenchmarkVisualizer
 
 
 def setup_parser() -> argparse.ArgumentParser:
     """Set up the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        description="Run FedZK benchmarks and visualize results."
+        description="Run FEDzk benchmarks and visualize results."
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")

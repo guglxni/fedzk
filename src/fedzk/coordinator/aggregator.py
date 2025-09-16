@@ -3,12 +3,14 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Federated Learning Aggregator for FedZK.
+Federated Learning Aggregator for FEDzk.
 
-This module provides a FastAPI service for the coordinator node in the FedZK system,
+This module provides a FastAPI service for the coordinator node in the FEDzk system,
 which aggregates model updates from clients after verifying their ZK proofs.
 """
 
+import os
+import pathlib
 from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException
@@ -16,11 +18,15 @@ from pydantic import BaseModel
 
 from fedzk.prover.verifier import ZKVerifier
 
-app = FastAPI(title="FedZK Aggregator",
-              description="Coordinator service for FedZK federated learning with zero-knowledge proofs")
+app = FastAPI(title="FEDzk Aggregator",
+              description="Coordinator service for FEDzk federated learning with zero-knowledge proofs")
 
-# Initialize verifier with dummy verification key
-verifier = ZKVerifier("dummy_vk.json")
+# Define base directory for ZK assets
+ASSET_DIR = pathlib.Path(__file__).resolve().parent.parent / "zk"
+
+# Initialize verifier with real verification key path
+STD_VER_KEY = str(ASSET_DIR / "verification_key.json")
+verifier = ZKVerifier(STD_VER_KEY)
 
 # In-memory storage for pending updates
 # In production, this would use a database

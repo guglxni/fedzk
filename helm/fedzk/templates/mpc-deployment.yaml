@@ -1,0 +1,168 @@
+{{- if .Values.mpc.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc
+  labels:
+    {{- include "fedzk.mpc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.mpc.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.mpc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fedzk.mpc.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.mpc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mpc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mpc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "fedzk.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.mpc.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fedzk-mpc
+          securityContext:
+            {{- toYaml .Values.mpc.securityContext | nindent 12 }}
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.mpc.image.repository }}:{{ .Values.mpc.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.mpc.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.mpc.service.port }}
+              protocol: TCP
+          env:
+            - name: FEDZK_ENV
+              value: {{ .Values.config.fedzk.env | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.fedzk.logLevel | quote }}
+            - name: PORT
+              value: {{ .Values.config.fedzk.port | quote }}
+            - name: PYTHONPATH
+              value: "/app"
+            - name: MPC_TIMEOUT
+              value: {{ .Values.config.mpc.timeout | quote }}
+            - name: MPC_MAX_RETRIES
+              value: {{ .Values.config.mpc.maxRetries | quote }}
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_HOST
+              value: "{{ include "fedzk.fullname" . }}-redis-master"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fedzk.fullname" . }}-redis
+                  key: redis-password
+            {{- else if .Values.externalRedis.host }}
+            - name: REDIS_HOST
+              value: {{ .Values.externalRedis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.externalRedis.port | quote }}
+            - name: REDIS_PASSWORD
+              value: {{ .Values.externalRedis.password | quote }}
+            {{- end }}
+            {{- if or .Values.postgresql.enabled .Values.externalDatabase.host }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "fedzk.fullname" . }}-db
+                  key: database-url
+            {{- end }}
+            {{- range .Values.config.mpc.apiKeys }}
+            - name: MPC_API_KEYS
+              value: {{ . | quote }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "fedzk.fullname" . }}-config
+          {{- if .Values.monitoring.enabled }}
+          env:
+            - name: FEDZK_METRICS_ENABLED
+              value: "true"
+            - name: FEDZK_METRICS_PORT
+              value: "{{ .Values.mpc.service.port }}"
+            - name: FEDZK_TRACING_ENABLED
+              value: "{{ .Values.monitoring.tracing.enabled }}"
+            - name: JAEGER_HOST
+              value: "{{ .Values.monitoring.tracing.jaeger.host }}"
+            - name: JAEGER_PORT
+              value: "{{ .Values.monitoring.tracing.jaeger.port }}"
+          {{- end }}
+          resources:
+            {{- toYaml .Values.mpc.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+              readOnly: false
+            - name: cache-volume
+              mountPath: /app/.cache
+              readOnly: false
+            {{- if .Values.persistence.enabled }}
+            - name: mpc-data
+              mountPath: /app/data
+              readOnly: false
+            {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+      volumes:
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        - name: cache-volume
+          emptyDir: {}
+        {{- if .Values.persistence.enabled }}
+        - name: mpc-data
+          persistentVolumeClaim:
+            claimName: {{ include "fedzk.fullname" . }}-mpc-data
+        {{- end }}
+      {{- with .Values.mpc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mpc.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.mpc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+

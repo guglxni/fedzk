@@ -3,7 +3,7 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-MPC Server module for FedZK Proof generation and verification.
+MPC Server module for FEDzk Proof generation and verification.
 Exposes /generate_proof and /verify_proof endpoints.
 """
 
@@ -20,6 +20,10 @@ from pydantic import BaseModel, Field
 from fedzk.prover.verifier import ZKVerifier
 from fedzk.prover.zkgenerator import ZKProver
 from fedzk.prover.batch_zkgenerator import BatchZKProver
+from fedzk.prover.zk_validator import ZKValidator
+
+# Global ZK validator instance for runtime monitoring
+zk_validator = None
 
 # Configure comprehensive logging
 logging.basicConfig(
@@ -77,39 +81,63 @@ SEC_VER_KEY = os.getenv("MPC_SEC_VER_KEY_PATH", SEC_VER_KEY_DEFAULT)
 async def lifespan(app: FastAPI):
     """Application lifespan management."""
     # Startup
-    logger.info("FedZK MPC Proof Server starting up...")
-    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    logger.info(f"Test mode: {os.getenv('FEDZK_TEST_MODE', 'false')}")
-    logger.info(f"ZK verified: {os.getenv('FEDZK_ZK_VERIFIED', 'false')}")
+    logger.info("FEDzk MPC Proof Server starting up...")
+    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'production')}")
+    logger.info("ZK enforcement: strict (no test mode bypasses)")
     
-    # Validate configuration
-    test_mode = os.getenv("FEDZK_TEST_MODE", "false").lower() == "true"
-    zk_verified = os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true"
+    # Ensure ZK tools are in PATH
+    current_path = os.environ.get('PATH', '')
+    homebrew_bin = '/opt/homebrew/bin'
+    if homebrew_bin not in current_path:
+        os.environ['PATH'] = f"{homebrew_bin}:{current_path}"
+        logger.info(f"Added {homebrew_bin} to PATH")
     
-    # Only validate files if we're not in test mode or if we're in test mode but haven't verified ZK
-    if not test_mode or (test_mode and not zk_verified):
-        missing_files = []
-        for file_path in [STD_WASM, STD_ZKEY, STD_VER_KEY, SEC_WASM, SEC_ZKEY, SEC_VER_KEY]:
-            if not os.path.exists(file_path):
-                missing_files.append(file_path)
-        
-        if missing_files:
-            logger.warning(f"Missing ZK circuit files: {missing_files}")
-            logger.warning("Some functionality may be limited. Run 'scripts/setup_zk.sh' to compile circuits.")
-            
-            if test_mode:
-                logger.warning("In test mode - will continue despite missing files")
-                logger.warning("Run 'scripts/prepare_test_environment.sh' to ensure all ZK components are available for testing")
-    
+    # Comprehensive ZK toolchain validation using centralized validator
+    zk_asset_dir = Path(__file__).resolve().parent.parent / "zk"
+    validator = ZKValidator(str(zk_asset_dir))
+    validation_results = validator.validate_toolchain()
+
+    if validation_results["overall_status"] == "failed":
+        logger.error("ZK toolchain validation failed:")
+        for error in validation_results["errors"]:
+            logger.error(f"  • {error}")
+        raise RuntimeError(
+            "ZK toolchain validation failed. Please run 'scripts/setup_zk.sh' to install/configure ZK toolchain."
+        )
+
+    if validation_results["overall_status"] == "warning":
+        logger.warning("ZK toolchain validation passed with warnings:")
+        for warning in validation_results["warnings"]:
+            logger.warning(f"  • {warning}")
+
+    logger.info("✅ ZK toolchain validation passed - all components ready")
+
+    # Initialize ZK validator for runtime monitoring
+    global zk_validator
+    zk_asset_dir = Path(__file__).resolve().parent.parent / "zk"
+    zk_validator = ZKValidator(str(zk_asset_dir))
+
+    # Start runtime monitoring (5 minute intervals)
+    if zk_validator.start_runtime_monitoring(check_interval=300):
+        logger.info("✅ ZK runtime monitoring started (5-minute intervals)")
+    else:
+        logger.warning("⚠️  Failed to start ZK runtime monitoring")
+
     yield  # Application runs here
-    
+
     # Shutdown
-    logger.info("FedZK MPC Proof Server shutting down...")
+    logger.info("FEDzk MPC Proof Server shutting down...")
+
+    # Stop runtime monitoring
+    if zk_validator:
+        zk_validator.stop_runtime_monitoring()
+        logger.info("✅ ZK runtime monitoring stopped")
+
     logger.info(f"Final metrics: {dict(metrics['requests_total'])}")
 
 # Production-grade FastAPI configuration
 app = FastAPI(
-    title="FedZK MPC Proof Server",
+    title="FEDzk MPC Proof Server",
     description="Production-grade service for generating and verifying zero-knowledge proofs in federated learning",
     version="1.0.0",
     docs_url="/docs" if os.getenv("ENVIRONMENT", "development") == "development" else None,
@@ -154,14 +182,20 @@ def load_api_keys():
         # In production, this should fail hard
         import warnings
         warnings.warn("No API keys configured! Using default keys for development only.")
-        return {"testkey", "anotherkey"}
+        # Hash the default keys for consistency (skip length validation for defaults)
+        default_keys = {"testkey", "anotherkey"}
+        hashed_keys = set()
+        for key in default_keys:
+            key_hash = hashlib.sha256(key.encode()).hexdigest()
+            hashed_keys.add(key_hash)
+        return hashed_keys
     
     # Hash keys for storage (don't store plain text)
     keys = set()
     for key in raw_keys.split(","):
         key = key.strip()
         if len(key) < 32:  # Enforce minimum key length
-            raise ValueError(f"API key too short: minimum 32 characters required")
+            raise ValueError(f"API key too short: minimum 32 characters required, got {len(key)}")
         # Store SHA-256 hash of the key
         key_hash = hashlib.sha256(key.encode()).hexdigest()
         keys.add(key_hash)
@@ -226,8 +260,8 @@ async def verify_api_key(
             detail="Missing API key. Include 'x-api-key' header."
         )
     
-    # Validate API key format
-    if len(x_api_key) < 32:
+    # Validate API key format (skip for known default keys)
+    if len(x_api_key) < 32 and x_api_key not in {"testkey", "anotherkey"}:
         _failed_attempts[client_ip] += 1
         raise HTTPException(
             status_code=401,
@@ -363,42 +397,12 @@ async def generate_proof_endpoint(
             record_request_end(start_time, "generate_proof", "error")
             logger.error(f"Proof generation failed for {client_ip}: {e}")
             
-            # Check if it's a ZK toolchain issue
-            if "snarkjs" in str(e).lower() or "circom" in str(e).lower():
-                # In test mode with ZK verified, provide a test proof
-                if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-                    logger.warning("ZK toolchain issue detected, but continuing in test mode with dummy proof")
-                    
-                    # Create a proof ID based on client info
-                    proof_id = hashlib.sha256(f"{client_ip}_{time.time()}".encode()).hexdigest()[:16]
-                    
-                    # Generate a hash from the input gradients to ensure different inputs get different proofs
-                    input_hash = hashlib.md5(str(req.gradients).encode()).hexdigest()
-                    
-                    # Test proof with consistency between standard and secure modes
-                    test_proof = {
-                        "proof": {
-                            "pi_a": [input_hash[:8], input_hash[8:16], "1"],
-                            "pi_b": [[input_hash[16:24], input_hash[24:32]], [input_hash[32:40], input_hash[40:48]], ["1", "0"]],
-                            "pi_c": [input_hash[48:56], input_hash[56:64], "1"],
-                            "protocol": "groth16",
-                            "curve": "bn128"
-                        },
-                        "publicSignals": [input_hash[:8], input_hash[8:16], input_hash[16:24]],
-                        "success": True,
-                        "timestamp": time.time(),
-                        "secure": req.secure,
-                        "client_ip": client_ip,
-                        "proof_id": proof_id
-                    }
-                    
-                    record_request_end(start_time, "generate_proof", "success")
-                    return test_proof
-                else:
-                    raise HTTPException(
-                        status_code=503, 
-                        detail="ZK toolchain unavailable. Please ensure Circom and SNARKjs are installed."
-                    )
+            # Strict error handling - no fallback or mock implementations allowed
+            if "snarkjs" in str(e).lower() or "circom" in str(e).lower() or "witness" in str(e).lower() or "circuit" in str(e).lower():
+                raise HTTPException(
+                    status_code=503,
+                    detail="ZK toolchain error. Please ensure Circom and SNARKjs are properly installed and all circuit files are present."
+                )
             else:
                 raise HTTPException(status_code=500, detail=f"Proof generation failed: {str(e)}")
         
@@ -452,11 +456,16 @@ async def verify_proof_endpoint(
             record_request_end(start_time, "verify_proof", "error")
             logger.error(f"Verification failed for {client_ip}: {e}")
             
-            # Check if it's a file access issue
-            if "No such file" in str(e) or "FileNotFoundError" in str(e):
+            # Strict error handling for verification
+            if "No such file" in str(e) or "FileNotFoundError" in str(e) or "verification key" in str(e).lower():
                 raise HTTPException(
-                    status_code=503, 
-                    detail="Verification key not found. ZK setup may be incomplete."
+                    status_code=503,
+                    detail="Verification key not found. ZK setup is incomplete. Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
+                )
+            elif "snarkjs" in str(e).lower() or "verify" in str(e).lower():
+                raise HTTPException(
+                    status_code=503,
+                    detail="ZK verification toolchain error. Please ensure SNARKjs is properly installed."
                 )
             else:
                 raise HTTPException(status_code=500, detail=f"Verification failed: {str(e)}")
@@ -469,12 +478,42 @@ async def verify_proof_endpoint(
         logger.error(f"Unexpected error in verify_proof: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+# ZK Health monitoring functions
+async def get_zk_health_status() -> Dict[str, Any]:
+    """
+    Get current ZK toolchain health status.
+
+    Returns:
+        Dict containing ZK health information
+    """
+    global zk_validator
+
+    if not zk_validator:
+        return {
+            "status": "unknown",
+            "message": "ZK validator not initialized",
+            "monitoring_active": False,
+            "degradation_mode": False
+        }
+
+    try:
+        health_status = zk_validator.get_health_status()
+        return health_status
+    except Exception as e:
+        logger.error(f"Failed to get ZK health status: {e}")
+        return {
+            "status": "error",
+            "message": f"Health check failed: {str(e)}",
+            "monitoring_active": zk_validator.runtime_monitoring if zk_validator else False,
+            "degradation_mode": False
+        }
+
 # Health check and monitoring endpoints
 @app.get("/health", summary="Health Check")
 async def health_check():
-    """Health check endpoint for load balancers and monitoring."""
+    """Enhanced health check endpoint with ZK toolchain monitoring."""
     start_time = record_request_start()
-    
+
     try:
         # Check system health
         health_status = {
@@ -483,25 +522,48 @@ async def health_check():
             "version": "1.0.0",
             "environment": os.getenv("ENVIRONMENT", "development")
         }
-        
-        # Check ZK circuit files exist (basic health check)
+
+        # Enhanced ZK toolchain health check
+        zk_health = await get_zk_health_status()
+
+        # Update overall status based on ZK health
+        if zk_health.get("status") == "failed":
+            health_status["status"] = "unhealthy"
+            health_status["zk_issues"] = zk_health.get("issues", [])
+        elif zk_health.get("status") == "warning":
+            health_status["status"] = "degraded"
+            health_status["zk_warnings"] = zk_health.get("issues", [])
+
+        # Include ZK health information
+        health_status["zk_toolchain"] = {
+            "status": zk_health.get("status"),
+            "monitoring_active": zk_health.get("monitoring_active", False),
+            "degradation_mode": zk_health.get("degradation_mode", False),
+            "last_check": zk_health.get("timestamp")
+        }
+
+        # Check ZK circuit files exist (legacy check)
         circuit_files = [STD_WASM, STD_ZKEY, STD_VER_KEY, SEC_WASM, SEC_ZKEY, SEC_VER_KEY]
         missing_files = [f for f in circuit_files if not os.path.exists(f)]
-        
-        if missing_files and os.getenv("FEDZK_TEST_MODE", "false").lower() != "true":
-            health_status["status"] = "degraded"
-            health_status["warnings"] = [f"Missing circuit files: {missing_files}"]
-        
-        # Add basic metrics
+
+        if missing_files:
+            health_status["status"] = "unhealthy" if health_status["status"] == "healthy" else health_status["status"]
+            health_status["warnings"] = health_status.get("warnings", []) + [f"Missing circuit files: {missing_files}"]
+
+        # Add comprehensive metrics
         health_status["metrics"] = {
             "active_connections": metrics["active_connections"],
             "total_requests": sum(metrics["requests_total"].values()),
-            "total_errors": sum(metrics["errors_total"].values())
+            "total_errors": sum(metrics["errors_total"].values()),
+            "zk_monitoring": {
+                "active": zk_health.get("monitoring_active", False),
+                "degradation_mode": zk_health.get("degradation_mode", False)
+            }
         }
-        
+
         record_request_end(start_time, "health", "success")
         return health_status
-        
+
     except Exception as e:
         record_request_end(start_time, "health", "error")
         logger.error(f"Health check failed: {e}")
@@ -523,8 +585,8 @@ async def get_metrics(api_key: str = Depends(verify_api_key)):
             "errors_by_endpoint": dict(metrics["errors_total"]),
             "active_connections": metrics["active_connections"],
             "system_info": {
-                "environment": os.getenv("ENVIRONMENT", "development"),
-                "zk_test_mode": os.getenv("FEDZK_TEST_MODE", "false"),
+                "environment": os.getenv("ENVIRONMENT", "production"),
+                "zk_enforced": True,
                 "timestamp": time.time()
             }
         }
@@ -536,15 +598,14 @@ async def get_metrics(api_key: str = Depends(verify_api_key)):
 async def readiness_check():
     """Readiness check for Kubernetes deployments."""
     try:
-        # More thorough checks for readiness
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() != "true":
-            # Check that we can initialize provers
-            try:
-                ZKProver(secure=False)
-                ZKVerifier(STD_VER_KEY)
-            except Exception as e:
-                logger.warning(f"ZK components not ready: {e}")
-                raise HTTPException(status_code=503, detail="ZK components not ready")
+        # More thorough checks for readiness - strict ZK validation
+        # Check that we can initialize provers (this should work since startup validation passed)
+        try:
+            ZKProver(secure=False)
+            ZKVerifier(STD_VER_KEY)
+        except Exception as e:
+            logger.error(f"ZK components not ready: {e}")
+            raise HTTPException(status_code=503, detail="ZK components not ready")
         
         return {"status": "ready", "timestamp": time.time()}
         
@@ -554,14 +615,73 @@ async def readiness_check():
         logger.error(f"Readiness check failed: {e}")
         raise HTTPException(status_code=503, detail="Service not ready")
 
-if __name__ == "__main__":
+@app.get("/zk/health", summary="ZK Toolchain Health Status")
+async def zk_health_check(api_key: str = Depends(verify_api_key)):
+    """
+    Dedicated ZK toolchain health check endpoint.
+
+    Provides detailed information about ZK toolchain status,
+    runtime monitoring, and health history.
+    """
+    try:
+        global zk_validator
+
+        if not zk_validator:
+            return {
+                "status": "error",
+                "message": "ZK validator not initialized",
+                "timestamp": time.time()
+            }
+
+        # Get current health status
+        health_status = zk_validator.get_health_status()
+
+        # Add additional runtime information
+        health_info = {
+            "status": health_status.get("status"),
+            "timestamp": health_status.get("timestamp"),
+            "monitoring_active": health_status.get("monitoring_active", False),
+            "degradation_mode": health_status.get("degradation_mode", False),
+            "degradation_duration": health_status.get("degradation_duration"),
+            "components": health_status.get("components", {}),
+            "issues": health_status.get("issues", []),
+            "last_check_timestamp": health_status.get("timestamp"),
+            "health_checks_performed": len(zk_validator.health_history) if zk_validator else 0
+        }
+
+        # Add recent health history (last 5 checks)
+        if zk_validator:
+            recent_history = zk_validator.get_health_history(limit=5)
+            health_info["recent_history"] = recent_history
+
+        return health_info
+
+    except Exception as e:
+        logger.error(f"ZK health check failed: {e}")
+        raise HTTPException(status_code=500, detail=f"ZK health check failed: {str(e)}")
+
+def run_server(host: str = "0.0.0.0", port: int = 8000):
+    """Run the MPC server with production configuration."""
     import uvicorn
+    
+    logger.info(f"Starting FEDzk MPC Proof Server on {host}:{port}")
+    
+    # Production server configuration
     uvicorn.run(
         app, 
-        host="0.0.0.0", 
-        port=int(os.getenv("PORT", 8000)),
+        host=host, 
+        port=port,
         log_level=os.getenv("LOG_LEVEL", "info").lower(),
-        access_log=True
+        access_log=True,
+        workers=1,  # Single worker for now - can be scaled in production
+        loop="asyncio",  # Use asyncio (uvloop not required)
+        http="auto"  # Auto-detect best HTTP implementation
+    )
+
+if __name__ == "__main__":
+    run_server(
+        host="0.0.0.0", 
+        port=int(os.getenv("PORT", 8000))
     )
 
 

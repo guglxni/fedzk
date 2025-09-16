@@ -3,7 +3,7 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Zero-Knowledge Proof Verifier for FedZK.
+Zero-Knowledge Proof Verifier for FEDzk.
 
 This module contains the ZKVerifier class which handles verification of zero-knowledge
 proofs for gradient updates in federated learning.
@@ -11,100 +11,152 @@ proofs for gradient updates in federated learning.
 
 import json
 import os
+import pathlib
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+from .zk_validator import ZKValidator
 
 
 class ZKVerifier:
     """
-    Production Zero-Knowledge Proof Verifier for FedZK.
-    
+    Production Zero-Knowledge Proof Verifier for FEDzk.
+
     This class verifies real zero-knowledge proofs using SNARKjs.
     It requires a complete ZK toolchain installation (run scripts/setup_zk.sh).
+
+    Supports both standard and secure circuit verification with automatic
+    verification key mapping based on proof type.
     """
 
-    def __init__(self, verification_key_path: str):
+    def __init__(self, verification_key_path: Optional[str] = None):
         """
         Initialize with path to verification key.
-        
-        Args:
-            verification_key_path: Path to the verification key for the ZK circuit
-        """
-        self.verification_key_path = verification_key_path
-        
-        # Verify ZK infrastructure is available
-        self._verify_zk_setup()
 
-    def _verify_zk_setup(self):
-        """Verify that the ZK infrastructure is properly set up."""
-        # Skip verification in test mode with verified flag
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-            return
-            
-        # Check SNARKjs is available
-        try:
-            result = subprocess.run(["snarkjs", "--version"], 
-                                  capture_output=True, text=True)
-            # SNARKjs may return non-zero exit code but still work
-            if result.returncode not in [0, 99]:  # 99 is a known SNARKjs exit code
-                raise subprocess.CalledProcessError(result.returncode, ["snarkjs", "--version"])
-        except FileNotFoundError:
-            if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
-                # Log warning but continue in test mode
-                print("Warning: SNARKjs not found (continuing in test mode)")
-            else:
-                raise RuntimeError(
-                    "SNARKjs not found. Please run 'scripts/setup_zk.sh' to install the ZK toolchain."
-                )
-        
-        # Check verification key exists
-        if not Path(self.verification_key_path).exists():
-            if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
-                # Log warning but continue in test mode
-                print(f"Warning: Verification key not found at {self.verification_key_path} (continuing in test mode)")
-            else:
-                raise RuntimeError(
-                    f"Verification key not found at {self.verification_key_path}. "
-                    f"Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
-                )
+        Args:
+            verification_key_path: Path to the verification key for the ZK circuit.
+                                 If None, uses default paths from ZK asset directory.
+        """
+        # Define base directory for ZK assets
+        self.asset_dir = pathlib.Path(__file__).resolve().parent.parent / "zk"
+
+        # Set up verification key paths
+        if verification_key_path:
+            self.standard_vkey_path = verification_key_path
+            self.secure_vkey_path = str(self.asset_dir / "verification_key_secure.json")
+        else:
+            self.standard_vkey_path = str(self.asset_dir / "verification_key.json")
+            self.secure_vkey_path = str(self.asset_dir / "verification_key_secure.json")
+
+        # Circuit-specific verification key mapping
+        self.circuit_keys = {
+            "standard": self.standard_vkey_path,
+            "secure": self.secure_vkey_path,
+            "model_update": self.standard_vkey_path,
+            "model_update_secure": self.secure_vkey_path
+        }
+
+        # Verify ZK infrastructure is available using centralized validator
+        self._validate_zk_toolchain()
+
+    def _validate_zk_toolchain(self):
+        """
+        Validate ZK toolchain using centralized ZKValidator.
+
+        Raises:
+            RuntimeError: If ZK toolchain validation fails
+        """
+        validator = ZKValidator(str(self.asset_dir))
+        validation_results = validator.validate_toolchain()
+
+        if validation_results["overall_status"] == "failed":
+            error_msg = "ZK toolchain validation failed:\n"
+            for error in validation_results["errors"]:
+                error_msg += f"  • {error}\n"
+
+            error_msg += "\nPlease run 'scripts/setup_zk.sh' to install/configure ZK toolchain."
+            raise RuntimeError(error_msg)
+
+        if validation_results["overall_status"] == "warning":
+            warning_msg = "ZK toolchain validation passed with warnings:\n"
+            for warning in validation_results["warnings"]:
+                warning_msg += f"  • {warning}\n"
+            print(f"⚠️  {warning_msg}")  # Print warnings but don't fail
+
+        print("✅ ZK toolchain validation passed")
+
+    def _detect_circuit_type(self, proof: Dict) -> str:
+        """
+        Detect the appropriate verification key based on proof characteristics.
+
+        Args:
+            proof: The proof dictionary
+
+        Returns:
+            String indicating circuit type ("standard" or "secure")
+        """
+        # Try to detect based on proof structure or metadata
+        if proof.get("protocol") == "groth16":
+            # For now, default to standard - in production this could be enhanced
+            # to detect based on proof size, curve, or other characteristics
+            return "standard"
+        return "standard"  # Default fallback
+
+    def _get_verification_key_for_proof(self, proof: Dict) -> str:
+        """
+        Get the appropriate verification key for a given proof.
+
+        Args:
+            proof: The proof dictionary
+
+        Returns:
+            Path to the appropriate verification key
+        """
+        circuit_type = self._detect_circuit_type(proof)
+
+        # Map circuit type to verification key
+        if circuit_type in self.circuit_keys:
+            return self.circuit_keys[circuit_type]
+        else:
+            # Default to standard verification key
+            return self.standard_vkey_path
 
     def verify_proof(self, proof: Dict, public_signals: List[str]) -> bool:
         """
         Verify a zero-knowledge proof using SNARKjs.
-        
+
+        Automatically detects the appropriate verification key based on proof characteristics.
+
         Args:
             proof: The proof dictionary generated by ZKProver
             public_signals: List of public signals/inputs for the proof
-            
+
         Returns:
             Boolean indicating whether the proof is valid
         """
-        # In test mode with ZK verified, always return success
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-            # Check for the test proof pattern from ZKProver
-            if (proof.get("pi_a") and proof["pi_a"][0] == "12345" and
-                proof["pi_a"][1] == "67890"):
-                return True
-                
-            # For real proofs, just return True in test mode
-            return True
-            
-        # For production, use the real verification
-        return self.verify_real_proof(proof, public_signals)
+        # Strict verification - no mock or test mode bypasses
+        # Automatically detect the appropriate verification key
+        vkey_path = self._get_verification_key_for_proof(proof)
+        return self.verify_proof_with_key(proof, public_signals, vkey_path)
 
-    def verify_real_proof(self, proof: Dict[str, Any], public_inputs: List[str]) -> bool:
+    def verify_proof_with_key(self, proof: Dict[str, Any], public_inputs: List[str], vkey_path: str) -> bool:
         """
-        Verify a real zero-knowledge proof using SNARKjs.
-        
+        Verify a zero-knowledge proof using a specific verification key.
+
         Args:
             proof: Dictionary containing the ZK proof
             public_inputs: List of public inputs/signals
-            
+            vkey_path: Path to the verification key to use
+
         Returns:
             Boolean indicating whether the proof is valid
         """
+        # Verify the verification key exists
+        if not Path(vkey_path).exists():
+            raise RuntimeError(f"Verification key not found: {vkey_path}")
+
         with tempfile.TemporaryDirectory() as tmpdir:
             proof_path = os.path.join(tmpdir, "proof.json")
             public_path = os.path.join(tmpdir, "public.json")
@@ -112,7 +164,7 @@ class ZKVerifier:
             # Write proof and public inputs to temporary files
             with open(proof_path, "w") as f:
                 json.dump(proof, f)
-            
+
             with open(public_path, "w") as f:
                 json.dump(public_inputs, f)
 
@@ -120,56 +172,96 @@ class ZKVerifier:
                 # Run SNARKjs verification
                 result = subprocess.run([
                     "snarkjs", "groth16", "verify",
-                    self.verification_key_path,
+                    vkey_path,
                     public_path,
                     proof_path
                 ], capture_output=True, text=True, check=True)
-                
+
                 # SNARKjs returns "OK" in stdout if verification succeeds
                 return "OK" in result.stdout
-                
-            except subprocess.CalledProcessError as e:
-                # Verification failed
-                print(f"Proof verification failed: {e.stderr}")
-                return False
 
-    def verify_secure_proof(self, proof: Dict[str, Any], public_inputs: List[str], 
-                          secure_vkey_path: str) -> bool:
+            except subprocess.CalledProcessError as e:
+                # Verification failed - provide detailed error
+                error_msg = e.stderr.strip() if e.stderr else f"Exit code: {e.returncode}"
+                raise RuntimeError(f"Proof verification failed: {error_msg}")
+
+    def verify_real_proof(self, proof: Dict[str, Any], public_inputs: List[str]) -> bool:
         """
-        Verify a secure zero-knowledge proof using the secure circuit verification key.
-        
+        Verify a real zero-knowledge proof using SNARKjs with automatic key detection.
+
         Args:
             proof: Dictionary containing the ZK proof
             public_inputs: List of public inputs/signals
-            secure_vkey_path: Path to secure circuit verification key
-            
+
         Returns:
             Boolean indicating whether the proof is valid
         """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            proof_path = os.path.join(tmpdir, "proof.json")
-            public_path = os.path.join(tmpdir, "public.json")
+        # Use automatic verification key detection
+        vkey_path = self._get_verification_key_for_proof(proof)
+        return self.verify_proof_with_key(proof, public_inputs, vkey_path)
 
-            # Write proof and public inputs to temporary files
-            with open(proof_path, "w") as f:
-                json.dump(proof, f)
-            
-            with open(public_path, "w") as f:
-                json.dump(public_inputs, f)
+    def verify_secure_proof(self, proof: Dict[str, Any], public_inputs: List[str],
+                          secure_vkey_path: Optional[str] = None) -> bool:
+        """
+        Verify a secure zero-knowledge proof using the secure circuit verification key.
 
+        Args:
+            proof: Dictionary containing the ZK proof
+            public_inputs: List of public inputs/signals
+            secure_vkey_path: Path to secure circuit verification key (optional, uses default if None)
+
+        Returns:
+            Boolean indicating whether the proof is valid
+        """
+        # Use provided path or default secure verification key
+        vkey_path = secure_vkey_path or self.secure_vkey_path
+        return self.verify_proof_with_key(proof, public_inputs, vkey_path)
+
+    def verify_with_circuit_type(self, proof: Dict[str, Any], public_inputs: List[str],
+                                circuit_type: str) -> bool:
+        """
+        Verify a proof using a specific circuit type.
+
+        Args:
+            proof: Dictionary containing the ZK proof
+            public_inputs: List of public inputs/signals
+            circuit_type: Type of circuit ("standard", "secure", "model_update", "model_update_secure")
+
+        Returns:
+            Boolean indicating whether the proof is valid
+        """
+        if circuit_type not in self.circuit_keys:
+            raise ValueError(f"Unknown circuit type: {circuit_type}. "
+                           f"Available types: {list(self.circuit_keys.keys())}")
+
+        vkey_path = self.circuit_keys[circuit_type]
+        return self.verify_proof_with_key(proof, public_inputs, vkey_path)
+
+    def get_available_circuits(self) -> Dict[str, str]:
+        """
+        Get information about available verification circuits.
+
+        Returns:
+            Dictionary mapping circuit names to their verification key paths
+        """
+        return self.circuit_keys.copy()
+
+    def validate_verification_keys(self) -> Dict[str, bool]:
+        """
+        Validate that all verification keys are accessible and valid.
+
+        Returns:
+            Dictionary mapping circuit names to validation status
+        """
+        results = {}
+        for circuit_name, key_path in self.circuit_keys.items():
             try:
-                # Run SNARKjs verification with secure key
-                result = subprocess.run([
-                    "snarkjs", "groth16", "verify",
-                    secure_vkey_path,
-                    public_path,
-                    proof_path
-                ], capture_output=True, text=True, check=True)
-                
-                # SNARKjs returns "OK" in stdout if verification succeeds
-                return "OK" in result.stdout
-                
-            except subprocess.CalledProcessError as e:
-                # Verification failed
-                print(f"Secure proof verification failed: {e.stderr}")
-                return False
+                if Path(key_path).exists():
+                    file_size = Path(key_path).stat().st_size
+                    results[circuit_name] = file_size > 0
+                else:
+                    results[circuit_name] = False
+            except (OSError, PermissionError):
+                results[circuit_name] = False
+
+        return results

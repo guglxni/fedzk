@@ -1,0 +1,21 @@
+{{- if .Values.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ include "fedzk.fullname" . }}-quota
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+spec:
+  hard:
+    requests.cpu: {{ .Values.resourceQuota.requests.cpu | quote }}
+    requests.memory: {{ .Values.resourceQuota.requests.memory | quote }}
+    limits.cpu: {{ .Values.resourceQuota.limits.cpu | quote }}
+    limits.memory: {{ .Values.resourceQuota.limits.memory | quote }}
+    pods: "20"
+    services: "10"
+    persistentvolumeclaims: "5"
+    secrets: "10"
+    configmaps: "10"
+---
+{{- end }}
+

@@ -1,0 +1,101 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fedzk.fullname" . }}-monitoring-config
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    app.kubernetes.io/component: monitoring
+data:
+  # Prometheus metrics configuration
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval | default "30s" }}
+      evaluation_interval: {{ .Values.monitoring.prometheus.evaluationInterval | default "30s" }}
+
+    rule_files:
+      - "/etc/prometheus/rules/*.rules"
+
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager:9093
+
+    scrape_configs:
+      - job_name: 'fedzk-coordinator'
+        static_configs:
+        - targets: ['{{ include "fedzk.fullname" . }}-coordinator:{{ .Values.coordinator.service.port }}']
+        metrics_path: '/metrics'
+        scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval | default "30s" }}
+
+      {{- if .Values.mpc.enabled }}
+      - job_name: 'fedzk-mpc'
+        static_configs:
+        - targets: ['{{ include "fedzk.fullname" . }}-mpc:{{ .Values.mpc.service.port }}']
+        metrics_path: '/metrics'
+        scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval | default "30s" }}
+      {{- end }}
+
+      {{- if .Values.zk.enabled }}
+      - job_name: 'fedzk-zk'
+        static_configs:
+        - targets: ['{{ include "fedzk.fullname" . }}-zk:{{ .Values.zk.service.port }}']
+        metrics_path: '/metrics'
+        scrape_interval: {{ .Values.monitoring.prometheus.scrapeInterval | default "30s" }}
+      {{- end }}
+
+  # Grafana dashboard provisioning
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+    - name: 'fedzk'
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10
+      allowUiUpdates: true
+      options:
+        path: /var/lib/grafana/dashboards/fedzk
+
+  # Alert rules
+  alert_rules.yml: |
+    groups:
+    - name: fedzk
+      rules:
+      - alert: FEDzkHighCPUUsage
+        expr: fedzk_cpu_usage_percent > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: FEDzkHighMemoryUsage
+        expr: fedzk_memory_usage_bytes{type="used"} / fedzk_memory_usage_bytes{type="total"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90%"
+
+      - alert: FEDzkZKProofFailure
+        expr: rate(fedzk_zk_proof_generation_total{success="false"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: error
+        annotations:
+          summary: "ZK proof generation failure"
+          description: "ZK proof generation is failing"
+
+      - alert: FEDzkLowActiveParticipants
+        expr: fedzk_fl_participants_active < 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low federated learning participants"
+          description: "Active participants: {{ $value }}"
+---
+{{- end }}

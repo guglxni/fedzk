@@ -4,23 +4,30 @@
 
 # src/fedzk/mpc/client.py
 import requests
+import time
+import logging
 from typing import Dict, Any, Optional, Tuple, List
+
+from fedzk.prover.zkgenerator import ZKProver
+from fedzk.prover.batch_zkgenerator import BatchZKProver
+
+logger = logging.getLogger(__name__)
 
 class MPCClient:
     def __init__(
         self,
         server_url: str,
         api_key: Optional[str] = None,
-        fallback_disabled: bool = False,
-        fallback_mode: str = "silent",
+        timeout: int = 30,
+        max_retries: int = 3,
     ):
-        self.server_url = server_url
+        self.server_url = server_url.rstrip('/')
         self.api_key = api_key
-        self.fallback_disabled = fallback_disabled
-        self.fallback_mode = fallback_mode
-        # Placeholder for local ZKProver if needed for fallback
-        # from fedzk.prover.zkgenerator import ZKProver 
-        # self.local_prover = ZKProver()
+        self.timeout = timeout
+        self.max_retries = max_retries
+
+        logger.info(f"MPCClient initialized with server: {server_url}")
+        logger.info("Real cryptographic operations only - no fallbacks or mocks")
 
     def generate_proof(
         self,
@@ -30,32 +37,131 @@ class MPCClient:
         chunk_size: Optional[int] = None,
         max_norm_squared: Optional[float] = None,
         min_active: Optional[int] = None,
-    ) -> Tuple[Dict, List]: # Assuming proof is Dict, public_inputs is List
-        # This is a stub. In a real implementation, it would:
-        # 1. Try to POST to self.server_url/generate_proof
-        # 2. If successful, return the server's proof and public_inputs.
-        # 3. If MPC server fails and fallback is enabled:
-        #    - Log warning/error based on fallback_mode.
-        #    - Use self.local_prover (properly initialized) to generate proof locally.
-        #    - Return local proof.
-        # 4. If MPC server fails and fallback is disabled, raise an exception.
+    ) -> Tuple[Dict, List]:
+        """
+        Generate zero-knowledge proof via MPC server.
 
-        print(f"[MPCClient STUB] Attempting to generate proof via MPC server: {self.server_url}")
-        # Simulate an MPC server error for testing fallback
-        if not self.fallback_disabled:
-            if self.fallback_mode == "warn":
-                print("[MPCClient STUB] MPC server failed. WARN: Falling back to local proof.")
-            elif self.fallback_mode != "silent": # strict or other non-silent modes
-                print("[MPCClient STUB] MPC server failed. ERROR: Falling back to local proof.")
-            
-            # Simulate local proof generation
-            # This requires ZKProver to be importable and correctly functioning
-            # For now, returning a consistent stub proof to allow CLI tests to proceed
-            print("[MPCClient STUB] Generating proof locally (stubbed)...")
-            return {"proof": "local_stub_proof_from_mpc_client_fallback"}, ["local_stub_public_inputs"]
+        Args:
+            gradient_dict: Dictionary of gradient tensors/parameters
+            secure: Whether to use secure circuit with constraints
+            batch: Enable batch processing of multiple gradient sets
+            chunk_size: Chunk size for batch processing
+            max_norm_squared: Maximum allowed squared L2 norm for gradients
+            min_active: Minimum number of non-zero gradient elements required
+
+        Returns:
+            Tuple of (proof_dict, public_signals_list)
+
+        Raises:
+            ConnectionError: If MPC server is unreachable
+            RuntimeError: If proof generation fails
+        """
+        # Validate input
+        if not gradient_dict:
+            raise ValueError("Empty gradient dictionary provided")
+
+        # Prepare request payload - convert tensors to lists for JSON serialization
+        processed_gradients = {}
+        for key, value in gradient_dict.items():
+            if hasattr(value, 'tolist'):  # PyTorch tensor
+                processed_gradients[key] = value.tolist()
+            else:
+                processed_gradients[key] = value
+
+        payload = {
+            "gradients": processed_gradients,
+            "secure": secure,
+            "batch": batch,
+        }
+
+        if chunk_size is not None:
+            payload["chunk_size"] = chunk_size
+        if max_norm_squared is not None:
+            payload["maxNorm"] = max_norm_squared
+        if min_active is not None:
+            payload["minNonZero"] = min_active
+
+        # Make MPC server call - no fallbacks allowed
+        logger.info(f"Attempting MPC proof generation via server: {self.server_url}")
+        response = self._call_mpc_server(payload)
+
+        if response and "proof" in response:
+            logger.info("MPC server proof generation successful")
+            return response["proof"], response.get("public_signals", [])
         else:
-            print("[MPCClient STUB] MPC server failed and fallback is disabled.")
-            raise ConnectionError("MPC server call failed and fallback is disabled (stub behavior)")
+            raise RuntimeError("MPC server returned invalid response")
 
-        # Fallback for non-implemented path, should not be reached if logic above is complete
-        return {"proof": "mpc_stub_proof"}, ["mpc_stub_public_signal"] 
+    def _call_mpc_server(self, payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Make HTTP call to MPC server.
+
+        Args:
+            payload: Request payload for proof generation
+
+        Returns:
+            Server response or None if failed
+        """
+        url = f"{self.server_url}/generate_proof"
+
+        headers = {}
+        if self.api_key:
+            headers["x-api-key"] = self.api_key
+
+        for attempt in range(self.max_retries):
+            try:
+                logger.debug(f"MPC server call attempt {attempt + 1}/{self.max_retries}")
+
+                response = requests.post(
+                    url,
+                    json=payload,
+                    headers=headers,
+                    timeout=self.timeout
+                )
+
+                response.raise_for_status()
+                return response.json()
+
+            except requests.RequestException as e:
+                logger.warning(f"MPC server call attempt {attempt + 1} failed: {e}")
+                if attempt < self.max_retries - 1:
+                    time.sleep(2 ** attempt)  # Exponential backoff
+                else:
+                    logger.error(f"All MPC server attempts failed: {e}")
+                    raise
+
+        return None
+
+
+
+    def get_server_health(self) -> Dict[str, Any]:
+        """
+        Check MPC server health status.
+
+        Returns:
+            Dict containing server health information
+        """
+        try:
+            url = f"{self.server_url}/health"
+            headers = {}
+            if self.api_key:
+                headers["x-api-key"] = self.api_key
+
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+
+            health_data = response.json()
+            health_data["server_reachable"] = True
+            return health_data
+
+        except requests.RequestException as e:
+            return {
+                "server_reachable": False,
+                "error": str(e),
+                "status": "unhealthy"
+            }
+        except Exception as e:
+            return {
+                "server_reachable": False,
+                "error": str(e),
+                "status": "error"
+            } 

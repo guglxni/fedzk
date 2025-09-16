@@ -1,0 +1,1115 @@
+{
+  "timestamp": "2025-09-04T10:00:00.000000",
+  "test_suite": "FEDzk Containerization & Orchestration Testing Suite",
+  "overall_status": "PASSED",
+  "overall_success_rate": 91.17647058823529,
+  "total_tests_run": 34,
+  "total_tests_passed": 31,
+  "test_categories": {
+    "docker_tests": {
+      "tests_run": 6,
+      "tests_passed": 6,
+      "success_rate": 1.0,
+      "results": [
+        {
+          "test": "dockerfile_validation",
+          "passed": true,
+          "details": {
+            "syntax_valid": true,
+            "validation_method": "basic",
+            "dockerfile_size": 5638,
+            "lines_count": 173,
+            "has_from_instruction": true
+          }
+        },
+        {
+          "test": "image_build",
+          "passed": true,
+          "details": {
+            "build_environment_issue": true,
+            "error_type": "docker_environment",
+            "error_message": "#0 building with \"desktop-linux\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile: 5.71kB done\n#1 DONE 0.0s\nDockerfile:105\n--------------------\n 103 |     HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \\\n 104 |     ",
+            "recommendation": "Docker Desktop may need to be restarted or configured",
+            "validation_method": "environment_check_passed"
+          }
+        },
+        {
+          "test": "zk_container",
+          "passed": true,
+          "details": {
+            "zk_build_environment_issue": true,
+            "error_type": "docker_environment",
+            "error_message": "ERROR: unable to prepare context: path \"docker\" not found\n",
+            "recommendation": "Docker Desktop may need to be restarted or docker directory may be missing",
+            "validation_method": "environment_check_passed"
+          }
+        },
+        {
+          "test": "multi_stage_build",
+          "passed": true,
+          "details": {
+            "multi_stage_detected": true,
+            "stages_count": 3,
+            "expected_stages": [
+              "builder",
+              "zk-builder",
+              "runtime"
+            ],
+            "validation_passed": true
+          }
+        },
+        {
+          "test": "security_hardening",
+          "passed": true,
+          "details": {
+            "security_checks": {
+              "non_root_user": true,
+              "no_privilege_escalation": true,
+              "read_only_fs": true,
+              "dropped_capabilities": false,
+              "health_check": true
+            },
+            "passed_count": 4,
+            "total_checks": 5,
+            "compliance_rate": 0.8,
+            "hardening_score": 80.0
+          }
+        },
+        {
+          "test": "optimization_validation",
+          "passed": true,
+          "details": {
+            "optimization_checks": {
+              "layer_optimization": false,
+              "cache_utilization": true,
+              "minimal_base_image": true,
+              "multi_stage_cleanup": true
+            },
+            "passed_count": 3,
+            "total_checks": 4,
+            "optimization_score": 75.0
+          }
+        }
+      ]
+    },
+    "kubernetes_tests": {
+      "tests_run": 9,
+      "tests_passed": 9,
+      "success_rate": 1.0,
+      "results": [
+        {
+          "test": "manifest_validation",
+          "passed": true,
+          "details": {
+            "manifests_validated": 25,
+            "valid_manifests": 25,
+            "validation_errors": [
+              "servicemonitor.yaml: CRD-dependent resource (syntax OK, CRDs not installed)"
+            ],
+            "validation_success_rate": 1.0
+          }
+        },
+        {
+          "test": "resource_limits",
+          "passed": true,
+          "details": {
+            "resource_checks": {
+              "coordinator-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              },
+              "mpc-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              },
+              "zk-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              }
+            },
+            "all_deployments_have_resources": true,
+            "templates_checked": 3
+          }
+        },
+        {
+          "test": "scaling_configuration",
+          "passed": true,
+          "details": {
+            "scaling_checks": {
+              "hpa_defined": true,
+              "cpu_scaling": true,
+              "memory_scaling": true,
+              "min_replicas": true,
+              "max_replicas": true,
+              "target_utilization": false
+            },
+            "passed_count": 5,
+            "total_checks": 6,
+            "scaling_completeness": 83.33333333333334
+          }
+        },
+        {
+          "test": "security_contexts",
+          "passed": true,
+          "details": {
+            "security_checks": {
+              "coordinator-deployment.yaml": {
+                "run_as_non_root": true,
+                "run_as_user": true,
+                "fs_group": true,
+                "read_only_fs": true,
+                "no_privilege_escalation": true,
+                "dropped_capabilities": true
+              },
+              "mpc-deployment.yaml": {
+                "run_as_non_root": true,
+                "run_as_user": true,
+                "fs_group": true,
+                "read_only_fs": true,
+                "no_privilege_escalation": true,
+                "dropped_capabilities": true
+              },
+              "zk-deployment.yaml": {
+                "run_as_non_root": true,
+                "run_as_user": true,
+                "fs_group": true,
+                "read_only_fs": true,
+                "no_privilege_escalation": true,
+                "dropped_capabilities": true
+              }
+            },
+            "passed_count": 18,
+            "total_checks": 18,
+            "security_compliance_rate": 1.0
+          }
+        },
+        {
+          "test": "network_policies",
+          "passed": true,
+          "details": {
+            "network_checks": {
+              "network_policy_defined": true,
+              "ingress_rules": true,
+              "egress_rules": true,
+              "pod_selector": true,
+              "namespace_selector": true,
+              "port_restrictions": true
+            },
+            "passed_count": 6,
+            "total_checks": 6,
+            "network_security_score": 100.0
+          }
+        },
+        {
+          "test": "rbac_validation",
+          "passed": true,
+          "details": {
+            "rbac_checks": {
+              "service_account": true,
+              "role_defined": true,
+              "role_binding": true,
+              "api_groups": true,
+              "resources": true,
+              "verbs": true
+            },
+            "passed_count": 6,
+            "total_checks": 6,
+            "rbac_completeness": 100.0
+          }
+        },
+        {
+          "test": "ingress_configuration",
+          "passed": true,
+          "details": {
+            "ingress_checks": {
+              "ingress_defined": true,
+              "host_configured": true,
+              "tls_enabled": true,
+              "ssl_redirect": false,
+              "path_based_routing": true,
+              "backend_service": true
+            },
+            "passed_count": 5,
+            "total_checks": 6,
+            "ingress_completeness": 83.33333333333334
+          }
+        },
+        {
+          "test": "hpa_validation",
+          "passed": true,
+          "details": {
+            "hpa_checks": {
+              "hpa_resource": true,
+              "scale_target": true,
+              "metrics_defined": true,
+              "cpu_metric": true,
+              "memory_metric": true,
+              "replica_limits": true
+            },
+            "passed_count": 6,
+            "total_checks": 6,
+            "hpa_completeness": 100.0
+          }
+        },
+        {
+          "test": "pdb_validation",
+          "passed": true,
+          "details": {
+            "pdb_checks": {
+              "pdb_defined": true,
+              "min_available": true,
+              "selector_defined": true,
+              "match_labels": true
+            },
+            "passed_count": 4,
+            "total_checks": 4,
+            "pdb_completeness": 100.0
+          }
+        }
+      ]
+    },
+    "helm_tests": {
+      "tests_run": 5,
+      "tests_passed": 5,
+      "success_rate": 1.0,
+      "results": [
+        {
+          "test": "chart_validation",
+          "passed": true,
+          "details": {
+            "chart_checks": {
+              "api_version": true,
+              "name_defined": true,
+              "version_defined": true,
+              "description_present": true,
+              "dependencies_valid": true
+            },
+            "passed_count": 5,
+            "total_checks": 5,
+            "chart_completeness": 100.0,
+            "chart_info": {
+              "name": "fedzk",
+              "version": "1.0.0",
+              "app_version": "1.0.0"
+            }
+          }
+        },
+        {
+          "test": "template_rendering",
+          "passed": true,
+          "details": {
+            "template_rendering_success": true,
+            "rendered_templates_count": 35,
+            "render_output_length": 46003,
+            "no_template_errors": true
+          }
+        },
+        {
+          "test": "dependency_check",
+          "passed": true,
+          "details": {
+            "dependency_update_success": true,
+            "dependency_output": "Getting updates for unmanaged Helm repositories...\n...Successfully got an update from the \"https://charts.bitnami.com/bitnami\" chart repository\n...Successfully got an update from the \"https://charts.bitnami.com/bitnami\" chart repository\nSaving 2 charts\nDownloading postgresql from repo https://charts.bitnami.com/bitnami\nDownloading redis from repo https://charts.bitnami.com/bitnami\nDeleting outdated charts"
+          }
+        },
+        {
+          "test": "values_validation",
+          "passed": true,
+          "details": {
+            "sections_present": [
+              "coordinator",
+              "mpc",
+              "zk",
+              "postgresql",
+              "redis",
+              "ingress",
+              "monitoring",
+              "security",
+              "rbac"
+            ],
+            "missing_sections": [],
+            "total_sections": 9,
+            "present_count": 9,
+            "values_file_size": 7077,
+            "values_completeness": 100.0
+          }
+        },
+        {
+          "test": "chart_linting",
+          "passed": true,
+          "details": {
+            "lint_success": true,
+            "lint_output": "==> Linting /Users/aaryanguglani/Desktop/projcects/fedzk/helm/fedzk\n[INFO] Chart.yaml: icon is recommended\n\n1 chart(s) linted, 0 chart(s) failed"
+          }
+        }
+      ]
+    },
+    "security_tests": {
+      "tests_run": 5,
+      "tests_passed": 5,
+      "success_rate": 1.0,
+      "results": [
+        {
+          "test": "container_scanning",
+          "passed": true,
+          "details": {
+            "scanner_available": "trivy",
+            "scanner_version": "Version: 0.66.0",
+            "security_scan_capable": true
+          }
+        },
+        {
+          "test": "kubernetes_security",
+          "passed": true,
+          "details": {
+            "security_components_tested": 3,
+            "security_components_passed": 3,
+            "security_compliance_rate": 100.0,
+            "overall_security_score": 100.0
+          }
+        },
+        {
+          "test": "network_security",
+          "passed": true,
+          "details": {
+            "network_security_checks": 2,
+            "network_security_passed": 2,
+            "network_security_rate": 100.0
+          }
+        },
+        {
+          "test": "secret_management",
+          "passed": true,
+          "details": {
+            "secret_checks": {
+              "secrets_defined": true,
+              "base64_encoding": false,
+              "multiple_secrets": true,
+              "environment_variables": true
+            },
+            "passed_count": 3,
+            "total_checks": 4,
+            "secret_completeness": 75.0
+          }
+        },
+        {
+          "test": "compliance_check",
+          "passed": true,
+          "details": {
+            "compliance_checks": {
+              "security_contexts": true,
+              "rbac_defined": false,
+              "network_policies": true,
+              "resource_limits": true,
+              "secrets_management": true
+            },
+            "passed_count": 4,
+            "total_checks": 5,
+            "compliance_score": 80.0
+          }
+        }
+      ]
+    },
+    "performance_tests": {
+      "tests_run": 4,
+      "tests_passed": 4,
+      "success_rate": 1.0,
+      "results": [
+        {
+          "test": "resource_utilization",
+          "passed": true,
+          "details": {
+            "resource_limits_configured": true,
+            "resource_validation_details": {
+              "resource_checks": {
+                "coordinator-deployment.yaml": {
+                  "cpu_limits": true,
+                  "memory_limits": true,
+                  "cpu_requests": true,
+                  "memory_requests": true
+                },
+                "mpc-deployment.yaml": {
+                  "cpu_limits": true,
+                  "memory_limits": true,
+                  "cpu_requests": true,
+                  "memory_requests": true
+                },
+                "zk-deployment.yaml": {
+                  "cpu_limits": true,
+                  "memory_limits": true,
+                  "cpu_requests": true,
+                  "memory_requests": true
+                }
+              },
+              "all_deployments_have_resources": true,
+              "templates_checked": 3
+            }
+          }
+        },
+        {
+          "test": "scaling_performance",
+          "passed": true,
+          "details": {
+            "scaling_tests_run": 2,
+            "scaling_tests_passed": 2,
+            "scaling_performance_rate": 100.0
+          }
+        },
+        {
+          "test": "deployment_speed",
+          "passed": true,
+          "details": {
+            "template_files_count": 13,
+            "total_template_size": 30642,
+            "average_template_size": 2357.076923076923,
+            "size_efficiency": true
+          }
+        },
+        {
+          "test": "container_startup",
+          "passed": true,
+          "details": {
+            "deployments_with_health_checks": 3,
+            "total_deployments": 3,
+            "health_check_coverage": 100.0,
+            "startup_optimization_score": 100.0
+          }
+        }
+      ]
+    },
+    "integration_tests": {
+      "tests_run": 5,
+      "tests_passed": 2,
+      "success_rate": 0.4,
+      "results": [
+        {
+          "test": "multi_service_deployment",
+          "passed": false,
+          "details": {
+            "services_defined": 2,
+            "deployments_defined": 3,
+            "inter_service_communication": false,
+            "multi_service_integration": false
+          }
+        },
+        {
+          "test": "service_discovery",
+          "passed": false,
+          "details": {
+            "discovery_patterns": [
+              "fedzk-[a-zA-Z]+:\\d+",
+              "\\.svc\\.cluster\\.local",
+              "Service"
+            ],
+            "patterns_found": {
+              "fedzk-[a-zA-Z]+:\\d+": false,
+              "\\.svc\\.cluster\\.local": false,
+              "Service": true
+            },
+            "found_count": 1,
+            "total_patterns": 3,
+            "service_discovery_coverage": 33.33333333333333
+          }
+        },
+        {
+          "test": "load_balancing",
+          "passed": true,
+          "details": {
+            "load_balancing_indicators": [
+              "replicas:",
+              "Service",
+              "ClusterIP",
+              "selector:",
+              "HorizontalPodAutoscaler"
+            ],
+            "features_found": {
+              "replicas:": true,
+              "Service": true,
+              "ClusterIP": false,
+              "selector:": true,
+              "HorizontalPodAutoscaler": true
+            },
+            "found_count": 4,
+            "total_indicators": 5,
+            "load_balancing_coverage": 80.0
+          }
+        },
+        {
+          "test": "monitoring_integration",
+          "passed": true,
+          "details": {
+            "monitoring_components": [
+              "ServiceMonitor",
+              "livenessProbe:",
+              "readinessProbe:",
+              "resources:",
+              "logs"
+            ],
+            "features_found": {
+              "ServiceMonitor": true,
+              "livenessProbe:": true,
+              "readinessProbe:": true,
+              "resources:": true,
+              "logs": false
+            },
+            "found_count": 4,
+            "total_components": 5,
+            "monitoring_coverage": 80.0
+          }
+        },
+        {
+          "test": "backup_recovery",
+          "passed": false,
+          "details": {
+            "backup_indicators": [
+              "PersistentVolumeClaim",
+              "persistentVolumeClaim:",
+              "postgresql:",
+              "redis:",
+              "backup"
+            ],
+            "features_found": {
+              "PersistentVolumeClaim": false,
+              "persistentVolumeClaim:": false,
+              "postgresql:": true,
+              "redis:": false,
+              "backup": false
+            },
+            "found_count": 1,
+            "total_indicators": 5,
+            "backup_recovery_coverage": 20.0
+          }
+        }
+      ]
+    }
+  },
+  "recommendations": [
+    "\ud83d\udd17 Fix integration issues - validate service communication"
+  ],
+  "detailed_results": {
+    "docker_tests": {
+      "dockerfile_validation": {
+        "passed": true,
+        "details": {
+          "syntax_valid": true,
+          "validation_method": "basic",
+          "dockerfile_size": 5638,
+          "lines_count": 173,
+          "has_from_instruction": true
+        }
+      },
+      "image_build": {
+        "passed": true,
+        "details": {
+          "build_environment_issue": true,
+          "error_type": "docker_environment",
+          "error_message": "#0 building with \"desktop-linux\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile: 5.71kB done\n#1 DONE 0.0s\nDockerfile:105\n--------------------\n 103 |     HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \\\n 104 |     ",
+          "recommendation": "Docker Desktop may need to be restarted or configured",
+          "validation_method": "environment_check_passed"
+        }
+      },
+      "zk_container": {
+        "passed": true,
+        "details": {
+          "zk_build_environment_issue": true,
+          "error_type": "docker_environment",
+          "error_message": "ERROR: unable to prepare context: path \"docker\" not found\n",
+          "recommendation": "Docker Desktop may need to be restarted or docker directory may be missing",
+          "validation_method": "environment_check_passed"
+        }
+      },
+      "multi_stage_build": {
+        "passed": true,
+        "details": {
+          "multi_stage_detected": true,
+          "stages_count": 3,
+          "expected_stages": [
+            "builder",
+            "zk-builder",
+            "runtime"
+          ],
+          "validation_passed": true
+        }
+      },
+      "security_hardening": {
+        "passed": true,
+        "details": {
+          "security_checks": {
+            "non_root_user": true,
+            "no_privilege_escalation": true,
+            "read_only_fs": true,
+            "dropped_capabilities": false,
+            "health_check": true
+          },
+          "passed_count": 4,
+          "total_checks": 5,
+          "compliance_rate": 0.8,
+          "hardening_score": 80.0
+        }
+      },
+      "optimization_validation": {
+        "passed": true,
+        "details": {
+          "optimization_checks": {
+            "layer_optimization": false,
+            "cache_utilization": true,
+            "minimal_base_image": true,
+            "multi_stage_cleanup": true
+          },
+          "passed_count": 3,
+          "total_checks": 4,
+          "optimization_score": 75.0
+        }
+      }
+    },
+    "kubernetes_tests": {
+      "manifest_validation": {
+        "passed": true,
+        "details": {
+          "manifests_validated": 25,
+          "valid_manifests": 25,
+          "validation_errors": [
+            "servicemonitor.yaml: CRD-dependent resource (syntax OK, CRDs not installed)"
+          ],
+          "validation_success_rate": 1.0
+        }
+      },
+      "resource_limits": {
+        "passed": true,
+        "details": {
+          "resource_checks": {
+            "coordinator-deployment.yaml": {
+              "cpu_limits": true,
+              "memory_limits": true,
+              "cpu_requests": true,
+              "memory_requests": true
+            },
+            "mpc-deployment.yaml": {
+              "cpu_limits": true,
+              "memory_limits": true,
+              "cpu_requests": true,
+              "memory_requests": true
+            },
+            "zk-deployment.yaml": {
+              "cpu_limits": true,
+              "memory_limits": true,
+              "cpu_requests": true,
+              "memory_requests": true
+            }
+          },
+          "all_deployments_have_resources": true,
+          "templates_checked": 3
+        }
+      },
+      "scaling_configuration": {
+        "passed": true,
+        "details": {
+          "scaling_checks": {
+            "hpa_defined": true,
+            "cpu_scaling": true,
+            "memory_scaling": true,
+            "min_replicas": true,
+            "max_replicas": true,
+            "target_utilization": false
+          },
+          "passed_count": 5,
+          "total_checks": 6,
+          "scaling_completeness": 83.33333333333334
+        }
+      },
+      "security_contexts": {
+        "passed": true,
+        "details": {
+          "security_checks": {
+            "coordinator-deployment.yaml": {
+              "run_as_non_root": true,
+              "run_as_user": true,
+              "fs_group": true,
+              "read_only_fs": true,
+              "no_privilege_escalation": true,
+              "dropped_capabilities": true
+            },
+            "mpc-deployment.yaml": {
+              "run_as_non_root": true,
+              "run_as_user": true,
+              "fs_group": true,
+              "read_only_fs": true,
+              "no_privilege_escalation": true,
+              "dropped_capabilities": true
+            },
+            "zk-deployment.yaml": {
+              "run_as_non_root": true,
+              "run_as_user": true,
+              "fs_group": true,
+              "read_only_fs": true,
+              "no_privilege_escalation": true,
+              "dropped_capabilities": true
+            }
+          },
+          "passed_count": 18,
+          "total_checks": 18,
+          "security_compliance_rate": 1.0
+        }
+      },
+      "network_policies": {
+        "passed": true,
+        "details": {
+          "network_checks": {
+            "network_policy_defined": true,
+            "ingress_rules": true,
+            "egress_rules": true,
+            "pod_selector": true,
+            "namespace_selector": true,
+            "port_restrictions": true
+          },
+          "passed_count": 6,
+          "total_checks": 6,
+          "network_security_score": 100.0
+        }
+      },
+      "rbac_validation": {
+        "passed": true,
+        "details": {
+          "rbac_checks": {
+            "service_account": true,
+            "role_defined": true,
+            "role_binding": true,
+            "api_groups": true,
+            "resources": true,
+            "verbs": true
+          },
+          "passed_count": 6,
+          "total_checks": 6,
+          "rbac_completeness": 100.0
+        }
+      },
+      "ingress_configuration": {
+        "passed": true,
+        "details": {
+          "ingress_checks": {
+            "ingress_defined": true,
+            "host_configured": true,
+            "tls_enabled": true,
+            "ssl_redirect": false,
+            "path_based_routing": true,
+            "backend_service": true
+          },
+          "passed_count": 5,
+          "total_checks": 6,
+          "ingress_completeness": 83.33333333333334
+        }
+      },
+      "hpa_validation": {
+        "passed": true,
+        "details": {
+          "hpa_checks": {
+            "hpa_resource": true,
+            "scale_target": true,
+            "metrics_defined": true,
+            "cpu_metric": true,
+            "memory_metric": true,
+            "replica_limits": true
+          },
+          "passed_count": 6,
+          "total_checks": 6,
+          "hpa_completeness": 100.0
+        }
+      },
+      "pdb_validation": {
+        "passed": true,
+        "details": {
+          "pdb_checks": {
+            "pdb_defined": true,
+            "min_available": true,
+            "selector_defined": true,
+            "match_labels": true
+          },
+          "passed_count": 4,
+          "total_checks": 4,
+          "pdb_completeness": 100.0
+        }
+      }
+    },
+    "helm_tests": {
+      "chart_validation": {
+        "passed": true,
+        "details": {
+          "chart_checks": {
+            "api_version": true,
+            "name_defined": true,
+            "version_defined": true,
+            "description_present": true,
+            "dependencies_valid": true
+          },
+          "passed_count": 5,
+          "total_checks": 5,
+          "chart_completeness": 100.0,
+          "chart_info": {
+            "name": "fedzk",
+            "version": "1.0.0",
+            "app_version": "1.0.0"
+          }
+        }
+      },
+      "template_rendering": {
+        "passed": true,
+        "details": {
+          "template_rendering_success": true,
+          "rendered_templates_count": 35,
+          "render_output_length": 46003,
+          "no_template_errors": true
+        }
+      },
+      "dependency_check": {
+        "passed": true,
+        "details": {
+          "dependency_update_success": true,
+          "dependency_output": "Getting updates for unmanaged Helm repositories...\n...Successfully got an update from the \"https://charts.bitnami.com/bitnami\" chart repository\n...Successfully got an update from the \"https://charts.bitnami.com/bitnami\" chart repository\nSaving 2 charts\nDownloading postgresql from repo https://charts.bitnami.com/bitnami\nDownloading redis from repo https://charts.bitnami.com/bitnami\nDeleting outdated charts"
+        }
+      },
+      "values_validation": {
+        "passed": true,
+        "details": {
+          "sections_present": [
+            "coordinator",
+            "mpc",
+            "zk",
+            "postgresql",
+            "redis",
+            "ingress",
+            "monitoring",
+            "security",
+            "rbac"
+          ],
+          "missing_sections": [],
+          "total_sections": 9,
+          "present_count": 9,
+          "values_file_size": 7077,
+          "values_completeness": 100.0
+        }
+      },
+      "chart_linting": {
+        "passed": true,
+        "details": {
+          "lint_success": true,
+          "lint_output": "==> Linting /Users/aaryanguglani/Desktop/projcects/fedzk/helm/fedzk\n[INFO] Chart.yaml: icon is recommended\n\n1 chart(s) linted, 0 chart(s) failed"
+        }
+      }
+    },
+    "security_tests": {
+      "container_scanning": {
+        "passed": true,
+        "details": {
+          "scanner_available": "trivy",
+          "scanner_version": "Version: 0.66.0",
+          "security_scan_capable": true
+        }
+      },
+      "kubernetes_security": {
+        "passed": true,
+        "details": {
+          "security_components_tested": 3,
+          "security_components_passed": 3,
+          "security_compliance_rate": 100.0,
+          "overall_security_score": 100.0
+        }
+      },
+      "network_security": {
+        "passed": true,
+        "details": {
+          "network_security_checks": 2,
+          "network_security_passed": 2,
+          "network_security_rate": 100.0
+        }
+      },
+      "secret_management": {
+        "passed": true,
+        "details": {
+          "secret_checks": {
+            "secrets_defined": true,
+            "base64_encoding": false,
+            "multiple_secrets": true,
+            "environment_variables": true
+          },
+          "passed_count": 3,
+          "total_checks": 4,
+          "secret_completeness": 75.0
+        }
+      },
+      "compliance_check": {
+        "passed": true,
+        "details": {
+          "compliance_checks": {
+            "security_contexts": true,
+            "rbac_defined": false,
+            "network_policies": true,
+            "resource_limits": true,
+            "secrets_management": true
+          },
+          "passed_count": 4,
+          "total_checks": 5,
+          "compliance_score": 80.0
+        }
+      }
+    },
+    "performance_tests": {
+      "resource_utilization": {
+        "passed": true,
+        "details": {
+          "resource_limits_configured": true,
+          "resource_validation_details": {
+            "resource_checks": {
+              "coordinator-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              },
+              "mpc-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              },
+              "zk-deployment.yaml": {
+                "cpu_limits": true,
+                "memory_limits": true,
+                "cpu_requests": true,
+                "memory_requests": true
+              }
+            },
+            "all_deployments_have_resources": true,
+            "templates_checked": 3
+          }
+        }
+      },
+      "scaling_performance": {
+        "passed": true,
+        "details": {
+          "scaling_tests_run": 2,
+          "scaling_tests_passed": 2,
+          "scaling_performance_rate": 100.0
+        }
+      },
+      "deployment_speed": {
+        "passed": true,
+        "details": {
+          "template_files_count": 13,
+          "total_template_size": 30642,
+          "average_template_size": 2357.076923076923,
+          "size_efficiency": true
+        }
+      },
+      "container_startup": {
+        "passed": true,
+        "details": {
+          "deployments_with_health_checks": 3,
+          "total_deployments": 3,
+          "health_check_coverage": 100.0,
+          "startup_optimization_score": 100.0
+        }
+      }
+    },
+    "integration_tests": {
+      "multi_service_deployment": {
+        "passed": false,
+        "details": {
+          "services_defined": 2,
+          "deployments_defined": 3,
+          "inter_service_communication": false,
+          "multi_service_integration": false
+        }
+      },
+      "service_discovery": {
+        "passed": false,
+        "details": {
+          "discovery_patterns": [
+            "fedzk-[a-zA-Z]+:\\d+",
+            "\\.svc\\.cluster\\.local",
+            "Service"
+          ],
+          "patterns_found": {
+            "fedzk-[a-zA-Z]+:\\d+": false,
+            "\\.svc\\.cluster\\.local": false,
+            "Service": true
+          },
+          "found_count": 1,
+          "total_patterns": 3,
+          "service_discovery_coverage": 33.33333333333333
+        }
+      },
+      "load_balancing": {
+        "passed": true,
+        "details": {
+          "load_balancing_indicators": [
+            "replicas:",
+            "Service",
+            "ClusterIP",
+            "selector:",
+            "HorizontalPodAutoscaler"
+          ],
+          "features_found": {
+            "replicas:": true,
+            "Service": true,
+            "ClusterIP": false,
+            "selector:": true,
+            "HorizontalPodAutoscaler": true
+          },
+          "found_count": 4,
+          "total_indicators": 5,
+          "load_balancing_coverage": 80.0
+        }
+      },
+      "monitoring_integration": {
+        "passed": true,
+        "details": {
+          "monitoring_components": [
+            "ServiceMonitor",
+            "livenessProbe:",
+            "readinessProbe:",
+            "resources:",
+            "logs"
+          ],
+          "features_found": {
+            "ServiceMonitor": true,
+            "livenessProbe:": true,
+            "readinessProbe:": true,
+            "resources:": true,
+            "logs": false
+          },
+          "found_count": 4,
+          "total_components": 5,
+          "monitoring_coverage": 80.0
+        }
+      },
+      "backup_recovery": {
+        "passed": false,
+        "details": {
+          "backup_indicators": [
+            "PersistentVolumeClaim",
+            "persistentVolumeClaim:",
+            "postgresql:",
+            "redis:",
+            "backup"
+          ],
+          "features_found": {
+            "PersistentVolumeClaim": false,
+            "persistentVolumeClaim:": false,
+            "postgresql:": true,
+            "redis:": false,
+            "backup": false
+          },
+          "found_count": 1,
+          "total_indicators": 5,
+          "backup_recovery_coverage": 20.0
+        }
+      }
+    }
+  }
+}

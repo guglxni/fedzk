@@ -1,0 +1,233 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "FEDzk Federated Learning Monitoring",
+    "tags": ["fedzk", "federated-learning", "ml", "monitoring"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Federated Learning Overview",
+        "type": "row",
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Participants",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "fedzk_fl_participants_active",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 1
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "orange",
+                  "value": 1
+                },
+                {
+                  "color": "green",
+                  "value": 3
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Training Rounds Completed",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "fedzk_fl_rounds_total",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 1
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Model Updates Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(fedzk_fl_model_updates_total[5m])",
+            "legendFormat": "{{participant_id}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 1
+        },
+        "yaxes": [
+          {
+            "unit": "ops",
+            "label": "Updates/sec"
+          },
+          {
+            "unit": "short"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Training Round Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "fedzk_fl_rounds_total",
+            "legendFormat": "{{status}}",
+            "refId": "A",
+            "instant": true
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 5
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left"
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "MPC Operations",
+        "type": "row",
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 13
+        }
+      },
+      {
+        "id": 7,
+        "title": "MPC Operation Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(fedzk_mpc_operations_total[5m])",
+            "legendFormat": "{{operation_type}} - {{success}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        },
+        "yaxes": [
+          {
+            "unit": "ops",
+            "label": "Operations/sec"
+          },
+          {
+            "unit": "short"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "MPC Computation Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(fedzk_mpc_computation_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile - {{operation_type}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(fedzk_mpc_computation_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile - {{operation_type}}",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 14
+        },
+        "yaxes": [
+          {
+            "unit": "seconds",
+            "label": "Duration"
+          },
+          {
+            "unit": "short"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ]
+    },
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 0,
+    "links": []
+  }
+}

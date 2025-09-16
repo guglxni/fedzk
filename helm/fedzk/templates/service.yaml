@@ -1,0 +1,70 @@
+{{- if .Values.coordinator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator
+  labels:
+    {{- include "fedzk.coordinator.labels" . | nindent 4 }}
+  {{- with .Values.coordinator.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.coordinator.service.type }}
+  ports:
+    - port: {{ .Values.coordinator.service.port }}
+      targetPort: {{ .Values.coordinator.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "fedzk.coordinator.selectorLabels" . | nindent 4 }}
+{{- end }}
+
+---
+
+{{- if .Values.mpc.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc
+  labels:
+    {{- include "fedzk.mpc.labels" . | nindent 4 }}
+  {{- with .Values.mpc.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.mpc.service.type }}
+  ports:
+    - port: {{ .Values.mpc.service.port }}
+      targetPort: {{ .Values.mpc.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "fedzk.mpc.selectorLabels" . | nindent 4 }}
+{{- end }}
+
+---
+
+{{- if .Values.zk.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk
+  labels:
+    {{- include "fedzk.zk.labels" . | nindent 4 }}
+  {{- with .Values.zk.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.zk.service.type }}
+  ports:
+    - port: {{ .Values.zk.service.port }}
+      targetPort: {{ .Values.zk.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "fedzk.zk.selectorLabels" . | nindent 4 }}
+{{- end }}
+

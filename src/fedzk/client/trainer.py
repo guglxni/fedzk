@@ -502,3 +502,38 @@ class LocalTrainer:
         logger.info(f"Epoch completed - Average loss: {avg_loss:.4f}")
         
         return gradients
+    
+    def train_step(self, inputs, targets) -> float:
+        """
+        Perform a single training step on the given batch of data.
+        
+        Args:
+            inputs: Input data batch (tensors)
+            targets: Target data batch (tensors)
+            
+        Returns:
+            float: The loss value from this training step
+        """
+        self.model.train()
+        
+        # Move data to the correct device
+        inputs = inputs.to(self.device)
+        targets = targets.to(self.device)
+        
+        # Forward pass
+        self.optimizer.zero_grad()
+        outputs = self.model(inputs)
+        
+        # Handle different output and target shapes
+        if isinstance(self.criterion, nn.MSELoss) and outputs.shape != targets.shape:
+            if len(targets.shape) == 1:
+                targets = targets.reshape(-1, 1)
+        
+        # Compute loss and backpropagate
+        loss = self.criterion(outputs, targets)
+        loss.backward()
+        
+        # Update weights
+        self.optimizer.step()
+        
+        return float(loss.item())

@@ -3,7 +3,7 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-HTTP client for FedZK Coordinator API.
+HTTP client for FEDzk Coordinator API.
 Provides methods to submit gradient updates with proofs and fetch coordinator status.
 """
 
@@ -14,7 +14,7 @@ import requests
 
 class ClientAPI:
     """
-    HTTP client for interacting with the FedZK coordinator service.
+    HTTP client for interacting with the FEDzk coordinator service.
     """
     def __init__(self, base_url: str, timeout: Optional[float] = None):
         """

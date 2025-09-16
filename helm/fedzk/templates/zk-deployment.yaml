@@ -1,0 +1,135 @@
+{{- if .Values.zk.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk
+  labels:
+    {{- include "fedzk.zk.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.zk.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.zk.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fedzk.zk.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.zk.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zk.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zk.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "fedzk.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.zk.podSecurityContext | nindent 8 }}
+      containers:
+        - name: fedzk-zk
+          securityContext:
+            {{- toYaml .Values.zk.securityContext | nindent 12 }}
+          image: "{{ .Values.global.imageRegistry }}{{ .Values.zk.image.repository }}:{{ .Values.zk.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.zk.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.zk.service.port }}
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: {{ .Values.config.fedzk.env | quote }}
+            - name: CIRCOM_HOME
+              value: "/zk"
+            - name: NODE_PATH
+              value: "/usr/local/lib/node_modules"
+            {{- if .Values.monitoring.enabled }}
+            - name: FEDZK_METRICS_ENABLED
+              value: "true"
+            - name: FEDZK_METRICS_PORT
+              value: "{{ .Values.zk.service.port }}"
+            - name: FEDZK_TRACING_ENABLED
+              value: "{{ .Values.monitoring.tracing.enabled }}"
+            - name: JAEGER_HOST
+              value: "{{ .Values.monitoring.tracing.jaeger.host }}"
+            - name: JAEGER_PORT
+              value: "{{ .Values.monitoring.tracing.jaeger.port }}"
+            {{- end }}
+          resources:
+            {{- toYaml .Values.zk.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - circom --version && snarkjs --version
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - circom --version && snarkjs --version
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: zk-circuits
+              mountPath: /zk/circuits
+              readOnly: false
+            - name: zk-artifacts
+              mountPath: /zk/artifacts
+              readOnly: false
+            - name: tmp-volume
+              mountPath: /tmp
+              readOnly: false
+            {{- if .Values.persistence.enabled }}
+            - name: zk-data
+              mountPath: /zk/data
+              readOnly: false
+            {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+      volumes:
+        - name: zk-circuits
+          emptyDir: {}
+        - name: zk-artifacts
+          emptyDir: {}
+        - name: tmp-volume
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        {{- if .Values.persistence.enabled }}
+        - name: zk-data
+          persistentVolumeClaim:
+            claimName: {{ include "fedzk.fullname" . }}-zk-data
+        {{- end }}
+      {{- with .Values.zk.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zk.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zk.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+

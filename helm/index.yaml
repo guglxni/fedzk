@@ -1,0 +1,70 @@
+apiVersion: v1
+entries:
+  fedzk:
+    - apiVersion: v2
+      appVersion: "1.0.0"
+      created: "2024-01-01T00:00:00Z"
+      description: FEDZK - Federated Learning with Zero-Knowledge Proofs
+      digest: ""
+      home: https://fedzk.io
+      icon: https://fedzk.io/images/logo.png
+      keywords:
+        - federated-learning
+        - zero-knowledge-proofs
+        - privacy-preserving
+        - machine-learning
+        - cryptography
+      maintainers:
+        - email: support@fedzk.io
+          name: FEDZK Team
+      name: fedzk
+      sources:
+        - https://github.com/fedzk/fedzk
+      urls:
+        - https://charts.fedzk.io/fedzk-1.0.0.tgz
+      version: 1.0.0
+    - apiVersion: v2
+      appVersion: "0.9.0"
+      created: "2023-12-15T00:00:00Z"
+      description: FEDZK - Federated Learning with Zero-Knowledge Proofs (Beta)
+      digest: ""
+      home: https://fedzk.io
+      icon: https://fedzk.io/images/logo.png
+      keywords:
+        - federated-learning
+        - zero-knowledge-proofs
+        - privacy-preserving
+        - machine-learning
+        - cryptography
+      maintainers:
+        - email: support@fedzk.io
+          name: FEDZK Team
+      name: fedzk
+      sources:
+        - https://github.com/fedzk/fedzk
+      urls:
+        - https://charts.fedzk.io/fedzk-0.9.0.tgz
+      version: 0.9.0
+  fedzk-monitoring:
+    - apiVersion: v2
+      appVersion: "1.0.0"
+      created: "2024-01-01T00:00:00Z"
+      description: FEDZK Monitoring Stack
+      digest: ""
+      home: https://fedzk.io
+      icon: https://fedzk.io/images/monitoring.png
+      keywords:
+        - monitoring
+        - prometheus
+        - grafana
+        - observability
+      maintainers:
+        - email: support@fedzk.io
+          name: FEDZK Team
+      name: fedzk-monitoring
+      sources:
+        - https://github.com/fedzk/fedzk
+      urls:
+        - https://charts.fedzk.io/fedzk-monitoring-1.0.0.tgz
+      version: 1.0.0
+generated: "2024-01-01T00:00:00Z"

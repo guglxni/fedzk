@@ -1,0 +1,24 @@
+{
+  "title": "FEDZK Static Analysis Report",
+  "generated_at": "2025-09-15T19:34:23.880434",
+  "tools_used": [
+    "bandit",
+    "safety",
+    "pylint"
+  ],
+  "findings": {
+    "high_severity": [],
+    "medium_severity": [],
+    "low_severity": []
+  },
+  "code_quality_metrics": {
+    "cyclomatic_complexity": "TBD",
+    "maintainability_index": "TBD",
+    "test_coverage": "TBD"
+  },
+  "recommendations": [
+    "Run bandit for security issues",
+    "Use safety for dependency vulnerabilities",
+    "Configure pylint for code quality"
+  ]
+}

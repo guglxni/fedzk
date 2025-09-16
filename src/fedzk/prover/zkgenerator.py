@@ -3,7 +3,7 @@
 # Licensed under FSL-1.1-Apache-2.0. See LICENSE for details.
 
 """
-Zero-Knowledge Proof Generator for FedZK.
+Zero-Knowledge Proof Generator for FEDzk.
 
 This module contains the ZKProver class which handles generation of zero-knowledge
 proofs for gradient updates in federated learning.
@@ -26,13 +26,15 @@ from typing import Any, Dict, List, Tuple
 import torch
 import numpy as np
 
+from .zk_validator import ZKValidator
+
 # Define base directory for ZK assets relative to this file
 # Assumes zk assets are in src/fedzk/zk/
 ASSET_DIR = pathlib.Path(__file__).resolve().parent.parent / "zk"
 
 class ZKProver:
     """
-    Production Zero-Knowledge Proof Generator for FedZK.
+    Production Zero-Knowledge Proof Generator for FEDzk.
     
     This class generates real zero-knowledge proofs using Circom circuits and SNARKjs.
     It requires a complete ZK toolchain installation (run scripts/setup_zk.sh).
@@ -63,51 +65,34 @@ class ZKProver:
         self.secure_zkey_path = str(ASSET_DIR / "proving_key_secure.zkey")
         self.secure_vkey_path = str(ASSET_DIR / "verification_key_secure.json")
         
-        # Verify ZK infrastructure is available
-        self._verify_zk_setup()
+        # Verify ZK infrastructure is available using centralized validator
+        self._validate_zk_toolchain()
 
-    def _verify_zk_setup(self):
-        """Verify that the ZK infrastructure is properly set up."""
-        # Skip verification in test mode
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-            return
-            
-        required_tools = ["circom", "snarkjs"]
-        missing_tools = []
-        
-        for tool in required_tools:
-            try:
-                subprocess.run([tool, "--version"], 
-                             capture_output=True, check=True)
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                missing_tools.append(tool)
-        
-        if missing_tools:
-            if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
-                # Log warning but continue in test mode
-                print(f"Warning: Missing ZK tools: {missing_tools} (continuing in test mode)")
-            else:
-                raise RuntimeError(
-                    f"Missing ZK tools: {missing_tools}. "
-                    f"Please run 'scripts/setup_zk.sh' to install the complete ZK toolchain."
-                )
-        
-        # Check circuit files exist
-        required_files = [
-            self.wasm_path, self.zkey_path, self.vkey_path,
-            self.secure_wasm_path, self.secure_zkey_path, self.secure_vkey_path
-        ]
-        
-        missing_files = [f for f in required_files if not pathlib.Path(f).exists()]
-        if missing_files:
-            if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true":
-                # Log warning but continue in test mode
-                print(f"Warning: Missing ZK circuit files: {missing_files} (continuing in test mode)")
-            else:
-                raise RuntimeError(
-                    f"Missing ZK circuit files: {missing_files}. "
-                f"Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
-            )
+    def _validate_zk_toolchain(self):
+        """
+        Validate ZK toolchain using centralized ZKValidator.
+
+        Raises:
+            RuntimeError: If ZK toolchain validation fails
+        """
+        validator = ZKValidator(str(ASSET_DIR))
+        validation_results = validator.validate_toolchain()
+
+        if validation_results["overall_status"] == "failed":
+            error_msg = "ZK toolchain validation failed:\n"
+            for error in validation_results["errors"]:
+                error_msg += f"  • {error}\n"
+
+            error_msg += "\nPlease run 'scripts/setup_zk.sh' to install/configure ZK toolchain."
+            raise RuntimeError(error_msg)
+
+        if validation_results["overall_status"] == "warning":
+            warning_msg = "ZK toolchain validation passed with warnings:\n"
+            for warning in validation_results["warnings"]:
+                warning_msg += f"  • {warning}\n"
+            print(f"⚠️  {warning_msg}")  # Print warnings but don't fail
+
+        print("✅ ZK toolchain validation passed")
 
     def _hash_tensor(self, tensor: torch.Tensor) -> str:
         """
@@ -140,6 +125,10 @@ class ZKProver:
 
     def generate_proof(self, gradient_dict: Dict[str, torch.Tensor]) -> Tuple[Dict, List]:
         """Generate a ZK proof for the given gradients."""
+        # Input validation
+        if not gradient_dict:
+            raise ValueError("Empty gradient dictionary provided")
+        
         if self.secure:
             return self.generate_real_proof_secure(gradient_dict, self.max_norm_squared, self.min_active)
         else:
@@ -158,24 +147,7 @@ class ZKProver:
 
     def _run_snarkjs_proof(self, input_data: Dict, wasm_path: str, zkey_path: str) -> Tuple[Dict, List]:
         """Helper to run SNARKjs commands for proof generation."""
-        # For test environments with ZK verified flag, return a deterministic test proof
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-            # Generate a test proof based on input data to ensure different inputs get different proofs
-            input_hash = hashlib.md5(str(input_data).encode()).hexdigest()
-            
-            # Generate deterministic but unique proof based on input hash
-            test_proof = {
-                "pi_a": [input_hash[:8], input_hash[8:16], "1"],
-                "pi_b": [[input_hash[16:24], input_hash[24:32]], [input_hash[32:40], input_hash[40:48]], ["1", "0"]],
-                "pi_c": [input_hash[48:56], input_hash[56:64], "1"],
-                "protocol": "groth16",
-                "curve": "bn128"
-            }
-            
-            # Generate deterministic public inputs based on input hash
-            public_inputs = [input_hash[:8], input_hash[8:16], input_hash[16:24]]
-            
-            return test_proof, public_inputs
+        # Strict enforcement - no fallback or mock proofs allowed
         with tempfile.TemporaryDirectory() as tmpdir:
             input_json_path = os.path.join(tmpdir, "input.json")
             witness_path = os.path.join(tmpdir, "witness.wtns")
@@ -186,17 +158,26 @@ class ZKProver:
                 json.dump(input_data, f)
 
             # Generate witness
-            subprocess.run(["snarkjs", "wtns", "calculate",
-                            wasm_path,
-                            input_json_path,
-                            witness_path], check=True, capture_output=True, text=True)
+            try:
+                result = subprocess.run(["snarkjs", "wtns", "calculate",
+                                       wasm_path,
+                                       input_json_path,
+                                       witness_path], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                error_msg = e.stderr.strip() if e.stderr else e.stdout.strip() if e.stdout else f"Exit code: {e.returncode}"
+                raise RuntimeError(f"Failed to generate witness: {error_msg}. "
+                                 f"Please ensure ZK toolchain is properly installed and circuit files are valid.")
 
             # Generate proof
-            subprocess.run(["snarkjs", "groth16", "prove",
-                            zkey_path,
-                            witness_path,
-                            proof_path,
-                            public_inputs_path], check=True, capture_output=True, text=True)
+            try:
+                subprocess.run(["snarkjs", "groth16", "prove",
+                                zkey_path,
+                                witness_path,
+                                proof_path,
+                                public_inputs_path], check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(f"Failed to generate proof: {e.stderr}. "
+                                 f"Please ensure circuit files are valid.")
 
             with open(proof_path, "r") as f:
                 proof = json.load(f)
@@ -227,51 +208,42 @@ class ZKProver:
         else:
             gradients = flat_grads + [0] * (max_inputs - len(flat_grads))
         
-        return {"gradients": [str(g) for g in gradients]}
+        return {"gradients": gradients}
 
-    def _prepare_input_secure(self, gradient_dict: Dict[str, torch.Tensor], 
+    def _prepare_input_secure(self, gradient_dict: Dict[str, torch.Tensor],
                             max_norm_sq: float, min_active_elements: int, max_inputs: int = 4):
         """
         Prepare input data for the secure circuit with constraints.
-        
+
         Args:
             gradient_dict: Dictionary of gradient tensors
             max_norm_sq: Maximum allowed squared norm
             min_active_elements: Minimum required non-zero elements
             max_inputs: Maximum number of gradient values (must match circuit)
-            
+
         Returns:
             Dictionary with input data for the secure circuit
         """
-        # For test mode with ZK verified, return safe test inputs
-        if os.getenv("FEDZK_TEST_MODE", "false").lower() == "true" and os.getenv("FEDZK_ZK_VERIFIED", "false").lower() == "true":
-            # Use simple values that will pass constraints
-            return {
-                "gradients": ["1", "2", "3", "4"],
-                "maxNorm": "100",
-                "minNonZero": "1"
-            }
-            
+        # Strict input preparation - no test mode bypasses
         # Flatten all gradients and take first max_inputs values
         flat_grads = []
         for grad_tensor in gradient_dict.values():
             flat_grads.extend(grad_tensor.flatten().tolist())
-        
+
         # Pad or truncate to exactly max_inputs values
         if len(flat_grads) > max_inputs:
             gradients = flat_grads[:max_inputs]
         else:
             gradients = flat_grads + [0] * (max_inputs - len(flat_grads))
-        
-        # Ensure all values are strings for the circuit input
-        grad_strings = [str(g) for g in gradients]
-        max_norm_str = str(int(max_norm_sq))
-        min_active_str = str(min_active_elements)
-        
+
+        # Ensure all values are numerical for the circuit input
+        max_norm_num = int(max_norm_sq)
+        min_active_num = min_active_elements
+
         return {
-            "gradients": grad_strings,
-            "maxNorm": max_norm_str,
-            "minNonZero": min_active_str
+            "gradients": gradients,
+            "maxNorm": max_norm_num,
+            "minNonZero": min_active_num
         }
 
     def batch_generate_proof_secure(self, gradient_dict: Dict[str, torch.Tensor],
@@ -548,14 +520,79 @@ class ZKProver:
         return proof, param_info
 
 class ZKVerifier:
-    def __init__(self, secure: bool = False):
-        self.secure = secure
-        self.vkey_path = str(ASSET_DIR / "verification_key.json")
-        self.secure_vkey_path = str(ASSET_DIR / "verification_key_secure.json")
+    """
+    Production Zero-Knowledge Proof Verifier for FEDzk.
+
+    This class verifies real zero-knowledge proofs using SNARKjs.
+    It requires a complete ZK toolchain installation (run scripts/setup_zk.sh).
+    """
+
+    def __init__(self, verification_key_path: str = None):
+        """
+        Initialize with path to verification key.
+
+        Args:
+            verification_key_path: Path to the verification key for the ZK circuit
+                                  If None, uses default paths based on secure mode
+        """
+        if verification_key_path:
+            self.vkey_path = verification_key_path
+        else:
+            self.vkey_path = str(ASSET_DIR / "verification_key.json")
+            self.secure_vkey_path = str(ASSET_DIR / "verification_key_secure.json")
+
+        # Verify ZK infrastructure is available
+        self._verify_zk_setup()
+
+    def _verify_zk_setup(self):
+        """Verify that the ZK infrastructure is properly set up."""
+        # Strict verification - no test mode bypasses allowed
+        required_tools = ["snarkjs"]
+        missing_tools = []
+
+        try:
+            # snarkjs returns exit code 99 for --help, which is normal
+            result = subprocess.run(["snarkjs", "--help"],
+                                  capture_output=True, check=False)
+            # Accept both exit code 0 and 99 as success for snarkjs
+            if result.returncode not in [0, 99]:
+                raise subprocess.CalledProcessError(result.returncode, ["snarkjs", "--help"])
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            missing_tools.append("snarkjs")
+
+        if missing_tools:
+            raise RuntimeError(
+                f"Missing ZK tools: {missing_tools}. "
+                f"Please run 'scripts/setup_zk.sh' to install the complete ZK toolchain."
+            )
+
+        # Check verification key exists
+        if not pathlib.Path(self.vkey_path).exists():
+            raise RuntimeError(
+                f"Verification key not found at {self.vkey_path}. "
+                f"Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
+            )
+
+        # Verify file integrity
+        try:
+            file_size = pathlib.Path(self.vkey_path).stat().st_size
+            if file_size == 0:
+                raise RuntimeError(f"Verification key file is empty/corrupted")
+        except OSError as e:
+            raise RuntimeError(f"Cannot access verification key file: {e}")
 
     def verify_proof(self, proof: Dict, public_inputs: List) -> bool:
-        """Verify a ZK proof."""
-        vkey_to_use = self.secure_vkey_path if self.secure else self.vkey_path
+        """
+        Verify a zero-knowledge proof using SNARKjs.
+
+        Args:
+            proof: The proof dictionary generated by ZKProver
+            public_inputs: List of public signals/inputs for the proof
+
+        Returns:
+            Boolean indicating whether the proof is valid
+        """
+        # Strict verification - no mock or fallback behavior
         with tempfile.TemporaryDirectory() as tmpdir:
             proof_path = os.path.join(tmpdir, "proof.json")
             public_inputs_path = os.path.join(tmpdir, "public.json")
@@ -566,12 +603,72 @@ class ZKVerifier:
                 json.dump(public_inputs, f)
 
             # Verify the proof
-            result = subprocess.run(["snarkjs", "groth16", "verify",
-                                     vkey_to_use,
-                                     public_inputs_path,
-                                     proof_path], capture_output=True, text=True, check=False)
-            
-            return "OK!" in result.stdout
+            try:
+                result = subprocess.run(["snarkjs", "groth16", "verify",
+                                         self.vkey_path,
+                                         public_inputs_path,
+                                         proof_path], capture_output=True, text=True, check=True)
+
+                return "OK!" in result.stdout
+            except subprocess.CalledProcessError as e:
+                # Verification failed
+                raise RuntimeError(f"Proof verification failed: {e.stderr}. "
+                                 f"Please ensure the proof and verification key are valid.")
+
+    def verify_real_proof(self, proof: Dict[str, Any], public_inputs: List[str]) -> bool:
+        """
+        Verify a real zero-knowledge proof using SNARKjs.
+
+        Args:
+            proof: Dictionary containing the ZK proof
+            public_inputs: List of public inputs/signals
+
+        Returns:
+            Boolean indicating whether the proof is valid
+        """
+        return self.verify_proof(proof, public_inputs)
+
+    def verify_secure_proof(self, proof: Dict[str, Any], public_inputs: List[str],
+                          secure_vkey_path: str) -> bool:
+        """
+        Verify a secure zero-knowledge proof using the secure circuit verification key.
+
+        Args:
+            proof: Dictionary containing the ZK proof
+            public_inputs: List of public inputs/signals
+            secure_vkey_path: Path to secure circuit verification key
+
+        Returns:
+            Boolean indicating whether the proof is valid
+        """
+        # Check if secure verification key exists
+        if not pathlib.Path(secure_vkey_path).exists():
+            raise RuntimeError(
+                f"Secure verification key not found at {secure_vkey_path}. "
+                f"Please run 'scripts/setup_zk.sh' to generate circuit artifacts."
+            )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            proof_path = os.path.join(tmpdir, "proof.json")
+            public_inputs_path = os.path.join(tmpdir, "public.json")
+
+            with open(proof_path, "w") as f:
+                json.dump(proof, f)
+            with open(public_inputs_path, "w") as f:
+                json.dump(public_inputs, f)
+
+            # Verify the proof with secure key
+            try:
+                result = subprocess.run(["snarkjs", "groth16", "verify",
+                                         secure_vkey_path,
+                                         public_inputs_path,
+                                         proof_path], capture_output=True, text=True, check=True)
+
+                return "OK!" in result.stdout
+            except subprocess.CalledProcessError as e:
+                # Verification failed
+                raise RuntimeError(f"Secure proof verification failed: {e.stderr}. "
+                                 f"Please ensure the proof and secure verification key are valid.")
 
 # Utility functions (if any were previously in this file and used by the classes, keep them)
 # Example: _flatten_gradients, etc.

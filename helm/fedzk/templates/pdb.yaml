@@ -1,0 +1,45 @@
+{{- if and .Values.coordinator.enabled .Values.coordinator.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator-pdb
+  labels:
+    {{- include "fedzk.coordinator.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.coordinator.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.coordinator.selectorLabels" . | nindent 6 }}
+---
+{{- end }}
+
+{{- if and .Values.mpc.enabled .Values.mpc.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc-pdb
+  labels:
+    {{- include "fedzk.mpc.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.mpc.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.mpc.selectorLabels" . | nindent 6 }}
+---
+{{- end }}
+
+{{- if and .Values.zk.enabled .Values.zk.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk-pdb
+  labels:
+    {{- include "fedzk.zk.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.zk.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "fedzk.zk.selectorLabels" . | nindent 6 }}
+---
+{{- end }}
+

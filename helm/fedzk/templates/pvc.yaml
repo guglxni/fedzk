@@ -1,0 +1,57 @@
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "fedzk.fullname" . }}-coordinator-data
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    component: coordinator
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.coordinator.size | default "10Gi" }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+---
+{{- if .Values.mpc.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "fedzk.fullname" . }}-mpc-data
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    component: mpc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.mpc.size | default "20Gi" }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+---
+{{- end }}
+{{- if .Values.zk.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "fedzk.fullname" . }}-zk-data
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+    component: zk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.zk.size | default "50Gi" }}
+  {{- if .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- end }}
+---
+{{- end }}
+{{- end }}

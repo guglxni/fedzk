@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fedzk.fullname" . }}-config
+  labels:
+    {{- include "fedzk.labels" . | nindent 4 }}
+data:
+  # FEDzk Configuration
+  FEDZK_ENV: {{ .Values.config.fedzk.env | quote }}
+  FEDZK_ZK_VERIFIED: {{ .Values.config.fedzk.zkVerified | quote }}
+  LOG_LEVEL: {{ .Values.logging.level | quote }}
+  LOG_FORMAT: {{ .Values.logging.format | quote }}
+
+  # Service Discovery
+  COORDINATOR_SERVICE: "{{ include "fedzk.fullname" . }}-coordinator:{{ .Values.coordinator.service.port }}"
+  {{- if .Values.mpc.enabled }}
+  MPC_SERVICE: "{{ include "fedzk.fullname" . }}-mpc:{{ .Values.mpc.service.port }}"
+  {{- end }}
+  {{- if .Values.zk.enabled }}
+  ZK_SERVICE: "{{ include "fedzk.fullname" . }}-zk:{{ .Values.zk.service.port }}"
+  {{- end }}
+
+  # Monitoring Configuration
+  METRICS_ENABLED: {{ .Values.monitoring.enabled | quote }}
+  PROMETHEUS_ENABLED: {{ .Values.monitoring.prometheus.enabled | quote }}
+
+  # Database Configuration
+  {{- if or .Values.postgresql.enabled .Values.externalDatabase.host }}
+  DB_POOL_SIZE: {{ .Values.config.database.poolSize | quote }}
+  DB_MAX_CONNECTIONS: {{ .Values.config.database.maxConnections | quote }}
+  DB_CONNECTION_TIMEOUT: {{ .Values.config.database.connectionTimeout | quote }}
+  {{- end }}
+
+  # Redis Configuration
+  {{- if or .Values.redis.enabled .Values.externalRedis.host }}
+  REDIS_POOL_SIZE: {{ .Values.config.redis.poolSize | quote }}
+  REDIS_MAX_CONNECTIONS: {{ .Values.config.redis.maxConnections | quote }}
+  REDIS_CONNECTION_TIMEOUT: {{ .Values.config.redis.connectionTimeout | quote }}
+  {{- end }}
+
+  # Security Configuration
+  SECURITY_NETWORK_POLICY_ENABLED: {{ .Values.security.networkPolicy.enabled | quote }}
+  SECURITY_POD_SECURITY_STANDARDS_ENABLED: {{ .Values.security.podSecurityStandards.enabled | quote }}
+  SECURITY_SECRETS_ENCRYPTION_ENABLED: {{ .Values.security.secrets.encryption | quote }}
+
+  # High Availability Configuration
+  HA_ENABLED: {{ .Values.highAvailability.enabled | quote }}
+  HA_ZONE_DISTRIBUTION: {{ .Values.highAvailability.zoneDistribution | quote }}
+  HA_ANTI_AFFINITY: {{ .Values.highAvailability.antiAffinity | quote }}
+
+  # Rolling Update Configuration
+  ROLLING_UPDATE_MAX_UNAVAILABLE: {{ .Values.rollingUpdate.maxUnavailable | quote }}
+  ROLLING_UPDATE_MAX_SURGE: {{ .Values.rollingUpdate.maxSurge | quote }}
+  ROLLING_UPDATE_TIMEOUT: {{ .Values.rollingUpdate.timeout | quote }}
+
+  # Resource Limits
+  {{- if .Values.resourceQuota.enabled }}
+  RESOURCE_QUOTA_REQUESTS_CPU: {{ .Values.resourceQuota.requests.cpu | quote }}
+  RESOURCE_QUOTA_REQUESTS_MEMORY: {{ .Values.resourceQuota.requests.memory | quote }}
+  RESOURCE_QUOTA_LIMITS_CPU: {{ .Values.resourceQuota.limits.cpu | quote }}
+  RESOURCE_QUOTA_LIMITS_MEMORY: {{ .Values.resourceQuota.limits.memory | quote }}
+  {{- end }}
+

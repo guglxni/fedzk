@@ -1,0 +1,473 @@
+{
+  "healthcare_federated_learning.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "pass",
+      "message": "Classes defined: ['MedicalCNN']",
+      "classes": [
+        "MedicalCNN"
+      ]
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 5",
+      "functions": [
+        "__init__",
+        "forward",
+        "__init__",
+        "run_healthcare_federated_learning",
+        "main"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 2"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 22"
+    },
+    "zk_patterns": {
+      "status": "pass",
+      "message": "Has ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "pass",
+      "message": "Has FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "warn",
+      "message": "No security imports found"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  },
+  "financial_risk_assessment.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "pass",
+      "message": "Classes defined: ['FinancialRiskModel']",
+      "classes": [
+        "FinancialRiskModel"
+      ]
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 6",
+      "functions": [
+        "__init__",
+        "forward",
+        "__init__",
+        "_log_audit_event",
+        "run_financial_federated_learning"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 3"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 29"
+    },
+    "zk_patterns": {
+      "status": "pass",
+      "message": "Has ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "pass",
+      "message": "Has FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "pass",
+      "message": "Has security imports"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  },
+  "iot_device_network.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "pass",
+      "message": "Classes defined: ['TinyIoTModel']",
+      "classes": [
+        "TinyIoTModel"
+      ]
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 7",
+      "functions": [
+        "__init__",
+        "forward",
+        "__init__",
+        "simulate_network_conditions",
+        "network_fluctuation"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 3"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 40"
+    },
+    "zk_patterns": {
+      "status": "pass",
+      "message": "Has ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "pass",
+      "message": "Has FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "warn",
+      "message": "No security imports found"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  },
+  "production_configuration.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "fail",
+      "message": "No classes defined",
+      "classes": []
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 4",
+      "functions": [
+        "__init__",
+        "setup_production_environment",
+        "demonstrate_production_fedzk_usage",
+        "main"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 3"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 39"
+    },
+    "zk_patterns": {
+      "status": "fail",
+      "message": "Missing ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "fail",
+      "message": "Missing FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "pass",
+      "message": "Has security imports"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  },
+  "troubleshooting_guide.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "fail",
+      "message": "No classes defined",
+      "classes": []
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 3",
+      "functions": [
+        "__init__",
+        "demonstrate_common_issues",
+        "main"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 2"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 45"
+    },
+    "zk_patterns": {
+      "status": "fail",
+      "message": "Missing ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "pass",
+      "message": "Has FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "warn",
+      "message": "No security imports found"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  },
+  "deployment_tutorial.py": {
+    "shebang": {
+      "status": "pass",
+      "message": "Has proper shebang"
+    },
+    "docstring": {
+      "status": "fail",
+      "message": "Missing module docstring"
+    },
+    "main_guard": {
+      "status": "pass",
+      "message": "Has main guard"
+    },
+    "fedzk_imports": {
+      "status": "pass",
+      "message": "Has FEDzk imports"
+    },
+    "std_imports": {
+      "status": "pass",
+      "message": "Has standard imports"
+    },
+    "classes_defined": {
+      "status": "fail",
+      "message": "No classes defined",
+      "classes": []
+    },
+    "fedzk_classes": {
+      "status": "warn",
+      "message": "No FEDzk-style classes found"
+    },
+    "functions_defined": {
+      "status": "pass",
+      "message": "Functions defined: 14",
+      "functions": [
+        "__init__",
+        "print_header",
+        "print_step",
+        "step_1_verify_prerequisites",
+        "step_2_setup_zk_environment"
+      ]
+    },
+    "main_function": {
+      "status": "pass",
+      "message": "Has main function"
+    },
+    "function_docstrings": {
+      "status": "pass",
+      "message": "Function docstrings: 11"
+    },
+    "comments": {
+      "status": "pass",
+      "message": "Comment lines: 25"
+    },
+    "zk_patterns": {
+      "status": "fail",
+      "message": "Missing ZK proof patterns"
+    },
+    "fl_patterns": {
+      "status": "pass",
+      "message": "Has FL patterns"
+    },
+    "no_mocks": {
+      "status": "pass",
+      "message": "No mock implementations"
+    },
+    "security_imports": {
+      "status": "warn",
+      "message": "No security imports found"
+    },
+    "error_handling": {
+      "status": "pass",
+      "message": "Has error handling"
+    },
+    "logging": {
+      "status": "pass",
+      "message": "Has logging"
+    }
+  }
+}

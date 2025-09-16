@@ -1,0 +1,9 @@
+{
+  "direct_dependencies": [],
+  "security_analysis": {},
+  "vulnerability_scan": {
+    "last_scan": "2025-09-15T19:34:23.880328",
+    "vulnerable_packages": [],
+    "recommended_updates": []
+  }
+}
