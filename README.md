@@ -260,76 +260,28 @@ The FEDzk framework consists of three main components:
 3.  **Prover**: The prover is a service that generates ZK proofs for the model updates, which can be run locally or on a remote server
 
 ```mermaid
-graph TB
-    subgraph "FEDzk Architecture Overview"
-        subgraph "Federated Learning Clients"
-            C1[Client 1<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
-            C2[Client 2<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]  
-            C3[Client 3<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
-            CN[Client N<br/>🖥️ Local Training<br/>🔐 ZK Proof Gen]
-        end
-        
-        subgraph "Central Coordinator"
-            COORD[🎯 Coordinator<br/>Secure Aggregation]
-            AGG[📊 Aggregator<br/>Model Updates]
-            VAL[✅ Validator<br/>Proof Verification]
-            API[🌐 API Gateway<br/>Client Interface]
-            STORE[💾 Storage<br/>Global Model]
-        end
-        
-        subgraph "Zero-Knowledge Infrastructure"
-            ZK[🔐 ZK Proof System]
-            CIRC1[📐 Model Update Circuit<br/>Circom/SnarkJS]
-            CIRC2[🔍 Gradient Validation<br/>Range Proofs]
-            CIRC3[🛡️ Privacy Preserving<br/>Differential Privacy]
-        end
-        
-        subgraph "Security & Monitoring"
-            SEC[🔒 Security Layer<br/>TLS 1.3 + mTLS]
-            MON[📈 Monitoring<br/>Prometheus/Grafana]
-            LOG[📝 Logging<br/>Structured JSON]
-        end
-    end
-    
-    %% Client connections
-    C1 -->|Encrypted Updates + Proofs| COORD
-    C2 -->|Encrypted Updates + Proofs| COORD
-    C3 -->|Encrypted Updates + Proofs| COORD
-    CN -->|Encrypted Updates + Proofs| COORD
-    
-    %% Coordinator internal flow
-    COORD --> AGG
-    COORD --> VAL
-    COORD --> API
-    COORD --> STORE
-    
-    %% ZK verification flow
-    VAL --> ZK
-    ZK --> CIRC1
-    ZK --> CIRC2
-    ZK --> CIRC3
-    
-    %% Security and monitoring
-    SEC -.->|Protects| COORD
-    MON -.->|Observes| COORD
-    LOG -.->|Audits| COORD
-    
-    %% Global model distribution
-    STORE -->|Updated Model| C1
-    STORE -->|Updated Model| C2
-    STORE -->|Updated Model| C3
-    STORE -->|Updated Model| CN
+graph TD
+    A[Federated Learning Clients] --> B[FEDzk Client]
+    B --> C[MPC Server]
+    B --> D[Coordinator]
+    C --> E[ZK Proof Generation]
+    D --> F[Secure Aggregation]
+    E --> G[SNARKjs Verification]
+    F --> H[Global Model Update]
+    G --> I[Proof Validation]
+    H --> J[Model Distribution]
+    I --> K[Security Compliance]
+    J --> A
 
-    %% Styling
-    classDef client fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef coordinator fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef zk fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef security fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    
-    class C1,C2,C3,CN client
-    class COORD,AGG,VAL,API,STORE coordinator
-    class ZK,CIRC1,CIRC2,CIRC3 zk
-    class SEC,MON,LOG security
+    style A fill:#e1f5fe
+    style C fill:#f3e5f5
+    style D fill:#e8f5e8
+    style E fill:#fff3e0
+    style G fill:#ffebee
+    style H fill:#f1f8e9
+    style I fill:#fce4ec
+    style J fill:#e8eaf6
+    style K fill:#fff8e1
 ```
 
 **🏗️ Architecture Components:**
