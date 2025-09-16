@@ -48,7 +48,7 @@
     ],
     "compilation_check": [
       {
-        "circuit": "secure",
+        "circuit": "model_update",
         "artifacts_found": [
           "zkey",
           "vkey"
@@ -65,15 +65,6 @@
         "complete": true
       },
       {
-        "circuit": "proving_key",
-        "artifacts_found": [
-          "zkey",
-          "vkey"
-        ],
-        "vkey_valid": true,
-        "complete": true
-      },
-      {
         "circuit": "model_update_secure",
         "artifacts_found": [
           "zkey",
@@ -83,7 +74,16 @@
         "complete": true
       },
       {
-        "circuit": "model_update",
+        "circuit": "proving_key",
+        "artifacts_found": [
+          "zkey",
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      },
+      {
+        "circuit": "secure",
         "artifacts_found": [
           "zkey",
           "vkey"
