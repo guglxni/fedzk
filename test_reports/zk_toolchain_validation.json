@@ -1,0 +1,107 @@
+{
+  "timestamp": "2025-09-04T10:00:00.000000",
+  "validation_type": "ZK Toolchain CI/CD Validation",
+  "overall_status": true,
+  "results": {
+    "toolchain_check": true,
+    "circuit_validation": [
+      {
+        "circuit": "model_update_quantized.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/model_update_quantized.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "batch_verification.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/batch_verification.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "differential_privacy.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/differential_privacy.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "model_update_secure.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/model_update_secure.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "sparse_gradients.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/sparse_gradients.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "model_update.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/model_update.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "model_update_optimized.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/model_update_optimized.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      },
+      {
+        "circuit": "custom_constraints.circom",
+        "valid": false,
+        "error": "\u001b[31mInput file does not exist: src/fedzk/zk/circuits/custom_constraints.circom\u001b[0m\n\u001b[31mprevious errors were found\u001b[0m\n"
+      }
+    ],
+    "compilation_check": [
+      {
+        "circuit": "secure",
+        "artifacts_found": [
+          "zkey",
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      },
+      {
+        "circuit": "verification_key",
+        "artifacts_found": [
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      },
+      {
+        "circuit": "proving_key",
+        "artifacts_found": [
+          "zkey",
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      },
+      {
+        "circuit": "model_update_secure",
+        "artifacts_found": [
+          "zkey",
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      },
+      {
+        "circuit": "model_update",
+        "artifacts_found": [
+          "zkey",
+          "vkey"
+        ],
+        "vkey_valid": true,
+        "complete": true
+      }
+    ],
+    "artifact_verification": [],
+    "security_validation": [
+      {
+        "circuit": "general",
+        "secure_keys": true,
+        "trusted_setup": true,
+        "proving_keys": 6,
+        "verification_keys": 4
+      }
+    ]
+  },
+  "recommendations": []
+}

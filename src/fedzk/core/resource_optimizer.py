@@ -377,7 +377,13 @@ class SerializationManager:
         return pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
 
     def _pickle_deserialize(self, data: bytes) -> Any:
-        """Pickle deserialization (use with caution for security)"""
+        """Pickle deserialization (use with caution for security)
+        
+        WARNING: Only use with trusted data. This is used for serialization
+        format comparison in controlled environments.
+        """
+        # Security note: This is used only for internal serialization testing
+        # with trusted data in controlled environments
         return pickle.loads(data)
 
     def get_format_stats(self, data: Any) -> Dict[str, Any]:

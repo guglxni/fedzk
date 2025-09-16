@@ -1,0 +1,793 @@
+{
+  "timestamp": "2025-09-04T10:00:00.000000",
+  "scan_type": "Basic Security Scan",
+  "total_findings": 97,
+  "severity_breakdown": {
+    "HIGH": 0,
+    "MEDIUM": 1,
+    "LOW": 96
+  },
+  "type_breakdown": {
+    "file_permissions": 96,
+    "unsafe_function": 1
+  },
+  "findings": [
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/test_zkgenerator_secure.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/zk_test.py",
+      "line": 0,
+      "description": "File has world-writable permissions (755)",
+      "code": "File permissions: 755"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/test_aggregator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/test_integration.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/test_zkgenerator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/tests/test_trainer.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/cli.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config_legacy.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/__main__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/visualization.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/benchmark_zk.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/cli.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/utils.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/benchmark/end_to_end.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/advanced_verification.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/input_normalization.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/proof_optimizer.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/coordinator/aggregator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/coordinator/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/coordinator/logic.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/coordinator/api.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/core/scalability_manager.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "unsafe_function",
+      "severity": "MEDIUM",
+      "file": "src/fedzk/core/resource_optimizer.py",
+      "line": 387,
+      "description": "Use of pickle.load/loads (potential code execution)",
+      "code": "return pickle.loads(data)"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/core/resource_optimizer.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config/validator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config/secrets_manager.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config/encryption.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config/environment.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/config/hot_reload.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/security/key_manager.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/security/transport_security.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/security/api_security.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/circuits/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/tests/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/utils/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/cli/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/mpc/server.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/mpc/client.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/mpc/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/.github/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/batch_zkgenerator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/zk_key_manager.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/advanced_proof_validator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/zkgenerator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/zk_validator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/prover/verifier.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/monitoring/metrics.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/monitoring/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/monitoring/metrics_server.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/client/remote.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/client/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/client/trainer.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/logging/log_aggregation.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/logging/security_compliance.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/logging/structured_logger.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/validation/gradient_validator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/validation/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/validation/proof_validator.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/.github/workflows/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/privacy/data_minimization.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/privacy/privacy_assessor.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/privacy/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/regulatory/privacy_compliance.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/regulatory/compliance_reporting.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/regulatory/regulatory_monitoring.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/regulatory/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/regulatory/industry_standards.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/code_review.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/security_auditor.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/cryptographic_review.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/checklists.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/compliance/audit/audit_preparation.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/artifacts/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/differential_privacy.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/model_update.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/sparse_gradients.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/batch_verification.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/model_update_quantized.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/model_update_secure.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/model_update_optimized.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/custom_constraints.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/temp_build/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/zk/circuits/vendor/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/proofs/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/tests/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/benchmarks/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/benchmarks/benchmark_results/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    },
+    {
+      "type": "file_permissions",
+      "severity": "LOW",
+      "file": "src/fedzk/artifacts/tests/test_results/__init__.py",
+      "line": 0,
+      "description": "File has world-writable permissions (644)",
+      "code": "File permissions: 644"
+    }
+  ],
+  "status": "PASS"
+}
