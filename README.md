@@ -2,7 +2,7 @@
   <img src="assets/images/fedzk_logo.png" alt="FEDzk Logo" width="400">
 </div>
 
-# 🔐 FEDZK: Enterprise-Grade Federated Learning with Zero-Knowledge Proofs
+# 🔐 FEDzk: Enterprise-Grade Federated Learning with Zero-Knowledge Proofs
 
 [![CI](https://github.com/guglxni/fedzk/workflows/CI/badge.svg)](https://github.com/guglxni/fedzk/actions)
 [![Release](https://img.shields.io/github/v/release/guglxni/fedzk?label=Latest&color=blue)](https://github.com/guglxni/fedzk/releases)
@@ -14,7 +14,7 @@
 [![Code Quality](https://img.shields.io/badge/code%20quality-A%2B-brightgreen.svg)](https://github.com/guglxni/fedzk)
 [![Security Audit](https://img.shields.io/badge/security-audited-green.svg)](https://github.com/guglxni/fedzk/security)
 
-**FEDZK** is a production-ready Python framework for building privacy-preserving federated learning systems using **real zero-knowledge proofs (ZKPs)**. It provides a complete end-to-end workflow for training, proving, and verifying model updates in a distributed environment with **cryptographic guarantees**.
+**FEDzk** is a production-ready Python framework for building privacy-preserving federated learning systems using **real zero-knowledge proofs (ZKPs)**. It provides a complete end-to-end workflow for training, proving, and verifying model updates in a distributed environment with **cryptographic guarantees**.
 
 <div align="center">
 
