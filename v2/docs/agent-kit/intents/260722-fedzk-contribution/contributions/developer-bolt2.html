@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><title>Contribution developer Bolt2</title>
+<link rel="stylesheet" href="../../../styles.css"/></head>
+<body data-kit="fedzk-html-first">
+<main style="max-width:900px;margin:2rem auto;padding:1rem">
+<h1>Contribution: aidlc-developer-agent</h1>
+<p data-stage="construction">Tree <code>v2/</code> — Bolt 2 Phase0 closeout + Phase1 scaffolding.</p>
+<h2>Produces</h2>
+<ul>
+<li><code>artifacts/artifact-manifest.json</code> + doctor pin checks</li>
+<li><code>zk/circuit_config.py</code>, <code>zk/chunk_protocol.py</code>, <code>model_update_gradients.circom</code></li>
+<li>Goldens <code>tests/goldens/model_update_n4/</code></li>
+<li>Real API tests; <code>ZKGenerator</code> import fixed to <code>ZKProver</code></li>
+<li><code>ARTIFACTS.html</code></li>
+</ul>
+<h2>Diary</h2>
+<ul>
+<li><strong>Interpretations:</strong> Shipped wasm ≠ historical model_update.circom I/O — freeze artifacts, regenerate from gradients template.</li>
+<li><strong>Deviations:</strong> Did not run full Powers-of-Tau for N=64 (halt-and-ask / ceremony).</li>
+<li><strong>Tradeoffs:</strong> Chunk protocol library-only until coordinator wires bundles.</li>
+<li><strong>Open questions:</strong> Who runs trusted setup for N=64/256?</li>
+</ul>
+</main></body></html>

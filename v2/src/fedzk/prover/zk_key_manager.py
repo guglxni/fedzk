@@ -16,7 +16,7 @@ import json
 
 from fedzk.security.key_manager import KeyManager, KeyType, KeyStorageType
 from fedzk.prover.verifier import ZKVerifier
-from fedzk.prover.zkgenerator import ZKGenerator
+from fedzk.prover.zkgenerator import ZKProver
 
 logger = logging.getLogger(__name__)
 

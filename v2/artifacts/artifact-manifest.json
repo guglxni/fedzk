@@ -1,0 +1,21 @@
+{
+  "schema": "fedzk.artifacts.v1",
+  "policy": "freeze",
+  "note": "Runtime prove/verify uses these files under src/fedzk/zk/. Circom sources under zk/circuits/ may drift — do not trust .circom until a regenerate job rewrites this manifest.",
+  "n_dev": 4,
+  "wire": "fedzk.proof.v1",
+  "frozen_at": "2026-07-22",
+  "branch_tree": "v2/",
+  "artifacts": {
+    "model_update.wasm": "4af21965ffa4c1c77ccb65ccd82a31b4cfe06548c8627560049ed7784434f0f5",
+    "proving_key.zkey": "df80aa50c61adeb2da42c11948796dd0eb8a7c03970fd21a4ec313f1a5ac9b6c",
+    "verification_key.json": "8c1f83bf9659e12d17c63749f29cf08601563c171609fec746f46b3aa30bbbc5",
+    "model_update_secure.wasm": "fe72596509db13091407c4991199708c940a5cad43d875e8509b2692f8ab0e20",
+    "proving_key_secure.zkey": "47982e29a60666057ebbe98b26d2f47842d15915a184b69455fcff6b2e240ef2",
+    "verification_key_secure.json": "04a760ca27490073a096137bcf7f07dd9e4d7b686f0399032a7ca222f4e08f10"
+  },
+  "circom_source_status": {
+    "model_update.circom": "DRIFT — source instantiates ModelUpdate(4) with weights+learningRate; shipped wasm accepts gradients[] only (prove path).",
+    "action": "Phase 1 regenerate from parameterized circuits; until then artifacts are authoritative."
+  }
+}

@@ -15,7 +15,8 @@ import importlib
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 
 ASSET_DIR = Path(__file__).resolve().parent / "zk"
 
@@ -28,6 +29,19 @@ CORE_ARTIFACTS = (
     "proving_key_secure.zkey",
     "verification_key_secure.json",
 )
+
+
+def _find_artifact_manifest() -> Optional[Path]:
+    """Locate freeze pin: v2/artifacts/artifact-manifest.json (preferred) or beside package."""
+    candidates = [
+        Path(__file__).resolve().parents[2] / "artifacts" / "artifact-manifest.json",  # v2/artifacts
+        Path(__file__).resolve().parents[3] / "artifacts" / "artifact-manifest.json",
+        ASSET_DIR / "artifact-manifest.json",
+    ]
+    for c in candidates:
+        if c.is_file():
+            return c
+    return None
 
 
 def _sha256_file(path: Path) -> str:
@@ -129,6 +143,52 @@ def run_doctor() -> Dict[str, Any]:
                     "detail": f"{path} sha256={digest[:16]}…",
                 }
             )
+
+    # 4b) Freeze pin vs artifacts/artifact-manifest.json
+    manifest_path = _find_artifact_manifest()
+    if manifest_path is None:
+        checks.append(
+            {
+                "id": "artifact_manifest",
+                "ok": False,
+                "detail": "artifact-manifest.json not found (expected v2/artifacts/)",
+            }
+        )
+        errors.append("Missing artifacts/artifact-manifest.json freeze pin")
+    else:
+        try:
+            import json
+
+            manifest = json.loads(manifest_path.read_text())
+            pinned = manifest.get("artifacts") or {}
+            mismatches = []
+            for name, expected in pinned.items():
+                actual = artifact_hashes.get(name)
+                if actual is None:
+                    mismatches.append(f"{name}: missing on disk")
+                elif actual != expected:
+                    mismatches.append(f"{name}: pin drift")
+            ok = len(mismatches) == 0
+            checks.append(
+                {
+                    "id": "artifact_manifest",
+                    "ok": ok,
+                    "detail": str(manifest_path) if ok else "; ".join(mismatches),
+                }
+            )
+            if not ok:
+                errors.extend(mismatches)
+            if manifest.get("policy") == "freeze":
+                checks.append(
+                    {
+                        "id": "artifact_policy",
+                        "ok": True,
+                        "detail": f"policy=freeze n_dev={manifest.get('n_dev')} frozen_at={manifest.get('frozen_at')}",
+                    }
+                )
+        except Exception as exc:  # noqa: BLE001
+            checks.append({"id": "artifact_manifest", "ok": False, "detail": str(exc)})
+            errors.append(f"Failed reading artifact manifest: {exc}")
 
     # 5) ZKValidator (if available)
     try:

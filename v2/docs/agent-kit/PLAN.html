@@ -17,10 +17,10 @@
       <a href="scratchpad.html">scratchpad.html</a> (branch <code>v2</code>).</p>
 
     <div class="callout ok" id="v2-status">
-      <strong>v2 / Bolt 1 (2026-07-22): GREEN.</strong>
-      CLI unshadowed · <code>fedzk doctor</code> · GradientQuantizer on prove path · MPC paths fixed ·
-      secrets untracked · torch core · prove/verify smoke OK · classifier Alpha.
-      Remaining Phase 0: fictional API cleanup, circom freeze note, full e2e rewrite.
+      <strong>v2 / Bolt 1+2 (2026-07-22): GREEN.</strong>
+      Freeze pin · real API tests · chunk protocol stub · N=4 goldens ·
+      <code>model_update_gradients.circom</code> compile smoke. See <a href="ARTIFACTS.html">ARTIFACTS.html</a>.
+      Next: N=64 ceremony + coordinator chunk verify.
     </div>
 
     <div class="callout" id="concepts-primer">
@@ -40,19 +40,19 @@
       <li>✅ Fix CLI shadowing; unify version (<code>__version__=1.2.0</code>).</li>
       <li>✅ Wire GradientQuantizer into ZKProver (CLI/MPC inherit).</li>
       <li>✅ Fix MPC artifact defaults; add <code>fedzk doctor</code> hash checks.</li>
-      <li>◐ Collapse dual coordinators (aggregator → api shim); rewrite e2e to real APIs (remaining).</li>
-      <li>✅ Untrack secrets/; gitignore (key rotation = halt-and-ask).</li>
-      <li>☐ Regenerate or freeze circom↔artifact sync; document which.</li>
-      <li>✅ Strip false “production-ready” claims in README (rewritten honest Alpha README on v2).</li>
+      <li>✅ Collapse dual coordinators (aggregator → api shim); real API tests (no fictional symbols).</li>
+      <li>✅ Untrack secrets in v2 tree; gitignore.</li>
+      <li>✅ Freeze circom↔artifact pin (<a href="ARTIFACTS.html">ARTIFACTS</a> + doctor).</li>
+      <li>✅ Strip false production claims in <code>v2/README.md</code>.</li>
     </ul>
 
     <h2>Phase 1 — Real circuits &amp; protocol (3–6 weeks)</h2>
     <ul class="checklist">
-      <li>Parameterize N (64/256); secure + quantized circuits.</li>
-      <li>Chunk Protocol v1 + commitment binding.</li>
-      <li>Golden vectors CI for each circuit_id.</li>
-      <li>Coordinator verify-before-FedAvg with transcript events.</li>
-      <li>Adult LR smoke E2E (few rounds) green.</li>
+      <li>◐ Parameterize N — config + <code>model_update_gradients.circom</code>; N=64/256 artifacts pending ceremony.</li>
+      <li>◐ Chunk Protocol v1 module landed; coordinator binding pending.</li>
+      <li>◐ Golden vectors — N=4 recorded under <code>tests/goldens/model_update_n4/</code>.</li>
+      <li>☐ Coordinator verify-before-FedAvg with transcript events + chunk bundles.</li>
+      <li>☐ Adult LR smoke E2E (few rounds) green.</li>
     </ul>
 
     <h2>Phase 2 — Framework API &amp; packaging (2–4 weeks)</h2>

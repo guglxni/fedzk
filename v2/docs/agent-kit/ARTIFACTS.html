@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>ARTIFACTS — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+    <h1>ARTIFACTS.html — Freeze pin (Phase 0 closeout)</h1>
+    <p class="lead">
+      Authoritative runtime artifacts live under <code>v2/src/fedzk/zk/</code>.
+      Pins recorded in <code>v2/artifacts/artifact-manifest.json</code>. Policy: <strong>freeze</strong>
+      until a regenerate ceremony updates the manifest.
+    </p>
+    <div class="meta">
+      <span class="pill ok">policy: freeze</span>
+      <span class="pill">N_dev: 4</span>
+      <span class="pill warn">circom sources may drift</span>
+    </div>
+
+    <div class="callout bad">
+      <strong>Drift note:</strong> <code>model_update.circom</code> (weights + learningRate) does <em>not</em>
+      match the shipped wasm witness shape (<code>gradients[n]</code> only).
+      Regenerate target: <code>zk/circuits/model_update_gradients.circom</code> (compiles clean for N=4).
+      Do not swap wasm without updating the manifest + goldens.
+    </div>
+
+    <h2>Pinned sha256 (2026-07-22)</h2>
+    <table>
+      <tr><th>File</th><th>sha256</th></tr>
+      <tr><td>model_update.wasm</td><td><code>4af21965ffa4c1c7…4434f0f5</code></td></tr>
+      <tr><td>proving_key.zkey</td><td><code>df80aa50c61adeb2…a5ac9b6c</code></td></tr>
+      <tr><td>verification_key.json</td><td><code>8c1f83bf9659e12d…a30bbbc5</code></td></tr>
+      <tr><td>model_update_secure.wasm</td><td><code>fe72596509db1309…f8ab0e20</code></td></tr>
+      <tr><td>proving_key_secure.zkey</td><td><code>47982e29a6066605…2e240ef2</code></td></tr>
+      <tr><td>verification_key_secure.json</td><td><code>04a760ca27490073…f4e08f10</code></td></tr>
+    </table>
+    <p>Full digests: <code>v2/artifacts/artifact-manifest.json</code>. Enforced by <code>fedzk doctor</code> (<code>artifact_manifest</code> check).</p>
+
+    <h2>Goldens</h2>
+    <ul>
+      <li><code>v2/tests/goldens/model_update_n4/proof.json</code> — quantized input [0.001,-0.002,0.003,0.0]</li>
+      <li>Verify: <code>fedzk verify -i tests/goldens/model_update_n4/proof.json</code></li>
+    </ul>
+
+    <h2>Phase 1 next</h2>
+    <ol>
+      <li>Compile <code>ModelUpdateGradients(64)</code> / <code>(256)</code> + Powers of Tau + zkey.</li>
+      <li>Update manifest + PROFILE_N* + goldens.</li>
+      <li>Wire chunk protocol into coordinator verify-before-FedAvg.</li>
+    </ol>
+
+    <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="scratchpad.html">scratchpad</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

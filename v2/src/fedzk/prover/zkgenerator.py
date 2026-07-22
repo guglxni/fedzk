@@ -28,6 +28,7 @@ import numpy as np
 
 from .zk_validator import ZKValidator
 from fedzk.zk.input_normalization import GradientQuantizer
+from fedzk.zk.circuit_config import N_DEV, DEFAULT_SCALE_FACTOR
 
 # Define base directory for ZK assets relative to this file
 # Assumes zk assets are in src/fedzk/zk/
@@ -35,8 +36,8 @@ ASSET_DIR = pathlib.Path(__file__).resolve().parent.parent / "zk"
 
 # Fixed circuit capacity for shipped model_update*.wasm (Phase 0 / N_dev).
 # Phase 1 will parameterize N; until then truncate/pad must be explicit + logged.
-N_DEV = 4
-DEFAULT_QUANT_SCALE = 1000
+# Re-export for callers that imported N_DEV from this module previously.
+DEFAULT_QUANT_SCALE = DEFAULT_SCALE_FACTOR
 
 
 def _flatten_pad_or_truncate(values: List[int], max_inputs: int, context: str) -> List[int]:

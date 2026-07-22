@@ -13,84 +13,55 @@
   <main>
     <h1>scratchpad.html — Conductor working memory</h1>
     <p class="lead">
-      Live diary for branch <code>v2</code>. Updated every move.
-      Boot: <a href="MANIFEST.html">MANIFEST</a> · Plan: <a href="PLAN.html">PLAN</a> · Loops: <a href="LOOPS.html">LOOPS</a>.
+      Live diary for tree <code>v2/</code> on branch <code>v2</code>. Boot:
+      <a href="MANIFEST.html">MANIFEST</a> · <a href="PLAN.html">PLAN</a> · <a href="LOOPS.html">LOOPS</a>.
     </p>
     <div class="meta">
-      <span class="pill ok">branch: v2</span>
-      <span class="pill ok">Bolt1 sensors: GREEN</span>
-      <span class="pill info">prove/verify smoke: OK</span>
+      <span class="pill ok">branch: v2 · tree: v2/</span>
+      <span class="pill ok">Bolt1+Bolt2 sensors: GREEN</span>
+      <span class="pill info">15 unit tests pass</span>
     </div>
 
     <div class="callout bad" id="isolation">
-      <strong>Isolation:</strong> All v2 work lives under repo <code>v2/</code>.
-      Root tree must stay identical to <code>origin/main</code> / GitHub. Never edit root <code>src/</code>, root README, or root pyproject for v2 features.
+      <strong>Isolation:</strong> Edit only <code>v2/</code>. Root must stay = <code>origin/main</code>.
     </div>
+
     <section id="now">
       <h2>Now</h2>
-      <p><strong>Bolt 1 is green under tree <code>v2/</code> on git branch <code>v2</code>.</strong>
-      Root tree reset to <code>origin/main</code> (unchanged GitHub). All further work stays inside <code>v2/</code>.</p>
+      <p><strong>Bolt 2 complete.</strong> Artifact freeze enforced by doctor; real-API tests;
+      Chunk Protocol v1 + <code>circuit_config</code>; regenerate-target circom compiles;
+      N=4 golden recorded. Next: Phase 1 zkey ceremony for N=64 (halt-and-ask if ceremony keys).</p>
     </section>
 
     <section id="done">
-      <h2>Completed this session (Bolt1 + Phase0 parallel)</h2>
+      <h2>Completed</h2>
       <table>
         <tr><th>Unit</th><th>Change</th><th>Sensor</th></tr>
-        <tr><td>U00</td><td>Deleted empty <code>src/fedzk/cli/</code>; <code>fedzk.cli:app</code> → <code>cli.py</code></td><td><code>fedzk --help</code></td></tr>
-        <tr><td>U01</td><td><code>fedzk doctor</code> + <code>src/fedzk/doctor.py</code></td><td>doctor overall OK</td></tr>
-        <tr><td>U02</td><td><code>GradientQuantizer</code> in <code>ZKProver._prepare_input_*</code>; warn on pad/truncate</td><td>unit + prove smoke</td></tr>
-        <tr><td>U03</td><td>Prove/verify N_dev=4 quantized vector</td><td>✅ verify succeeded</td></tr>
-        <tr><td>U10</td><td>MPC + env defaults → <code>src/fedzk/zk/</code>; batch vkey name fixed</td><td>doctor artifacts</td></tr>
-        <tr><td>U11</td><td><code>aggregator.py</code> → deprecated shim to <code>api:app</code></td><td>import</td></tr>
-        <tr><td>U13</td><td><code>secrets/</code> gitignored + untracked (223 files)</td><td><code>git ls-files secrets</code> = 0</td></tr>
-        <tr><td>U14</td><td><code>torch</code> core dep; classifier Alpha (not Production/Stable)</td><td>pyproject</td></tr>
+        <tr><td>Bolt1</td><td>CLI · doctor · quantize · MPC paths · aggregator shim</td><td>green</td></tr>
+        <tr><td>U15</td><td><code>artifacts/artifact-manifest.json</code> + doctor pin</td><td>artifact_manifest OK</td></tr>
+        <tr><td>U16</td><td>Real API tests; fix <code>ZKGenerator</code>→<code>ZKProver</code> import</td><td>8 new tests</td></tr>
+        <tr><td>U17</td><td><code>circuit_config</code> · <code>chunk_protocol</code> · <code>model_update_gradients.circom</code> · goldens</td><td>circom compile + verify</td></tr>
       </table>
     </section>
 
-    <section id="decisions">
-      <h2>Decisions</h2>
-      <ul>
-        <li>D1 Delete package shadow (keep cli.py).</li>
-        <li>D2 Quantize at ZKProver choke point.</li>
-        <li>D3 Float max_norm → × scale² for secure circuit.</li>
-        <li>D4 Log truncate/pad (P4).</li>
-        <li>D5 torch in core deps.</li>
-        <li>D6 Untrack secrets.</li>
-      </ul>
+    <section id="next">
+      <h2>Next moves</h2>
+      <ol>
+        <li>Trusted setup for <code>ModelUpdateGradients(64)</code> → update manifest + PROFILE.</li>
+        <li>Wire chunk bundle verify into <code>coordinator.logic.submit_update</code>.</li>
+        <li>Adult LR smoke via <code>LocalTrainer</code> + prove path (few rounds).</li>
+      </ol>
     </section>
 
     <section id="log">
       <h2>Move log</h2>
       <ol>
-        <li>Create branch <code>v2</code>; open scratchpad; load PLAN Phase0.</li>
-        <li>Audit → implement U00–U14 code paths.</li>
-      <li>Sensors: 7/7 unit tests; doctor OK; generate+verify smoke OK.</li>
-      <li>Refresh HTML kit status; rewrite README to honest Alpha (strip production theater).</li>
-    </ol>
-    </section>
-
-    <section id="next">
-      <h2>Next moves (ordered)</h2>
-      <ol>
-        <li>Rewrite failing e2e tests to real symbols.</li>
-        <li>Document circom↔wasm freeze hashes from doctor output.</li>
-        <li>Phase 1: parameterize N (64/256) + golden CI.</li>
+        <li>Bolt1 on v2/ isolated from root; pushed origin/v2.</li>
+        <li>Bolt2: freeze pin, APIs, chunk protocol, gradients circom, goldens, ARTIFACTS.html.</li>
       </ol>
     </section>
 
-    <section id="sensors">
-      <h2>Sensors (Bolt1 exit) — all checked</h2>
-      <ol class="checklist">
-        <li>✅ <code>from fedzk.cli import app</code></li>
-        <li>✅ <code>fedzk --help</code> / <code>fedzk doctor</code></li>
-        <li>✅ Prove path emits integer witness gradients</li>
-        <li>✅ MPC defaults under <code>src/fedzk/zk/</code></li>
-        <li>✅ <code>secrets/</code> not tracked</li>
-        <li>✅ <code>fedzk generate</code> + <code>fedzk verify</code> smoke</li>
-      </ol>
-    </section>
-
-    <footer class="doc-foot">Conductor scratchpad · branch v2 · <a href="index.html">Hub</a></footer>
+    <footer class="doc-foot">Conductor scratchpad · <a href="ARTIFACTS.html">ARTIFACTS</a> · <a href="index.html">Hub</a></footer>
   </main>
 </div>
 <script src="nav.js" defer></script>

@@ -35,6 +35,7 @@
     ]},
     { g: "Build", items: [
       ["PLAN.html", "PLAN"],
+      ["ARTIFACTS.html", "ARTIFACTS (freeze)"],
       ["REPOS.html", "REPOS + gh"],
       ["INTEGRATION.html", "INTEGRATION"],
       ["scratchpad.html", "scratchpad (live)"],

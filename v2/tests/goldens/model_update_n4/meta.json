@@ -1,0 +1,15 @@
+{
+  "circuit_id": "model_update",
+  "n": 4,
+  "scale_factor": 1000,
+  "input": {
+    "w": [
+      0.001,
+      -0.002,
+      0.003,
+      0.0
+    ]
+  },
+  "wire": "fedzk.proof.v1",
+  "proof_sha256": "cf325380a7de3d6867fe04364914be7b9063bb6b3f920d9598095050f0c67ea4"
+}
