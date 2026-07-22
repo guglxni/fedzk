@@ -39,6 +39,46 @@ def test_prove_n256_single():
     assert ok is True
 
 
+def test_prove_n64_rust_cross_verify():
+    """snarkjs prove → arkworks fedzk-zk verify (N=64 DEV ceremony)."""
+    import json
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    bin_path = root / "rust" / "target" / "debug" / "fedzk-zk"
+    if not bin_path.is_file():
+        import pytest
+
+        pytest.skip("fedzk-zk not built")
+
+    g = {"w": torch.randn(64) * 0.001}
+    out = prove_update(g, n=64)
+    assert out["mode"] == "single"
+    vkey = ZK_ASSET / PROFILE_N64.vkey_name
+    with tempfile.TemporaryDirectory() as td:
+        tdp = Path(td)
+        (tdp / "proof.json").write_text(json.dumps(out["proof"]))
+        (tdp / "public.json").write_text(json.dumps(out["public_inputs"]))
+        proc = subprocess.run(
+            [
+                str(bin_path),
+                "verify",
+                "--vkey",
+                str(vkey),
+                "--proof",
+                str(tdp / "proof.json"),
+                "--public",
+                str(tdp / "public.json"),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    assert proc.returncode == 0, proc.stderr
+
+
 def test_prove_chunked_n4():
     # 10 values → 3 chunks of n=4
     g = {"w": torch.arange(10, dtype=torch.float32) * 0.001}

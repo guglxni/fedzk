@@ -1,14 +1,19 @@
-//! fedzk-zk — Phase 3 verify-first sidecar.
-//!
-//! Wire format: `fedzk.proof.v1` (snarkjs-shaped Groth16 JSON on BN254).
-//! Cryptographic verify uses arkworks `ark-groth16` against snarkjs vkeys.
+//! fedzk-zk — Phase 3 verify-first sidecar (+ optional Axum HTTP).
 
 mod snarkjs_ark;
 
 use anyhow::{bail, Context, Result};
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
 use clap::{Parser, Subcommand};
-use serde_json::Value;
+use serde::Deserialize;
+use serde_json::{json, Value};
 use std::fs;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -32,6 +37,18 @@ enum Commands {
         #[arg(long)]
         public: PathBuf,
     },
+    /// HTTP sidecar: GET /healthz, POST /verify
+    Serve {
+        #[arg(long, default_value = "127.0.0.1:8787")]
+        bind: String,
+    },
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyBody {
+    vkey: Value,
+    proof: Value,
+    public: Value,
 }
 
 fn main() -> ExitCode {
@@ -50,7 +67,7 @@ fn run() -> Result<ExitCode> {
         Commands::Health => {
             println!(
                 "{}",
-                serde_json::json!({
+                json!({
                     "ok": true,
                     "service": "fedzk-zk",
                     "phase": "arkworks_verify",
@@ -87,5 +104,50 @@ fn run() -> Result<ExitCode> {
                 Ok(ExitCode::from(2))
             }
         }
+        Commands::Serve { bind } => {
+            let rt = tokio::runtime::Runtime::new()?;
+            rt.block_on(serve(bind))?;
+            Ok(ExitCode::SUCCESS)
+        }
+    }
+}
+
+async fn serve(bind: String) -> Result<()> {
+    let app = Router::new()
+        .route("/healthz", get(healthz))
+        .route("/verify", post(verify_http));
+    let addr: SocketAddr = bind.parse().context("parse bind addr")?;
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    eprintln!("fedzk-zk listening on http://{addr}");
+    axum::serve(listener, app).await?;
+    Ok(())
+}
+
+async fn healthz() -> impl IntoResponse {
+    Json(json!({
+        "ok": true,
+        "service": "fedzk-zk",
+        "wire": "fedzk.proof.v1",
+        "verify": "ark_groth16",
+    }))
+}
+
+async fn verify_http(Json(body): Json<VerifyBody>) -> impl IntoResponse {
+    if !body.public.is_array() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"ok": false, "error": "public must be array"})),
+        );
+    }
+    match snarkjs_ark::verify_snarkjs(&body.vkey, &body.proof, &body.public) {
+        Ok(true) => (StatusCode::OK, Json(json!({"ok": true, "engine": "arkworks"}))),
+        Ok(false) => (
+            StatusCode::UNPROCESSABLE_ENTITY,
+            Json(json!({"ok": false, "error": "invalid_proof"})),
+        ),
+        Err(e) => (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"ok": false, "error": format!("{e:#}")})),
+        ),
     }
 }
