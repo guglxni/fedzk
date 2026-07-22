@@ -118,6 +118,44 @@ def _stat(xs: list[float]) -> dict:
     }
 
 
+def run_baseline(cfg: dict) -> dict:
+    """Same train loop without prove/verify/submit — wall-time baseline arm."""
+    clients = int(cfg["federated"]["clients"])
+    rounds = int(cfg["federated"]["rounds"])
+    n_samples = int(cfg["data"]["n_samples"])
+    n_features = int(cfg["data"]["n_features"])
+    lr = float(cfg["model"]["learning_rate"])
+    epochs = int(cfg["model"]["epochs_per_round"])
+    train_ms: list[float] = []
+    losses: list[float] = []
+    for r in range(rounds):
+        for c in range(clients):
+            X, y = _make_data(n_samples, n_features, seed=r * 100 + c)
+            trainer = LocalTrainer(
+                model_type="linear", learning_rate=lr, device="cpu", hidden_size=4
+            )
+            trainer.input_size = n_features
+            trainer.model = trainer.create_model(n_features, num_classes=2).to(
+                trainer.device
+            )
+            trainer.optimizer = trainer.create_optimizer(trainer.model)
+            trainer.criterion = torch.nn.CrossEntropyLoss()
+            trainer.dataloader = torch.utils.data.DataLoader(
+                torch.utils.data.TensorDataset(X, y), batch_size=16, shuffle=True
+            )
+            t0 = time.perf_counter()
+            metrics = trainer.train(epochs=epochs)
+            train_ms.append((time.perf_counter() - t0) * 1000.0)
+            losses.append(float(metrics.get("loss", 0.0) or 0.0))
+    return {
+        "arm": "baseline_no_zk",
+        "metrics": {
+            "train": _stat(train_ms),
+            "train_loss_mean": statistics.fmean(losses) if losses else None,
+        },
+    }
+
+
 def run_measure() -> dict:
     cfg = _load_cfg()
     clients = int(cfg["federated"]["clients"])
@@ -127,6 +165,8 @@ def run_measure() -> dict:
     n_features = int(cfg["data"]["n_features"])
     lr = float(cfg["model"]["learning_rate"])
     epochs = int(cfg["model"]["epochs_per_round"])
+
+    baseline = run_baseline(cfg)
 
     _reset()
     http = TestClient(app)
@@ -206,6 +246,7 @@ def run_measure() -> dict:
         "experiment": "adult-lr-measure",
         "n_circuit": n_circuit,
         "ceremony": profile.ceremony,
+        "baseline": baseline,
         "rounds": round_rows,
         "metrics": {
             "prove": _stat(prove_ms),
@@ -217,7 +258,16 @@ def run_measure() -> dict:
     dest = ROOT / "artifacts" / "transcripts" / "adult-lr-measure.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(out, indent=2))
-    print(json.dumps({"wrote": str(dest), "metrics": out["metrics"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "wrote": str(dest),
+                "baseline": baseline["metrics"],
+                "fedzk": out["metrics"],
+            },
+            indent=2,
+        )
+    )
     return out
 
 

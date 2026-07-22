@@ -1,0 +1,34 @@
+# CIFAR-10 batch FEDzk — Phase 4 experiment stub (v2 tree only)
+# Full CNN measurement deferred until chunked N=256 path is paper-ready.
+
+experiment:
+  id: cifar10-cnn-batch
+  paper_table: T2-cifar-overhead
+  mode: fedzk
+  status: stub
+
+data:
+  source: cifar10
+  note: Not downloaded in CI; synthetic tensor substitute until Phase4 data bolt.
+
+model:
+  type: cnn_small
+  num_classes: 10
+
+federated:
+  clients: 3
+  rounds: 1
+  aggregation: fedavg
+
+zk:
+  n_circuit: 256
+  wire: fedzk.proof.v1
+  ceremony: dev_unsafe
+  prove_path: chunk_bundle
+
+outputs:
+  transcript: artifacts/transcripts/cifar10-batch-stub.json
+
+runner:
+  command: "# deferred — use adult_lr_measure.py pattern"
+  cwd: v2

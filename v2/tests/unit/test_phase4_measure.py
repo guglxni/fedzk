@@ -18,5 +18,6 @@ def test_adult_lr_measure_transcript_shape():
     assert data["n_circuit"] in (4, 64, 256)
     assert "prove" in data["metrics"]
     assert data["metrics"]["prove"].get("n", 0) >= 1
+    assert data.get("baseline", {}).get("arm") == "baseline_no_zk"
     assert data["rounds"]
     assert all(c["http"] == 200 for r in data["rounds"] for c in r["clients"])
