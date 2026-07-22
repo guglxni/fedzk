@@ -30,3 +30,10 @@ Train loss (FEDzk arm mean): `0.7172777454058329`
 
 ---
 Regenerate: `python scripts/adult_lr_measure.py && python scripts/attack_rejection_suite.py && python scripts/render_paper_metrics.py`
+
+## Adult LR — verify backend matrix (submit path)
+
+| Backend | prove p50 | rust_verify p50 | submit p50 |
+| --- | ---: | ---: | ---: |
+| snarkjs | 257.6 | 68.0 | 239.1 |
+| rust | 252.9 | 67.7 | 128.0 |

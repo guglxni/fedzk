@@ -34,6 +34,33 @@ fedzk verify -i /tmp/proof.json
 pytest tests/unit/test_phase0_bolt1.py -q
 ```
 
+## Verify backend
+
+```bash
+# default: snarkjs subprocess
+fedzk doctor
+
+# arkworks verify via fedzk-zk (build first)
+(cd rust && cargo build -p fedzk-zk)
+export FEDZK_ZK_BACKEND=rust   # or auto|snarkjs
+# optional: export FEDZK_ZK_BIN=/path/to/fedzk-zk
+fedzk doctor                   # checks zk_backend health when rust
+fedzk verify -i /tmp/proof.json
+```
+
+See [`docs/PROVE_PATH.md`](docs/PROVE_PATH.md). Prove remains snarkjs until U41.
+
+## Sensors / paper scripts
+
+```bash
+./scripts/ci_local.sh
+python scripts/adult_lr_measure.py
+python scripts/adult_lr_backend_matrix.py   # snarkjs vs rust submit matrix
+python scripts/attack_rejection_suite.py
+python scripts/e5_backend_ablation.py
+python scripts/render_paper_metrics.py
+```
+
 ## What v2 fixes (Bolt 1)
 
 - CLI package shadow removed (`cli.py` is the module)

@@ -1,0 +1,72 @@
+{
+  "wire": "fedzk.proof.v1",
+  "experiment": "adult-lr-backend-matrix",
+  "rows": [
+    {
+      "backend": "snarkjs",
+      "zk_backend": "snarkjs",
+      "metrics": {
+        "prove": {
+          "n": 3,
+          "mean_ms": 257.57419466875336,
+          "p50_ms": 257.60854200052563,
+          "max_ms": 263.3739169978071
+        },
+        "rust_verify": {
+          "n": 3,
+          "mean_ms": 69.920611330114,
+          "p50_ms": 68.04499999270774,
+          "max_ms": 74.06204199651256
+        },
+        "submit": {
+          "n": 3,
+          "mean_ms": 237.31904166925233,
+          "p50_ms": 239.1207500040764,
+          "max_ms": 240.4649160016561
+        },
+        "train_loss_mean": 0.7045798848072687
+      },
+      "baseline_train": {
+        "n": 3,
+        "mean_ms": 11.765541334170848,
+        "p50_ms": 1.3760000001639128,
+        "max_ms": 32.88666601292789
+      },
+      "n_circuit": 64,
+      "ceremony": "dev_unsafe"
+    },
+    {
+      "backend": "rust",
+      "zk_backend": "rust",
+      "metrics": {
+        "prove": {
+          "n": 3,
+          "mean_ms": 252.37966699448103,
+          "p50_ms": 252.94587499229237,
+          "max_ms": 253.46458399144467
+        },
+        "rust_verify": {
+          "n": 3,
+          "mean_ms": 67.80477766975916,
+          "p50_ms": 67.7118750027148,
+          "max_ms": 68.19045799784362
+        },
+        "submit": {
+          "n": 3,
+          "mean_ms": 128.8689446664648,
+          "p50_ms": 128.04395900457166,
+          "max_ms": 131.0922910051886
+        },
+        "train_loss_mean": 0.6650486389795939
+      },
+      "baseline_train": {
+        "n": 3,
+        "mean_ms": 1.3717223337152973,
+        "p50_ms": 1.1795419995905831,
+        "max_ms": 1.7646670021349564
+      },
+      "n_circuit": 64,
+      "ceremony": "dev_unsafe"
+    }
+  ]
+}
