@@ -129,8 +129,9 @@ class LocalTrainer:
             self._init_legacy(model_or_model_type, dataloader_or_learning_rate, 
                             learning_rate, optimizer_type, secure, device, **model_kwargs)
         else:
-            # New API: LocalTrainer(model_type="linear", ...)
-            model_type = model_or_model_type or "linear"
+            # New API: LocalTrainer("linear", ...) or LocalTrainer(model_type="linear", ...)
+            kw_model_type = model_kwargs.pop("model_type", None)
+            model_type = model_or_model_type or kw_model_type or "linear"
             if dataloader_or_learning_rate is not None and isinstance(dataloader_or_learning_rate, (int, float)):
                 learning_rate = dataloader_or_learning_rate
             self._init_new(model_type, learning_rate, optimizer_type, secure, device, **model_kwargs)

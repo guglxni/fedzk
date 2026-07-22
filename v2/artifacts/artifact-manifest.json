@@ -1,7 +1,7 @@
 {
   "schema": "fedzk.artifacts.v1",
   "policy": "freeze",
-  "note": "Runtime prove/verify uses these files under src/fedzk/zk/. Circom sources under zk/circuits/ may drift — do not trust .circom until a regenerate job rewrites this manifest.",
+  "note": "N=4 artifacts: freeze (legacy wasm). N=64 model_update_gradients_n64: DEV ceremony (unsafe for production) \u2014 regenerate with real Powers of Tau before release.",
   "n_dev": 4,
   "wire": "fedzk.proof.v1",
   "frozen_at": "2026-07-22",
@@ -12,10 +12,24 @@
     "verification_key.json": "8c1f83bf9659e12d17c63749f29cf08601563c171609fec746f46b3aa30bbbc5",
     "model_update_secure.wasm": "fe72596509db13091407c4991199708c940a5cad43d875e8509b2692f8ab0e20",
     "proving_key_secure.zkey": "47982e29a60666057ebbe98b26d2f47842d15915a184b69455fcff6b2e240ef2",
-    "verification_key_secure.json": "04a760ca27490073a096137bcf7f07dd9e4d7b686f0399032a7ca222f4e08f10"
+    "verification_key_secure.json": "04a760ca27490073a096137bcf7f07dd9e4d7b686f0399032a7ca222f4e08f10",
+    "model_update_gradients_n64.wasm": "6f838bfa8e06114a954c60f36636d66bad6c28af66225ed8c237069cbec1dbfd",
+    "proving_key_gradients_n64.zkey": "5e4153b8b0990353b287f3bd26efefd25e02e805221b69a43ac98c548fcc3cc9",
+    "verification_key_gradients_n64.json": "8c53326ed58b5e5de833177f916d8547991a66083c7209b3ab1b0f6f8df09ae5"
   },
   "circom_source_status": {
-    "model_update.circom": "DRIFT — source instantiates ModelUpdate(4) with weights+learningRate; shipped wasm accepts gradients[] only (prove path).",
-    "action": "Phase 1 regenerate from parameterized circuits; until then artifacts are authoritative."
+    "model_update.circom": "DRIFT \u2014 source instantiates ModelUpdate(4) with weights+learningRate; shipped wasm accepts gradients[] only (prove path).",
+    "action": "Phase 1 regenerate from parameterized circuits; until then artifacts are authoritative.",
+    "model_update_gradients.circom": "Regenerate target; N=4 instance.",
+    "model_update_gradients_n64.circom": "Compiled + DEV zkey on 2026-07-22; ceremony=dev_unsafe."
+  },
+  "n_shipped": [
+    4,
+    64
+  ],
+  "artifacts_n64_dev": {
+    "model_update_gradients_n64.wasm": "6f838bfa8e06114a954c60f36636d66bad6c28af66225ed8c237069cbec1dbfd",
+    "proving_key_gradients_n64.zkey": "5e4153b8b0990353b287f3bd26efefd25e02e805221b69a43ac98c548fcc3cc9",
+    "verification_key_gradients_n64.json": "8c53326ed58b5e5de833177f916d8547991a66083c7209b3ab1b0f6f8df09ae5"
   }
 }

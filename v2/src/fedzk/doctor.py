@@ -126,7 +126,7 @@ def run_doctor() -> Dict[str, Any]:
     if circom is None:
         warnings.append("circom not on PATH — cannot rebuild circuits; prove may still work with shipped wasm")
 
-    # 4) Artifacts + hashes
+    # 4) Artifacts + hashes (core set)
     artifact_hashes: Dict[str, str] = {}
     for name in CORE_ARTIFACTS:
         path = ASSET_DIR / name
@@ -163,10 +163,13 @@ def run_doctor() -> Dict[str, Any]:
             pinned = manifest.get("artifacts") or {}
             mismatches = []
             for name, expected in pinned.items():
-                actual = artifact_hashes.get(name)
-                if actual is None:
+                path = ASSET_DIR / name
+                if not path.is_file():
                     mismatches.append(f"{name}: missing on disk")
-                elif actual != expected:
+                    continue
+                actual = _sha256_file(path)
+                artifact_hashes[name] = actual
+                if actual != expected:
                     mismatches.append(f"{name}: pin drift")
             ok = len(mismatches) == 0
             checks.append(
@@ -183,7 +186,7 @@ def run_doctor() -> Dict[str, Any]:
                     {
                         "id": "artifact_policy",
                         "ok": True,
-                        "detail": f"policy=freeze n_dev={manifest.get('n_dev')} frozen_at={manifest.get('frozen_at')}",
+                        "detail": f"policy=freeze n_dev={manifest.get('n_dev')} shipped={manifest.get('n_shipped', [manifest.get('n_dev')])} frozen_at={manifest.get('frozen_at')}",
                     }
                 )
         except Exception as exc:  # noqa: BLE001

@@ -33,9 +33,10 @@ def test_public_exports_are_real():
 
 def test_require_supported_n():
     require_supported_n(N_DEV)
+    require_supported_n(64)
     try:
-        require_supported_n(64)
-        assert False, "expected ValueError for N=64"
+        require_supported_n(256)
+        assert False, "expected ValueError for N=256"
     except ValueError as e:
         assert "not shipped" in str(e)
 

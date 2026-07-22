@@ -18,16 +18,22 @@
       until a regenerate ceremony updates the manifest.
     </p>
     <div class="meta">
-      <span class="pill ok">policy: freeze</span>
-      <span class="pill">N_dev: 4</span>
-      <span class="pill warn">circom sources may drift</span>
+      <span class="pill ok">policy: freeze (N=4 legacy)</span>
+      <span class="pill ok">N shipped: 4, 64</span>
+      <span class="pill warn">N=64 ceremony=dev_unsafe</span>
     </div>
 
     <div class="callout bad">
       <strong>Drift note:</strong> <code>model_update.circom</code> (weights + learningRate) does <em>not</em>
       match the shipped wasm witness shape (<code>gradients[n]</code> only).
-      Regenerate target: <code>zk/circuits/model_update_gradients.circom</code> (compiles clean for N=4).
+      Regenerate target: <code>zk/circuits/model_update_gradients.circom</code>.
       Do not swap wasm without updating the manifest + goldens.
+    </div>
+
+    <div class="callout warn">
+      <strong>N=64:</strong> <code>model_update_gradients_n64.*</code> built with a local snarkjs Powers-of-Tau
+      contribution — <em>not</em> a production multiparty ceremony. Rebuild with
+      <code>scripts/build_gradients_circuit.py --n 64</code> or a real ceremony before release.
     </div>
 
     <h2>Pinned sha256 (2026-07-22)</h2>

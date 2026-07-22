@@ -30,9 +30,12 @@ app = FastAPI(
 
 class UpdateRequest(BaseModel):
     gradients: Dict[str, List[float]] = Field(..., description="Gradient updates by parameter name")
-    proof: Dict[str, Any] = Field(..., description="Zero-knowledge proof object")
-    public_inputs: List[Any] = Field(..., description="Public inputs/signals for proof verification")
+    proof: Dict[str, Any] = Field(default_factory=dict, description="ZK proof object (single-proof mode)")
+    public_inputs: List[Any] = Field(default_factory=list, description="Public inputs for single-proof mode")
     client_id: str = Field("unknown", description="Client identifier for security tracking")
+    chunk_bundle: Optional[Dict[str, Any]] = Field(
+        None, description="Chunk Protocol v1 bundle (verify-all-chunks + commitment)"
+    )
 
 class SubmitResponse(BaseModel):
     status: str = Field(..., description="accepted or aggregated")
@@ -50,7 +53,7 @@ def submit_update_endpoint(request: UpdateRequest):
 
     This endpoint performs:
     - Rate limiting and security checks
-    - Comprehensive ZK proof verification
+    - Comprehensive ZK proof verification (single or chunk bundle)
     - Cryptographic integrity validation
     - Secure aggregation when threshold is met
     """
@@ -59,7 +62,8 @@ def submit_update_endpoint(request: UpdateRequest):
             request.gradients,
             request.proof,
             request.public_inputs,
-            request.client_id
+            request.client_id,
+            chunk_bundle=request.chunk_bundle,
         )
         return SubmitResponse(status=status, model_version=version, global_update=global_update)
     except ProofVerificationError as e:

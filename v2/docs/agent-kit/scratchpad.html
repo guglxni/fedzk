@@ -1,70 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="fedzk-agent-kit" content="html-first" />
-  <title>scratchpad — FEDzk Agent Kit</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body data-kit="fedzk-html-first" data-role="conductor">
-<div class="layout">
-  <nav class="sidebar" id="sidebar"></nav>
-  <main>
-    <h1>scratchpad.html — Conductor working memory</h1>
-    <p class="lead">
-      Live diary for tree <code>v2/</code> on branch <code>v2</code>. Boot:
-      <a href="MANIFEST.html">MANIFEST</a> · <a href="PLAN.html">PLAN</a> · <a href="LOOPS.html">LOOPS</a>.
-    </p>
-    <div class="meta">
-      <span class="pill ok">branch: v2 · tree: v2/</span>
-      <span class="pill ok">Bolt1+Bolt2 sensors: GREEN</span>
-      <span class="pill info">15 unit tests pass</span>
-    </div>
-
-    <div class="callout bad" id="isolation">
-      <strong>Isolation:</strong> Edit only <code>v2/</code>. Root must stay = <code>origin/main</code>.
-    </div>
-
-    <section id="now">
-      <h2>Now</h2>
-      <p><strong>Bolt 2 complete.</strong> Artifact freeze enforced by doctor; real-API tests;
-      Chunk Protocol v1 + <code>circuit_config</code>; regenerate-target circom compiles;
-      N=4 golden recorded. Next: Phase 1 zkey ceremony for N=64 (halt-and-ask if ceremony keys).</p>
-    </section>
-
-    <section id="done">
-      <h2>Completed</h2>
-      <table>
-        <tr><th>Unit</th><th>Change</th><th>Sensor</th></tr>
-        <tr><td>Bolt1</td><td>CLI · doctor · quantize · MPC paths · aggregator shim</td><td>green</td></tr>
-        <tr><td>U15</td><td><code>artifacts/artifact-manifest.json</code> + doctor pin</td><td>artifact_manifest OK</td></tr>
-        <tr><td>U16</td><td>Real API tests; fix <code>ZKGenerator</code>→<code>ZKProver</code> import</td><td>8 new tests</td></tr>
-        <tr><td>U17</td><td><code>circuit_config</code> · <code>chunk_protocol</code> · <code>model_update_gradients.circom</code> · goldens</td><td>circom compile + verify</td></tr>
-      </table>
-    </section>
-
-    <section id="next">
-      <h2>Next moves</h2>
-      <ol>
-        <li>Trusted setup for <code>ModelUpdateGradients(64)</code> → update manifest + PROFILE.</li>
-        <li>Wire chunk bundle verify into <code>coordinator.logic.submit_update</code>.</li>
-        <li>Adult LR smoke via <code>LocalTrainer</code> + prove path (few rounds).</li>
-      </ol>
-    </section>
-
-    <section id="log">
-      <h2>Move log</h2>
-      <ol>
-        <li>Bolt1 on v2/ isolated from root; pushed origin/v2.</li>
-        <li>Bolt2: freeze pin, APIs, chunk protocol, gradients circom, goldens, ARTIFACTS.html.</li>
-      </ol>
-    </section>
-
-    <footer class="doc-foot">Conductor scratchpad · <a href="ARTIFACTS.html">ARTIFACTS</a> · <a href="index.html">Hub</a></footer>
-  </main>
-</div>
-<script src="nav.js" defer></script>
-<script src="agent-kit.js" defer></script>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>scratchpad — FEDzk Agent Kit</title><link rel="stylesheet" href="styles.css"/></head>
+<body data-kit="fedzk-html-first"><div class="layout"><nav class="sidebar" id="sidebar"></nav><main>
+<h1>scratchpad.html — Conductor working memory</h1>
+<p class="lead">Tree <code>v2/</code> · branch <code>v2</code> · loop engineering active.</p>
+<div class="meta"><span class="pill ok">Bolt3 GREEN</span><span class="pill ok">18 unit tests</span><span class="pill ok">Adult LR smoke OK</span></div>
+<div class="callout bad"><strong>Isolation:</strong> Edit only <code>v2/</code>.</div>
+<section id="now"><h2>Now</h2>
+<p><strong>Bolt 3 complete.</strong> N=64 DEV ceremony artifacts shipped; chunk verify on coordinator;
+<code>prove_update</code>; Adult LR smoke aggregated. Next loop: N=256 build script run OR transcript schema CI; soften single-proof AdvancedValidator false rejects.</p></section>
+<section id="done"><h2>Done this loop</h2>
+<ul>
+<li>N=64 wasm/zkey/vkey (ceremony=dev_unsafe) + manifest pins</li>
+<li>Coordinator <code>chunk_bundle</code> verify-before-FedAvg</li>
+<li><code>prover/chunked.py</code> · <code>scripts/adult_lr_smoke.py</code> · <code>build_gradients_circuit.py</code></li>
+<li>LocalTrainer(model_type=…) kwargs fix</li>
+</ul></section>
+<section id="next"><h2>Next</h2>
+<ol>
+<li>Run build script for N=256 (longer ptau).</li>
+<li>Skip AdvancedProofValidator for known circuit profiles on single-proof path.</li>
+<li>Wire transcript schema validation for smoke JSON.</li>
+</ol></section>
+<footer class="doc-foot"><a href="ARTIFACTS.html">ARTIFACTS</a> · <a href="PLAN.html">PLAN</a></footer>
+</main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>
