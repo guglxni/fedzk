@@ -1,0 +1,21 @@
+[package]
+name = "fedzk-zk"
+version = "0.1.0"
+edition = "2021"
+description = "FEDzk Phase3 verify-first sidecar (snarkjs-shaped fedzk.proof.v1)"
+license = "MIT"
+publish = false
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+
+# Verify path (Bolt 5 scaffold): arkworks stack landed later; keep crate buildable without heavy crypto until U40 wiring.
+# ark-bn254 / ark-groth16 / ark-circom will be added when golden cross-check lands.
+
+[profile.release]
+lto = true
+codegen-units = 1

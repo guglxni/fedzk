@@ -1,0 +1,4 @@
+# fedzk-zk Phase 3 workspace (verify-first sidecar)
+[workspace]
+members = ["fedzk-zk"]
+resolver = "2"

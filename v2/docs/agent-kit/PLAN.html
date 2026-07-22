@@ -65,7 +65,9 @@
 
     <h2>Phase 3 — Rust proving engine (3–6 weeks)</h2>
     <ul class="checklist">
-      <li>fedzk-zk: witness + verify; golden cross-check snarkjs.</li>
+      <li>◐ fedzk-zk scaffold: CLI health + envelope verify (exit 3 until arkworks).</li>
+      <li>Python <code>FEDZK_ZK_BACKEND=snarkjs|rust|auto</code> fail-closed rust path.</li>
+      <li>fedzk-zk: arkworks witness + verify; golden cross-check snarkjs.</li>
       <li>Prove path via arkworks or rapidsnark FFI; feature flag.</li>
       <li>Axum sidecar; MPC proxies; Helm Node-optional.</li>
       <li>Paper systems microbench: snarkjs vs Rust.</li>

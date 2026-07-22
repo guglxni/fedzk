@@ -5,18 +5,18 @@
 <h1>scratchpad.html</h1>
 <p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code></p>
 <div class="meta">
-  <span class="pill ok">Bolt3 N=256</span>
-  <span class="pill ok">Bolt4 SDK+Flower</span>
-  <span class="pill ok">Adult smoke schema</span>
+  <span class="pill ok">N=4/64/256</span>
+  <span class="pill ok">Bolt4 SDK</span>
+  <span class="pill ok">Bolt5 rust scaffold</span>
 </div>
-<div class="callout bad">Isolation: only edit <code>v2/</code>. Diff vs main must be <code>v2/**</code> only.</div>
+<div class="callout bad">Isolation: only edit <code>v2/</code>.</div>
 <section id="now"><h2>Now</h2>
-<p>Phase1 capacity complete (N∈{4,64,256}). Phase2 started: package exports + Flower mixin spike + experiment YAML.</p></section>
+<p><code>v2/rust/fedzk-zk</code> builds; <code>FEDZK_ZK_BACKEND=rust</code> fail-closed until arkworks pairing. 27 unit tests green.</p></section>
 <section id="next"><h2>Next loop moves</h2>
 <ol>
-<li>Rust verify sidecar scaffold under <code>v2/rust/</code> (fail-closed feature flag).</li>
-<li>Wire smoke YAML → CI job stub under <code>v2/</code>.</li>
-<li>Paper baseline vs FEDzk measurement harness (Phase4).</li>
+<li>Wire arkworks Groth16 verify against N=4 golden (U40).</li>
+<li>CI stub under <code>v2/</code> for unit + <code>cargo test</code>.</li>
+<li>Phase4 measurement harness from Adult YAML.</li>
 </ol></section>
 <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="ARTIFACTS.html">ARTIFACTS</a></footer>
 </main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>
