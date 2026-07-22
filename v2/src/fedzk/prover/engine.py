@@ -116,11 +116,6 @@ def verify_with_rust(
         )
         if proc.returncode == 0:
             return True
-        if proc.returncode == 3:
-            raise RustEngineUnavailable(
-                "fedzk-zk envelope OK but arkworks pairing verify not wired yet "
-                f"(stderr={proc.stderr.strip()!r})"
-            )
         raise RustEngineUnavailable(
             f"fedzk-zk verify failed rc={proc.returncode}: {proc.stderr.strip()}"
         )

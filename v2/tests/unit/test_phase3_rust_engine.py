@@ -46,7 +46,7 @@ def test_rust_binary_builds_and_health():
     assert payload.get("wire") == "fedzk.proof.v1"
 
 
-def test_rust_verify_fail_closed_until_arkworks(monkeypatch):
+def test_rust_verify_accepts_n4_golden(monkeypatch):
     root = Path(__file__).resolve().parents[2]
     bin_path = next(
         (
@@ -64,5 +64,4 @@ def test_rust_verify_fail_closed_until_arkworks(monkeypatch):
     monkeypatch.setenv("FEDZK_ZK_BACKEND", "rust")
     monkeypatch.setenv("FEDZK_ZK_BIN", str(bin_path))
     data = json.loads(GOLDEN.read_text())
-    with pytest.raises(eng.RustEngineUnavailable):
-        eng.verify_with_rust(data["proof"], data["public_inputs"], str(VKEY))
+    assert eng.verify_with_rust(data["proof"], data["public_inputs"], str(VKEY)) is True
