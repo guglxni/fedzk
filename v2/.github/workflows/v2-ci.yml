@@ -1,0 +1,48 @@
+# Runs from repo root; only exercises the isolated v2/ tree.
+name: v2-ci
+
+on:
+  push:
+    branches: [v2]
+    paths: ["v2/**"]
+  pull_request:
+    branches: [v2, main]
+    paths: ["v2/**"]
+
+jobs:
+  python-unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install snarkjs
+        run: npm install -g snarkjs
+      - name: Install fedzk (v2)
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[dev]"
+      - name: Doctor
+        run: fedzk doctor
+      - name: Unit tests
+        run: pytest tests/unit/ -q
+
+  rust-fedzk-zk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: v2/rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build fedzk-zk
+        run: cargo build -p fedzk-zk
+      - name: Health
+        run: ./target/debug/fedzk-zk health
