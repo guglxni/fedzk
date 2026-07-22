@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>PLAN — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>PLAN — Phased Build to Paper + OSS v1</h1>
+    <p class="lead">Executable roadmap. Do not skip Phase 0. Live status:
+      <a href="scratchpad.html">scratchpad.html</a> (branch <code>v2</code>).</p>
+
+    <div class="callout ok" id="v2-status">
+      <strong>v2 / Bolt 1 (2026-07-22): GREEN.</strong>
+      CLI unshadowed · <code>fedzk doctor</code> · GradientQuantizer on prove path · MPC paths fixed ·
+      secrets untracked · torch core · prove/verify smoke OK · classifier Alpha.
+      Remaining Phase 0: fictional API cleanup, circom freeze note, full e2e rewrite.
+    </div>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Plan vs concepts:</strong> Phase 0 makes the codebase <em>honestly capable</em> of instantiating CONCEPTS;
+      Phase 1 makes L real at useful N; Phase 3 changes the engine, not the statement; Phase 4 measures the concept scientifically.
+      <a href="CONCEPTS.html">CONCEPTS.html</a>
+    </div>
+
+    <div class="callout" id="aidlc-primer">
+      <strong>PLAN ≡ Construction bolts under AI-DLC:</strong> Phase 0–5 map to Inception units + Construction stages.
+      Bolt 1 = walking skeleton (done on v2). Swarm leftovers per LOOPS.html.
+    </div>
+
+    <h2>Phase 0 — Hygiene &amp; honesty (1–3 weeks)</h2>
+    <div class="callout bad"><strong>Exit gate:</strong> Fresh clone can install, run <code>fedzk doctor</code>, prove/verify a quantized vector of length N_dev (even if still 4), and docs snippets match imports.</div>
+    <ul class="checklist">
+      <li>✅ Fix CLI shadowing; unify version (<code>__version__=1.2.0</code>).</li>
+      <li>✅ Wire GradientQuantizer into ZKProver (CLI/MPC inherit).</li>
+      <li>✅ Fix MPC artifact defaults; add <code>fedzk doctor</code> hash checks.</li>
+      <li>◐ Collapse dual coordinators (aggregator → api shim); rewrite e2e to real APIs (remaining).</li>
+      <li>✅ Untrack secrets/; gitignore (key rotation = halt-and-ask).</li>
+      <li>☐ Regenerate or freeze circom↔artifact sync; document which.</li>
+      <li>✅ Strip false “production-ready” claims in README (rewritten honest Alpha README on v2).</li>
+    </ul>
+
+    <h2>Phase 1 — Real circuits &amp; protocol (3–6 weeks)</h2>
+    <ul class="checklist">
+      <li>Parameterize N (64/256); secure + quantized circuits.</li>
+      <li>Chunk Protocol v1 + commitment binding.</li>
+      <li>Golden vectors CI for each circuit_id.</li>
+      <li>Coordinator verify-before-FedAvg with transcript events.</li>
+      <li>Adult LR smoke E2E (few rounds) green.</li>
+    </ul>
+
+    <h2>Phase 2 — Framework API &amp; packaging (2–4 weeks)</h2>
+    <ul class="checklist">
+      <li>Stable <code>fedzk</code> package exports per DESIGN.</li>
+      <li>Examples in CI; mkdocs or docs site.</li>
+      <li>Docker compose demo; remove default test keys in prod profile.</li>
+      <li>Optional Flower adapter spike.</li>
+    </ul>
+
+    <h2>Phase 3 — Rust proving engine (3–6 weeks)</h2>
+    <ul class="checklist">
+      <li>fedzk-zk: witness + verify; golden cross-check snarkjs.</li>
+      <li>Prove path via arkworks or rapidsnark FFI; feature flag.</li>
+      <li>Axum sidecar; MPC proxies; Helm Node-optional.</li>
+      <li>Paper systems microbench: snarkjs vs Rust.</li>
+    </ul>
+
+    <h2>Phase 4 — Experiments &amp; paper (4–8 weeks, overlaps)</h2>
+    <ul class="checklist">
+      <li>Full Adult baseline vs FEDzk; CIFAR batch config.</li>
+      <li>Attack rejection suite metrics.</li>
+      <li>Figures/tables; open transcripts; PAPER draft.</li>
+      <li>Limitations written from real measurements.</li>
+    </ul>
+
+    <h2>Phase 5 — Production OSS release (2–4 weeks)</h2>
+    <ul class="checklist">
+      <li>QUALITY gates; SBOM; signed release; changelog.</li>
+      <li>Security advisory process; CODEOWNERS; contributing guide.</li>
+      <li>v1.0.0 tag; announce; pin citation CITATION.cff.</li>
+    </ul>
+
+    <h2>Parallelism</h2>
+    <pre><code>Phase0 ────────────────────┐
+                           ├─ Phase1 ── Phase2 ── Phase5
+                           │              │
+                           │         Phase3 (after goldens)
+                           │              │
+                           └──────── Phase4 experiments ── Paper submit</code></pre>
+
+    <h2>Risk register</h2>
+    <table>
+      <tr><th>Risk</th><th>Mitigation</th></tr>
+      <tr><td>zkey import into arkworks fails</td><td>Time-box; ship verify-first; rapidsnark prove</td></tr>
+      <tr><td>N=256 prove too slow</td><td>Chunking; report honestly; GPU later out of scope</td></tr>
+      <tr><td>Accuracy collapse from quantization</td><td>Tune scale_bits; ablate in paper</td></tr>
+      <tr><td>Scope creep (compliance)</td><td>AGENTS forbidden list</td></tr>
+    </table>
+
+    <footer class="doc-foot">FEDzk Agent Kit · branch v2 · <a href="scratchpad.html">scratchpad</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

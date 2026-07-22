@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>FORMAT — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+  
+</head>
+<body data-kit="fedzk-html-first" data-aidlc-method="v2-adapted">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>FORMAT.html — Why this kit is HTML-first (not Markdown)</h1>
+    <p class="lead">
+      FEDzk agent instructions deliberately use <strong>semantic HTML</strong> as the control surface for agents and humans,
+      adapted from AI-DLC methodology but <strong>not</strong> the upstream <code>*.md</code> persona/stage files.
+      This page records the research rationale and the engineering rules that make HTML more efficient for our loop.
+    </p>
+    <div class="meta">
+      <span class="pill info">Primary source: Thariq Shihipar (Anthropic / Claude Code)</span>
+      <span class="pill ok">Kit policy: HTML source of truth</span>
+      <span class="pill warn">Upstream aidlc *.md = reference only, do not load in FEDzk runs</span>
+    </div>
+
+    <section data-agent-block="research" id="research">
+      <h2>1. Research basis (investigate → apply)</h2>
+      <table>
+        <tr><th>Source</th><th>Claim</th><th>Implication for FEDzk</th></tr>
+        <tr>
+          <td><a href="https://www.infoq.com/news/2026/06/anthropic-html-markdown-agent/">InfoQ on Shihipar / Anthropic</a></td>
+          <td>HTML keeps humans engaged in agentic loops better than long Markdown plans</td>
+          <td>Gates, plans, specs as navigable HTML so conductor + human-proxy actually inspect</td>
+        </tr>
+        <tr>
+          <td><a href="https://pasqualepillitteri.it/en/news/2243/html-vs-markdown-claude-code-thariq-anthropic">“Unreasonable Effectiveness of HTML”</a> (coverage of Thariq’s thesis)</td>
+          <td>Spatial layout, interactivity, higher density than linear MD</td>
+          <td>Tables, stage cards, load maps, copy-prompt blocks in kit</td>
+        </tr>
+        <tr>
+          <td><a href="https://blakecrosley.com/blog/html-is-the-format-agents-want">HTML Is the Format AI Agents Want</a></td>
+          <td>Format is part of the tool surface; MD flattens structure agents need</td>
+          <td><code>data-*</code> attributes + sections agents can target with Read/grep</td>
+        </tr>
+        <tr>
+          <td><a href="https://www.agentmail.to/blog/html-vs-markdown-for-ai-agents">AgentMail: HTML vs MD</a></td>
+          <td>MD wins token frugality; HTML wins human engagement &amp; structure when budget allows</td>
+          <td>Lean semantic HTML (no huge CSS/JS); MANIFEST load graph to avoid stuffing whole kit</td>
+        </tr>
+      </table>
+      <div class="callout ok">
+        <strong>Applied policy:</strong> For FEDzk, <em>agent operating artifacts</em> (concepts, stages, roster, loops, gates)
+        are HTML. We accept moderate token cost for scannable structure, in-page TOC, and machine hooks.
+        We do <strong>not</strong> paste raw AIDLC <code>core/agents/*.md</code> into context — we use
+        <a href="ROSTER.html">ROSTER.html</a> + stage HTML instead.
+      </div>
+    </section>
+
+    <section data-agent-block="efficiency" id="efficiency">
+      <h2>2. How HTML increases agent efficiency vs MD (our design)</h2>
+      <table>
+        <tr><th>Pattern</th><th>MD failure mode</th><th>HTML kit pattern</th></tr>
+        <tr><td>Selective load</td><td>Agents dump whole AGENTS.md</td><td><a href="MANIFEST.html">MANIFEST</a> load graph: min set per role/stage</td></tr>
+        <tr><td>Stable anchors</td><td>Heading drift breaks “see §3”</td><td><code>id=</code> + <code>data-req</code> / <code>data-stage</code></td></tr>
+        <tr><td>Role briefs</td><td>Prose buried in paragraphs</td><td><code>&lt;aside class="agent-brief" data-role&gt;</code> copy blocks</td></tr>
+        <tr><td>Gates</td><td>Checklists skimmable into oblivion</td><td>Callout + table + APPROVE/HALT contract</td></tr>
+        <tr><td>Nav</td><td>Linear scroll</td><td>Sticky sidebar + TOC + hub Q&amp;A</td></tr>
+        <tr><td>Human-in-loop</td><td>Unread 2k-line plans</td><td>Rendered kit in browser; spatial tables</td></tr>
+        <tr><td>Inter-agent</td><td>Pass entire MD files</td><td>Pass <em>paths + section ids</em> only; Read on demand</td></tr>
+      </table>
+    </section>
+
+    <section data-agent-block="rules" id="html-rules">
+      <h2>3. Hard rules for FEDzk agents</h2>
+      <ol class="checklist">
+        <li><strong>Source of truth:</strong> <code>v2/docs/agent-kit/**/*.html</code> only for methodology/ops.</li>
+        <li><strong>Forbidden in FEDzk conductor context:</strong> loading <code>vendor/aidlc-workflows/core/**/*.md</code> as instructions (clone for human study OK).</li>
+        <li><strong>Intent artifacts:</strong> write stage outputs as <code>v2/docs/agent-kit/intents/.../*.html</code> (not <code>aidlc/**/*.md</code>).</li>
+        <li><strong>Rules layers:</strong> use <code>v2/docs/agent-kit/rules/*.html</code> (HTML replacements for org/team/project/phase md).</li>
+        <li><strong>Lean markup:</strong> semantic tags + shared CSS; avoid inline megabyte styles in each page.</li>
+        <li><strong>Machine hooks:</strong> every critical requirement keeps <code>data-req="FR-…"</code> or <code>data-stage="…"</code>.</li>
+        <li><strong>Just-in-time Read:</strong> follow MANIFEST; never preload entire kit.</li>
+      </ol>
+    </section>
+
+    <section data-agent-block="aidlc-without-md" id="aidlc-html">
+      <h2>4. AIDLC methodology without AIDLC Markdown files</h2>
+      <p>We keep the <em>method</em> (phases, stages, roster, gates, learning loop, topologies) and replace the <em>files</em>:</p>
+      <table>
+        <tr><th>Upstream MD</th><th>FEDzk HTML replacement</th></tr>
+        <tr><td><code>core/agents/aidlc-*-agent.md</code></td><td><a href="ROSTER.html">ROSTER.html</a> + per-role briefs</td></tr>
+        <tr><td><code>core/aidlc-common/stages/**/*.md</code></td><td><a href="AIDLC.html">AIDLC.html</a> stage checklist + <a href="PLAN.html">PLAN.html</a> bolts</td></tr>
+        <tr><td><code>core/aidlc-common/conductor.md</code></td><td><a href="LOOPS.html">LOOPS.html</a></td></tr>
+        <tr><td><code>memory/org|team|project.md</code></td><td><a href="rules/org.html">rules/org.html</a> …</td></tr>
+        <tr><td>Stage contribution <code>.md</code></td><td><code>intents/…/contributions/*.html</code></td></tr>
+        <tr><td>Onboarding templates</td><td><a href="MANIFEST.html">MANIFEST.html</a> + <a href="index.html">index.html</a></td></tr>
+      </table>
+    </section>
+
+    <aside class="agent-brief" data-role="conductor">
+      <strong>Conductor brief (copy into system):</strong>
+      Run AI-DLC topologies using only docs/agent-kit HTML. Start at MANIFEST.html.
+      Do not @-include aidlc-workflows Markdown. Dispatch Task agents with ROSTER persona + HTML paths + section ids.
+    </aside>
+
+    <footer class="doc-foot">HTML-first agent kit · AIDLC methodology without upstream MD · <a href="index.html">Hub</a> · <a href="FORMAT.html">FORMAT</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>REQUIREMENTS — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>REQUIREMENTS — Detailed Requirements Catalog</h1>
+    <p class="lead">Traceable IDs for implementation and testing. Agents should reference IDs in commits/PRs.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Requirements encode concepts:</strong> FR-Q-01 (quantize) is CONCEPTS §9;
+      FR-CRD-01 (verify-before-aggregate) is the product core; FR-CHK-01 is honest capacity (P4).
+      Trace each ID to <a href="CONCEPTS.html">CONCEPTS.html</a> when prioritizing.
+    </div>
+
+
+
+    <h2>Functional</h2>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Priority</th><th>Phase</th></tr>
+      <tr><td>FR-CLI-01</td><td>Console script <code>fedzk</code> resolves Typer app</td><td>P0</td><td>0</td></tr>
+      <tr><td>FR-DEP-01</td><td>Core install includes torch or documents CPU wheel extra that examples use</td><td>P0</td><td>0</td></tr>
+      <tr><td>FR-Q-01</td><td>Prove path quantizes floats; rejects non-integers otherwise</td><td>P0</td><td>0</td></tr>
+      <tr><td>FR-ART-01</td><td>MPC/coordinator default artifact paths resolve to shipped files</td><td>P0</td><td>0</td></tr>
+      <tr><td>FR-API-01</td><td>Documented imports match exports</td><td>P0</td><td>0</td></tr>
+      <tr><td>FR-CIR-01</td><td>Parameterized N≥64 secure circuit with regenerated artifacts</td><td>P0</td><td>1</td></tr>
+      <tr><td>FR-CIR-02</td><td>Artifact manifest with sha256; CI verifies</td><td>P0</td><td>1</td></tr>
+      <tr><td>FR-CHK-01</td><td>Chunk protocol for updates longer than N</td><td>P0</td><td>1</td></tr>
+      <tr><td>FR-CRD-01</td><td>Single coordinator; verify-before-aggregate FedAvg</td><td>P0</td><td>1</td></tr>
+      <tr><td>FR-MPC-01</td><td>Remote prove API with auth; no default prod keys</td><td>P0</td><td>2</td></tr>
+      <tr><td>FR-EXP-01</td><td>round-runner produces schema-valid transcripts</td><td>P0</td><td>4</td></tr>
+      <tr><td>FR-BAT-01</td><td>Batch verify path for multi-proof rounds</td><td>P1</td><td>4</td></tr>
+      <tr><td>FR-FLW-01</td><td>Optional Flower client strategy wrapper</td><td>P2</td><td>5</td></tr>
+      <tr><td>FR-RST-01</td><td>Rust engine feature-flagged parity on goldens</td><td>P1</td><td>3</td></tr>
+    </table>
+
+    <h2>Non-functional</h2>
+    <table>
+      <tr><th>ID</th><th>Requirement</th><th>Target</th></tr>
+      <tr><td>NFR-P-01</td><td>Prove latency N=64 secure (laptop CPU)</td><td>Report p50/p95; goal &lt; 30s initially</td></tr>
+      <tr><td>NFR-P-02</td><td>Verify latency</td><td>&lt; 100ms typical Groth16 verify</td></tr>
+      <tr><td>NFR-R-01</td><td>Reproducibility</td><td>Fixed seeds → transcript hash stable</td></tr>
+      <tr><td>NFR-S-01</td><td>No critical vulns on release</td><td>bandit/cargo-audit/gitleaks clean</td></tr>
+      <tr><td>NFR-D-01</td><td>Docs examples in CI</td><td>doctest or script smoke</td></tr>
+      <tr><td>NFR-C-01</td><td>Coverage critical paths</td><td>≥90% prover/coordinator/quantizer</td></tr>
+    </table>
+
+    <h2>Security requirements</h2>
+    <ul>
+      <li>SEC-01: Prod mode requires explicit API keys / OIDC; refuse <code>testkey</code>.</li>
+      <li>SEC-02: TLS recommended defaults documented; plaintext only for dev.</li>
+      <li>SEC-03: Trusted setup procedure documented; ceremony vs Powers of Tau.</li>
+      <li>SEC-04: Dependency pin + SBOM on release.</li>
+      <li>SEC-05: Untrack secrets/; pre-commit gitleaks.</li>
+    </ul>
+
+    <h2>Research requirements</h2>
+    <ul>
+      <li>RS-01: Baseline plain FL vs FEDzk accuracy tables.</li>
+      <li>RS-02: Attack suite: oversized norm, zero vector, garbage proof, replay.</li>
+      <li>RS-03: Open transcripts under permissive license.</li>
+      <li>RS-04: Limitations section matching TECHNICAL_LIMITATIONS reality.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

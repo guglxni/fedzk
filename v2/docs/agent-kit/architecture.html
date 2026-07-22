@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Architecture — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>architecture.html — End-to-End System Architecture</h1>
+    <p class="lead">Target architecture for a working, publishable, production-oriented FEDzk. Agents implement toward this — not the broken demo paths.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Conceptual primer:</strong> FEDzk architecture exists to implement
+      <em>verify-before-aggregate</em> integrity-gated federated learning.
+      Clients prove update ∈ policy language L; coordinator verifies Groth16 proofs, then FedAvg.
+      See <a href="CONCEPTS.html">CONCEPTS.html</a> for what/how/why. This page is the structural instantiation of those concepts.
+    </div>
+    <h2 id="why-arch">Why this architecture (design rationale)</h2>
+    <ul>
+      <li><strong>Separate prove workers from coordinator:</strong> proving is CPU-heavy and horizontally scalable; aggregation is stateful and policy-critical.</li>
+      <li><strong>Quantizer as first-class stage:</strong> without it, the SNARK layer is conceptually disconnected from ML tensors (field vs float).</li>
+      <li><strong>Circuit artifacts as versioned policy:</strong> changing L is a protocol change (new circuit_id / vk), not a silent server tweak.</li>
+      <li><strong>Optional remote prove:</strong> preserves FL client diversity (phones, hospitals) without weakening coordinator verification.</li>
+      <li><strong>Transcript/metrics plane:</strong> research contribution requires observable rounds, not only a crypto demo.</li>
+    </ul>
+
+
+
+    <h2>1. Context diagram</h2>
+    <pre><code>┌────────────┐   gradients+proof    ┌─────────────────┐
+│ FL Client  │ ───────────────────► │   Coordinator   │
+│ LocalTrain │                      │ verify + FedAvg │
+│ Quantize   │ ◄──── global w ───── │                 │
+│ Prove*     │                      └────────┬────────┘
+└─────┬──────┘                               │
+      │ optional remote prove                │ metrics
+      ▼                                      ▼
+┌────────────┐                      ┌─────────────────┐
+│ Prove Svc  │                      │ Prometheus/OTel │
+│ (Rust/Axum │                      └─────────────────┘
+│  or MPC)   │
+└────────────┘
+* Prove uses Circom artifacts + Rust/snarkjs engine</code></pre>
+
+    <h2>2. Logical components</h2>
+    <table>
+      <tr><th>Component</th><th>Responsibility</th><th>Tech (target)</th><th>Today</th></tr>
+      <tr><td>Client runtime</td><td>Local epochs, export Δw/grads</td><td>Python, PyTorch</td><td>LocalTrainer</td></tr>
+      <tr><td>Quantizer</td><td>float→field ints, scale metadata</td><td>Python (+ Rust port later)</td><td>Exists, unwired</td></tr>
+      <tr><td>Circuit library</td><td>Constraints on updates</td><td>Circom</td><td>n=4 toy</td></tr>
+      <tr><td>Proving engine</td><td>Witness + Groth16 prove/verify</td><td>Rust fedzk-zk; snarkjs fallback</td><td>snarkjs subprocess only</td></tr>
+      <tr><td>MPC / Prove API</td><td>Remote prove for thin clients</td><td>FastAPI façade → Axum</td><td>FastAPI, bad defaults</td></tr>
+      <tr><td>Coordinator</td><td>AuthZ, verify, aggregate, version</td><td>FastAPI + logic</td><td>Dual implementations</td></tr>
+      <tr><td>Validators</td><td>Pre-crypto sanitization</td><td>Python</td><td>Present</td></tr>
+      <tr><td>Experiment runner</td><td>Reproducible rounds/transcripts</td><td>Python</td><td>round-runner.py</td></tr>
+      <tr><td>Obs / deploy</td><td>Metrics, Helm</td><td>Prom + charts</td><td>Scaffolding</td></tr>
+    </table>
+
+    <h2>3. Round protocol (normative)</h2>
+    <ol>
+      <li>Coordinator publishes <code>round_id</code>, global weights <code>w_t</code>, circuit_id, scale_bits, bounds.</li>
+      <li>Client trains locally → gradients/update <code>g</code>.</li>
+      <li>Client quantizes: <code>ĝ = Q(g; s)</code>, records scale <code>s</code>.</li>
+      <li>If <code>|ĝ| &gt; N</code>, client chunks per Chunk Protocol v1 (see DESIGN) producing proofs π_1..π_k.</li>
+      <li>Client (or Prove Svc) generates Groth16 proof(s) for circuit statement.</li>
+      <li>Client submits <code>{client_id, round_id, ĝ or chunk refs, public_signals, proof(s), meta}</code>.</li>
+      <li>Coordinator: rate-limit → structural ProofValidator → cryptographic verify → store VerifiedUpdate.</li>
+      <li>On threshold: FedAvg (or weighted) → bump <code>model_version</code> → broadcast <code>w_{t+1}</code>.</li>
+      <li>Emit transcript events for experiments.</li>
+    </ol>
+
+    <h2>4. Trust &amp; threat model (architecture view)</h2>
+    <ul>
+      <li><strong>Honest-but-curious coordinator:</strong> sees quantized updates + proofs; should not learn raw private data beyond what updates reveal (FL baseline leakage remains).</li>
+      <li><strong>Malicious client:</strong> tries out-of-bound / malformed updates — proofs must fail; structural validators catch junk.</li>
+      <li><strong>Malicious aggregator:</strong> out of scope for v1 client-proof design; cite zkFL for aggregator proofs; optional future.</li>
+      <li><strong>Trusted setup:</strong> toxic waste must be discarded for production keys; dev keys labeled untrusted.</li>
+    </ul>
+
+    <h2>5. Data stores</h2>
+    <ul>
+      <li>v1: in-memory coordinator OK for single-node demos.</li>
+      <li>v1.1+: Redis/Postgres for pending updates, idempotency keys, audit log of proof hashes.</li>
+      <li>Artifacts: content-addressed <code>sha256</code> of wasm/zkey/vkey in manifest.</li>
+    </ul>
+
+    <h2>6. Deployment topology</h2>
+    <ul>
+      <li>Dev: all-in-one docker-compose (coordinator, prove, client job).</li>
+      <li>Prod: separate Deployments — coordinator, prove-workers (HPA on CPU), optional MPC gateway.</li>
+      <li>ZK toolchain image: prefer Rust engine image without Node; Node image retained for ceremony/compile.</li>
+    </ul>
+
+    <h2>7. Alignment with graphify communities</h2>
+    <p>Implement packages that match graph hubs: prover/zk, coordinator, validation, security, config, monitoring.
+    Demote compliance modules from critical path until G1–G4 work.</p>
+
+    <h2>8. Anti-architecture (do not build)</h2>
+    <ul>
+      <li>Multiple coordinators with incompatible schemas.</li>
+      <li>Prove path that accepts floats into snarkjs.</li>
+      <li>Silent pad/truncate without protocol-level chunking.</li>
+      <li>Import-time hard-fail of entire library if snarkjs missing (lazy + explicit engine init).</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

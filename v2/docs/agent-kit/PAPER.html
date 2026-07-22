@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PAPER — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>PAPER — Research Paper Plan</h1>
+    <p class="lead">Working outline for a systems/security + FL venue paper backed by the open framework.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Paper claims must match concepts:</strong> claim update-constraint ZK + open reproducible system;
+      do not claim aggregator honesty or full training proofs unless built.
+      Align wording with <a href="CONCEPTS.html#prove-what">what the proof asserts</a>.
+    </div>
+
+
+
+    <h2>Working title options</h2>
+    <ul>
+      <li>FEDzk: An Open Framework for Zero-Knowledge Verified Federated Model Updates</li>
+      <li>Client-Side zkSNARKs for Integrity-Constrained Federated Learning: System and Evaluation</li>
+    </ul>
+
+    <h2>Claim checklist (only claim what experiments show)</h2>
+    <ul class="checklist">
+      <li>C1: Framework proves quantized updates satisfy circuit constraints under Groth16.</li>
+      <li>C2: Coordinator rejects malformed / out-of-bound updates with measured false accept ≈ 0 on suite.</li>
+      <li>C3: Accuracy vs plaintext FL within reported gap on Adult / CIFAR settings.</li>
+      <li>C4: End-to-end overhead (prove/verify/network) characterized vs round time.</li>
+      <li>C5: Open artifacts enable reproduction (configs, transcripts, circuit hashes).</li>
+    </ul>
+
+    <h2>Suggested structure</h2>
+    <ol>
+      <li>Introduction — FL trust gap; client integrity; contributions.</li>
+      <li>Background — FedAvg, R1CS, Groth16, quantization (MATH.html).</li>
+      <li>Threat model — malicious clients; honest-but-curious server; non-goals.</li>
+      <li>System design — architecture, circuits, chunk protocol, engines.</li>
+      <li>Implementation — Python FL, Circom, Rust/snarkjs, lines of code, artifact pipeline.</li>
+      <li>Evaluation — setup; datasets; metrics; results; attacks; ablations.</li>
+      <li>Related work — zkFL, zkFDL, Federify, Flower, etc.</li>
+      <li>Discussion — limitations, ethics, trusted setup.</li>
+      <li>Conclusion</li>
+    </ol>
+
+    <h2>Experiment matrix</h2>
+    <table>
+      <tr><th>Exp</th><th>Config</th><th>Compare</th><th>Metrics</th></tr>
+      <tr><td>E1</td><td>adult-lr-baseline.yaml</td><td>—</td><td>acc, loss, time</td></tr>
+      <tr><td>E2</td><td>adult-lr-fedzk.yaml</td><td>E1</td><td>+ prove/verify times, rejects</td></tr>
+      <tr><td>E3</td><td>cifar10-cnn-batch.yaml</td><td>plain FL</td><td>acc, batch verify scaling</td></tr>
+      <tr><td>E4</td><td>Attack suite</td><td>—</td><td>reject rate by attack class</td></tr>
+      <tr><td>E5</td><td>Backend abl. snarkjs vs Rust</td><td>—</td><td>p50/p95 prove/verify</td></tr>
+      <tr><td>E6</td><td>scale_bits / N ablation</td><td>—</td><td>acc vs cost</td></tr>
+    </table>
+
+    <h2>Venues (indicative)</h2>
+    <ul>
+      <li>Systems/security: IEEE S&amp;P workshops, ACSAC, NDSS workshops, PETS (if privacy angle strong).</li>
+      <li>FL/ML systems: MLSys, EuroSys workshops, FloCon-style FL workshops.</li>
+      <li>Aim for artifact evaluation badges where offered.</li>
+    </ul>
+
+    <h2>Artifact appendix</h2>
+    <ul>
+      <li>Docker image + <code>fedzk round run</code> one-command reproduce.</li>
+      <li>Circuit source + vk hashes + ceremony notes.</li>
+      <li>Raw transcripts + plotting scripts.</li>
+      <li>CITATION.cff + Zenodo DOI on release.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

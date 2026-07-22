@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>LOOPS — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>LOOPS.html — Conductor Loop Engineering (Human-Proxy)</h1>
+    <p class="lead">
+      How the Cursor parent agent runs AI-DLC as a self-correcting loop using
+      <strong>FEDzk HTML only</strong> — method from AIDLC v2, files from this kit (not <code>conductor.md</code>).
+    </p>
+    <div class="meta">
+      <span class="pill ok">HTML artifacts</span>
+      <span class="pill bad">No upstream AIDLC MD in context</span>
+    </div>
+
+    <div class="callout bad">
+      <strong>Load ban:</strong> Do not Read <code>vendor/aidlc-workflows/core/**/*.md</code>.
+      Conductor surface = this page + <a href="MANIFEST.html">MANIFEST</a> + <a href="ROSTER.html">ROSTER</a> + <a href="AIDLC.html">AIDLC</a>.
+    </div>
+
+    <h2 id="forward">1. Forwarding loop (mechanism)</h2>
+    <pre><code>loop:
+  directive ← next stage / topology from AIDLC.html + PLAN.html
+  conductor executes ONE move (inline | dispatch subagents | pipeline | mob)
+  write HTML artifacts + contributions under v2/docs/agent-kit/intents/...
+  run sensors (QUALITY.html)
+  learning-gate ritual (diary candidates → rules/project.html)
+  approval-gate (human OR human-proxy → human-proxy-audit.html)
+  continue | revise | halt-and-ask
+until intent complete</code></pre>
+
+    <h2 id="conductor">2. Conductor rules</h2>
+    <ul>
+      <li>Own quality inside the stage; PLAN/AIDLC owns which stage is next.</li>
+      <li>Never let agents call agents — only conductor dispatches Task.</li>
+      <li>Support agents write <code>v2/docs/agent-kit/intents/.../contributions/&lt;role&gt;.html</code>; lead integrates.</li>
+      <li>On NOT-READY reviewer: fix cycle is lead ↔ reviewer, not full mob replay.</li>
+      <li>Dispatch prompts: copy from <a href="MANIFEST.html#dispatch">MANIFEST §3</a>; personas from ROSTER.</li>
+    </ul>
+
+    <h2 id="proxy">3. Human-proxy policy (FEDzk Cursor)</h2>
+    <table>
+      <tr><th>Action</th><th>Proxy allowed?</th></tr>
+      <tr><td>Approve ideation/inception HTML artifacts</td><td>Yes, if sensors pass + CONCEPTS-consistent</td></tr>
+      <tr><td>Approve Phase 0 code PR plan</td><td>Yes for plan; user preferred for merge</td></tr>
+      <tr><td>Rotate secrets / force-push / PyPI release</td><td><strong>No</strong> — halt-and-ask</td></tr>
+      <tr><td>Change proof schema major version</td><td>No — halt-and-ask</td></tr>
+      <tr><td>Strategy D (leave Circom)</td><td>No — halt-and-ask</td></tr>
+    </table>
+    <p>Every proxy approval appends a row to
+      <a href="intents/260722-fedzk-contribution/human-proxy-audit.html">human-proxy-audit.html</a>.</p>
+
+    <h2 id="learning">4. Learning gate ritual</h2>
+    <ol>
+      <li>During stage: diary sections inside contribution HTML.</li>
+      <li>At gate: list candidates verbatim.</li>
+      <li>Proxy keeps items that prevent recurrence (e.g. CLI shadow lesson).</li>
+      <li>Write kept practices into <a href="rules/project.html">rules/project.html</a>.</li>
+    </ol>
+
+    <h2 id="swarm">5. Construction swarm (bolts)</h2>
+    <ul>
+      <li>Bolt 1 (walking skeleton) is solo + gated.</li>
+      <li>After Bolt 1: parallelize independent units via subagents with MANIFEST load sets.</li>
+      <li>Convergence: <code>fedzk doctor</code> + golden verify + unit tests.</li>
+    </ul>
+
+    <h2 id="cursor">6. Cursor Task mapping</h2>
+    <table>
+      <tr><th>AIDLC method</th><th>Cursor + HTML kit</th></tr>
+      <tr><td>Conductor</td><td>Parent agent; reads LOOPS + MANIFEST</td></tr>
+      <tr><td>Dispatch support agent</td><td><code>Task</code> + ROSTER persona + HTML paths</td></tr>
+      <tr><td>Contribution file</td><td><code>intents/.../contributions/*.html</code></td></tr>
+      <tr><td>Reviewer</td><td>Separate Task; HTML-only Read</td></tr>
+      <tr><td>Composer</td><td>Parent proposes stage subset from AIDLC.html</td></tr>
+    </table>
+
+    <h2 id="state">7. Current loop state</h2>
+    <p>Intent <code>260722-fedzk-contribution</code> —
+      <a href="intents/260722-fedzk-contribution/intent/intent.html">intent.html</a> ·
+      HTML-first methodology approved in audit log.</p>
+
+    <aside class="agent-brief" data-role="conductor">
+      <strong>Conductor brief:</strong> One move per turn. Dispatch with MANIFEST template.
+      Never @-include aidlc-workflows Markdown. Prefer section anchors over full-file dumps.
+    </aside>
+
+    <footer class="doc-foot">HTML-first loops · method from AIDLC v2 · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

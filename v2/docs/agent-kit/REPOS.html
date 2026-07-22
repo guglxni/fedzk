@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>REPOS — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>REPOS — Verified GitHub Clones (<code>gh</code>)</h1>
+    <p class="lead">Every URL below was checked with <code>gh repo view</code> (2026-07-22). Re-verify before pinning. Do not invent org names.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Repos exist to support concepts:</strong> Circom/snarkjs/arkworks → prove integrity policy;
+      Flower/FedML → FL orchestration/experiments; not replacements for verify-before-aggregate.
+    </div>
+
+
+
+    <div class="callout">
+      <strong>Prereq:</strong> Install GitHub CLI — <a href="https://cli.github.com/">cli.github.com</a> · <code>gh auth login</code>
+    </div>
+
+    
+    <h2 id="aidlc-upstream">0. AI-DLC workflows (methodology)</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th><th>Role</th></tr>
+      <tr><td>awslabs/aidlc-workflows</td><td><a href="https://github.com/awslabs/aidlc-workflows/tree/v2">github.com/awslabs/aidlc-workflows (branch/tag v2)</a></td><td>AI-DLC 2.x stages, agents, loop</td></tr>
+    </table>
+    <pre><code>gh repo view awslabs/aidlc-workflows --json url,description
+gh repo clone awslabs/aidlc-workflows vendor/aidlc-workflows -- --branch v2 --depth 1
+git -C vendor/aidlc-workflows rev-parse HEAD | tee docs/agent-kit/.aidlc-v2.pin
+# Optional: copy a dist harness later; FEDzk Cursor surface is docs/agent-kit + aidlc/spaces</code></pre>
+<h2>1. Standard verify + clone pattern</h2>
+    <pre><code># Verify
+gh repo view OWNER/NAME --json nameWithOwner,url,description,stargazerCount,defaultBranchRef
+
+# Shallow clone into vendor/
+mkdir -p vendor
+gh repo clone OWNER/NAME vendor/NAME -- --depth 1
+
+# Pin commit for reproducibility
+git -C vendor/NAME rev-parse HEAD | tee vendor/NAME.pin
+
+# Optional: specific tag
+gh repo clone OWNER/NAME vendor/NAME -- --depth 1 --branch TAG</code></pre>
+
+    <h2>2. ZK toolchain (required)</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th><th>Role</th></tr>
+      <tr><td>iden3/circom</td><td><a href="https://github.com/iden3/circom">github.com/iden3/circom</a></td><td>Circuit compiler</td></tr>
+      <tr><td>iden3/snarkjs</td><td><a href="https://github.com/iden3/snarkjs">github.com/iden3/snarkjs</a></td><td>Groth16 prove/verify JS</td></tr>
+      <tr><td>iden3/circomlib</td><td><a href="https://github.com/iden3/circomlib">github.com/iden3/circomlib</a></td><td>Comparators, aliases</td></tr>
+      <tr><td>iden3/circom-witnesscalc</td><td><a href="https://github.com/iden3/circom-witnesscalc">github.com/iden3/circom-witnesscalc</a></td><td>Native witness</td></tr>
+      <tr><td>iden3/rapidsnark</td><td><a href="https://github.com/iden3/rapidsnark">github.com/iden3/rapidsnark</a></td><td>Fast prover fallback</td></tr>
+    </table>
+    <pre><code>gh repo clone iden3/circom vendor/circom -- --depth 1
+gh repo clone iden3/snarkjs vendor/snarkjs -- --depth 1
+gh repo clone iden3/circomlib vendor/circomlib -- --depth 1
+gh repo clone iden3/circom-witnesscalc vendor/circom-witnesscalc -- --depth 1
+gh repo clone iden3/rapidsnark vendor/rapidsnark -- --depth 1</code></pre>
+
+    <h2>3. Rust proving stack (Phase 3)</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th><th>Role</th></tr>
+      <tr><td>arkworks-rs/groth16</td><td><a href="https://github.com/arkworks-rs/groth16">github.com/arkworks-rs/groth16</a></td><td>Groth16</td></tr>
+      <tr><td>arkworks-rs/algebra</td><td><a href="https://github.com/arkworks-rs/algebra">github.com/arkworks-rs/algebra</a></td><td>Fields/curves</td></tr>
+      <tr><td>arkworks-rs/snark</td><td><a href="https://github.com/arkworks-rs/snark">github.com/arkworks-rs/snark</a></td><td>SNARK traits</td></tr>
+      <tr><td>arkworks-rs/circom-compat</td><td><a href="https://github.com/arkworks-rs/circom-compat">github.com/arkworks-rs/circom-compat</a></td><td>Circom R1CS interop</td></tr>
+      <tr><td>philsippl/circom-witness-rs</td><td><a href="https://github.com/philsippl/circom-witness-rs">github.com/philsippl/circom-witness-rs</a></td><td>Rust witness option</td></tr>
+      <tr><td>tokio-rs/axum</td><td><a href="https://github.com/tokio-rs/axum">github.com/tokio-rs/axum</a></td><td>Sidecar HTTP</td></tr>
+      <tr><td>PyO3/pyo3</td><td><a href="https://github.com/PyO3/pyo3">github.com/PyO3/pyo3</a></td><td>Optional FFI later</td></tr>
+      <tr><td>rust-lang/rust</td><td><a href="https://github.com/rust-lang/rust">github.com/rust-lang/rust</a></td><td>Toolchain reference</td></tr>
+    </table>
+    <pre><code>gh repo clone arkworks-rs/circom-compat vendor/circom-compat -- --depth 1
+gh repo clone arkworks-rs/groth16 vendor/ark-groth16 -- --depth 1
+gh repo clone tokio-rs/axum vendor/axum -- --depth 1</code></pre>
+    <p>Prefer Cargo.toml crates.io deps for build; clone vendors for reading APIs / debugging.</p>
+
+    <h2>4. Optional circuit redesign research (Strategy D — not default)</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th></tr>
+      <tr><td>noir-lang/noir</td><td><a href="https://github.com/noir-lang/noir">github.com/noir-lang/noir</a></td></tr>
+      <tr><td>zcash/halo2</td><td><a href="https://github.com/zcash/halo2">github.com/zcash/halo2</a></td></tr>
+      <tr><td>privacy-ethereum/halo2</td><td><a href="https://github.com/privacy-ethereum/halo2">github.com/privacy-ethereum/halo2</a></td></tr>
+      <tr><td>Consensys/gnark</td><td><a href="https://github.com/Consensys/gnark">github.com/Consensys/gnark</a> (Go; comparative)</td></tr>
+    </table>
+
+    <h2>5. Federated learning frameworks</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th><th>Use</th></tr>
+      <tr><td>flwrlabs/flower</td><td><a href="https://github.com/flwrlabs/flower">github.com/flwrlabs/flower</a></td><td>Primary integration candidate</td></tr>
+      <tr><td>FedML-AI/FedML</td><td><a href="https://github.com/FedML-AI/FedML">github.com/FedML-AI/FedML</a></td><td>Benchmarks / ideas</td></tr>
+      <tr><td>SymbioticLab/FedScale</td><td><a href="https://github.com/SymbioticLab/FedScale">github.com/SymbioticLab/FedScale</a></td><td>Datasets / scale exps</td></tr>
+      <tr><td>OpenMined/PySyft</td><td><a href="https://github.com/OpenMined/PySyft">github.com/OpenMined/PySyft</a></td><td>Privacy stack adjacent</td></tr>
+      <tr><td>facebookresearch/FLSim</td><td><a href="https://github.com/facebookresearch/FLSim">github.com/facebookresearch/FLSim</a></td><td>Simulation ideas</td></tr>
+    </table>
+    <pre><code>gh repo clone flwrlabs/flower vendor/flower -- --depth 1
+gh repo clone FedML-AI/FedML vendor/FedML -- --depth 1
+gh repo clone SymbioticLab/FedScale vendor/FedScale -- --depth 1</code></pre>
+
+    <h2>6. ML / services / tooling</h2>
+    <table>
+      <tr><th>Repo</th><th>URL</th><th>Role</th></tr>
+      <tr><td>pytorch/pytorch</td><td><a href="https://github.com/pytorch/pytorch">github.com/pytorch/pytorch</a></td><td>Training</td></tr>
+      <tr><td>fastapi/fastapi</td><td><a href="https://github.com/fastapi/fastapi">github.com/fastapi/fastapi</a></td><td>Python services</td></tr>
+      <tr><td>huggingface/candle</td><td><a href="https://github.com/huggingface/candle">github.com/huggingface/candle</a></td><td>Future Rust ML research only</td></tr>
+      <tr><td>tracel-ai/burn</td><td><a href="https://github.com/tracel-ai/burn">github.com/tracel-ai/burn</a></td><td>Future Rust ML research only</td></tr>
+      <tr><td>astral-sh/uv</td><td><a href="https://github.com/astral-sh/uv">github.com/astral-sh/uv</a></td><td>Fast Python env</td></tr>
+      <tr><td>google/differential-privacy</td><td><a href="https://github.com/google/differential-privacy">github.com/google/differential-privacy</a></td><td>DP reference</td></tr>
+      <tr><td>OpenMined/PyDP</td><td><a href="https://github.com/OpenMined/PyDP">github.com/OpenMined/PyDP</a></td><td>Python DP bindings</td></tr>
+    </table>
+
+    <h2>7. Bulk bootstrap script</h2>
+    <pre><code>#!/usr/bin/env bash
+set -euo pipefail
+mkdir -p vendor
+repos=(
+  iden3/circom iden3/snarkjs iden3/circomlib
+  iden3/circom-witnesscalc arkworks-rs/circom-compat
+  flwrlabs/flower
+)
+for r in "${repos[@]}"; name
+  name="${r##*/}"
+  gh repo view "$r" --json url >/dev/null
+  if [[ ! -d "vendor/$name/.git" ]]; then
+    gh repo clone "$r" "vendor/$name" -- --depth 1
+  fi
+  git -C "vendor/$name" rev-parse HEAD &gt; "vendor/$name.pin"
+done
+echo "Vendor pins written."</code></pre>
+
+    <h2>8. Note on org renames</h2>
+    <ul>
+      <li>Flower lives under <code>flwrlabs/flower</code> (not the old adap URL).</li>
+      <li>PSE Halo2 may appear as <code>privacy-ethereum/halo2</code>.</li>
+      <li>Always re-run <code>gh repo view</code> if clone fails.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PRD — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>Product Requirements Document — Contribution-Grade FEDzk</h1>
+    <p class="lead">Target PRD for a research-publishable, production-grade open-source ZK-FL framework. Supersedes aspirational claims in the legacy README.</p>
+    <div class="meta">
+      <span class="pill info">Version target: 1.0.0 OSS</span>
+      <span class="pill warn">Legacy repo ≈ 0.3 research demo</span>
+    </div>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Conceptual primer:</strong> This PRD operationalizes the FEDzk concept:
+      integrity-gated FL with client-side ZK proofs of update constraint satisfaction.
+      Non-goals (aggregator ZK, full train proofs, update-hiding) are intentional—see
+      <a href="CONCEPTS.html#nonproblem">CONCEPTS §3</a>.
+    </div>
+    <h2 id="prd-concepts">Product concepts the PRD assumes</h2>
+    <ul>
+      <li><strong>Integrity policy as product surface:</strong> users choose circuit_id / bounds like they choose optimizers.</li>
+      <li><strong>Proof as admission ticket:</strong> UX and API center on prove→submit→verify, not on mock-friendly demos.</li>
+      <li><strong>Reproducibility as a feature:</strong> experiment configs are first-class because FEDzk is also a research instrument.</li>
+      <li><strong>Honesty as quality:</strong> claiming production without instantiating CONCEPTS is a product defect.</li>
+    </ul>
+
+
+
+    <h2>1. Vision</h2>
+    <p>Enable practitioners and researchers to run federated learning rounds where each client proves—in zero knowledge—that its update satisfies publicly agreed constraints, and the coordinator rejects invalid updates with cryptographic certainty.</p>
+
+    <h2>2. Problem</h2>
+    <ul>
+      <li>Plain FL trusts clients; Byzantine / poisoning attacks are real.</li>
+      <li>Existing ZK-FL research often lacks open, reproducible frameworks.</li>
+      <li>Current FEDzk scaffolding overclaims readiness (n=4 toy circuits, broken packaging).</li>
+    </ul>
+
+    <h2>3. Goals</h2>
+    <table>
+      <tr><th>ID</th><th>Goal</th><th>Metric</th></tr>
+      <tr><td>G1</td><td>Real ZK client-update proofs</td><td>Groth16 verify=true on quantized grads; no mocks</td></tr>
+      <tr><td>G2</td><td>Usable FL loop</td><td>Multi-client FedAvg with verify-before-aggregate</td></tr>
+      <tr><td>G3</td><td>Research reproducibility</td><td>YAML configs → transcripts matching schema</td></tr>
+      <tr><td>G4</td><td>OSS installability</td><td><code>pip install fedzk</code> + one documented ZK setup path</td></tr>
+      <tr><td>G5</td><td>Honest docs</td><td>Every getting-started snippet runs in CI</td></tr>
+      <tr><td>G6</td><td>Paper-ready benchmarks</td><td>Adult + CIFAR (or approved substitutes) with baselines</td></tr>
+      <tr><td>G7</td><td>Production ops path</td><td>Docker/Helm with healthchecks; no default test API keys in prod mode</td></tr>
+    </table>
+
+    <h2>4. Non-goals (v1)</h2>
+    <ul>
+      <li>Full on-chain settlement / blockchain dependency (optional later).</li>
+      <li>Replacing PyTorch with Rust training.</li>
+      <li>Migrating all circuits to Noir/Halo2 in v1.</li>
+      <li>Enterprise compliance theater (GDPR PDF generators) as a substitute for crypto correctness.</li>
+      <li>Supporting 10M-parameter end-to-end single-circuit proofs without chunking (must be explicit chunk protocol).</li>
+    </ul>
+
+    <h2>5. Personas</h2>
+    <ul>
+      <li><strong>Researcher:</strong> runs experiment YAMLs, exports transcripts, cites framework.</li>
+      <li><strong>FL engineer:</strong> integrates LocalTrainer + prove into existing pipeline.</li>
+      <li><strong>Security engineer:</strong> audits circuits, trusted setup, threat model.</li>
+      <li><strong>OSS contributor:</strong> clear issues, good-first-issues, passing CI.</li>
+    </ul>
+
+    <h2>6. User stories</h2>
+    <ul>
+      <li>As a researcher, I can reproduce Adult LR FEDzk vs baseline accuracy within ε from published transcript.</li>
+      <li>As a developer, I can <code>pip install -e .</code>, run setup script, and complete one local prove→verify→aggregate demo in &lt;30 minutes on a laptop.</li>
+      <li>As a coordinator operator, I can reject malformed/out-of-bound updates with logged proof failures.</li>
+      <li>As a contributor, I can add a circuit variant with golden tests via documented template.</li>
+    </ul>
+
+    <h2>7. Functional requirements (summary)</h2>
+    <p>Full list in <a href="REQUIREMENTS.html">REQUIREMENTS.html</a>. Must-have for v1:</p>
+    <ul>
+      <li>FR-1 Quantized gradient prove/verify (parameterized N).</li>
+      <li>FR-2 Secure circuit: L2 bound + min nonzero.</li>
+      <li>FR-3 Coordinator verify-before-FedAvg.</li>
+      <li>FR-4 MPC remote prove optional.</li>
+      <li>FR-5 CLI: setup, prove, verify, train-round, mpc serve.</li>
+      <li>FR-6 Experiment runner + transcript schema.</li>
+      <li>FR-7 Batch verification path (paper + CIFAR config).</li>
+    </ul>
+
+    <h2>8. Success = Definition of Done (v1.0)</h2>
+    <ul class="checklist">
+      <li>QUALITY.html gates green on main.</li>
+      <li>Paper experiment matrix runnable from clean machine instructions.</li>
+      <li>PyPI or GitHub Release with signed artifacts + SBOM.</li>
+      <li>Security: zero criticals; secrets untracked; prod mode refuses default keys.</li>
+      <li>Docs site / agent-kit + human docs agree with API.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

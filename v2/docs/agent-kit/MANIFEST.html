@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>MANIFEST — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+  
+</head>
+<body data-kit="fedzk-html-first" data-aidlc-method="v2-adapted">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>MANIFEST.html — Agent bootstrap &amp; load graph</h1>
+    <p class="lead">
+      Single entry for every agent session. Determines the <strong>minimum HTML set</strong> to Read
+      for a role/stage — the main efficiency lever vs dumping Markdown trees.
+    </p>
+    <div class="meta">
+      <span class="pill ok">Always start here</span>
+      <span class="pill info">HTML-first</span>
+      <span class="pill">AIDLC method · FEDzk files</span>
+    </div>
+
+    <section data-agent-block="boot" id="boot">
+      <h2>0. Session boot (all roles)</h2>
+      <ol>
+        <li>Read <a href="MANIFEST.html">MANIFEST.html</a> (this file) — stop after your role table.</li>
+        <li>Read <a href="FORMAT.html">FORMAT.html</a> §3 hard rules (HTML-only).</li>
+        <li>Read <a href="CONCEPTS.html">CONCEPTS.html</a> §§1–6 if not already in working memory.</li>
+        <li>Read matching <a href="rules/project.html">rules/project.html</a> + phase rules.</li>
+        <li>Open only the stage pages listed for your move — then act.</li>
+      </ol>
+    </section>
+
+    <section data-agent-block="load-graph" id="load-graph">
+      <h2>1. Load graph by role (minimum)</h2>
+      <table>
+        <tr><th>Role</th><th>Must Read (paths)</th><th>Optional</th><th>Never</th></tr>
+        <tr>
+          <td>conductor</td>
+          <td>MANIFEST, FORMAT, LOOPS, AIDLC, ROSTER, CONCEPTS#loop, rules/project</td>
+          <td>PLAN, QUALITY</td>
+          <td>vendor/aidlc-workflows/**/*.md</td>
+        </tr>
+        <tr>
+          <td>product</td>
+          <td>CONCEPTS, PROPOSAL, prd, PAPER, REQUIREMENTS, rules/phases/ideation</td>
+          <td>RESEARCH</td>
+          <td>circuit source dumps</td>
+        </tr>
+        <tr>
+          <td>architect</td>
+          <td>CONCEPTS, architecture, STACK, MATH, DESIGN, PLAN, rules/phases/inception</td>
+          <td>REPOS</td>
+          <td>compliance theater docs</td>
+        </tr>
+        <tr>
+          <td>developer</td>
+          <td>CONCEPTS#map, INTEGRATION, PLAN Phase0, DESIGN#sdk, rules/phases/construction</td>
+          <td>REPOS clone recipes</td>
+          <td>full RESEARCH corpus</td>
+        </tr>
+        <tr>
+          <td>quality</td>
+          <td>QUALITY, REQUIREMENTS, LOOPS#sensors, PLAN Bolt1</td>
+          <td>PAPER metrics</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>devsecops</td>
+          <td>QUALITY, CONCEPTS#threats, REPOS, rules/project</td>
+          <td>INTEGRATION Helm</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>reviewer</td>
+          <td>MANIFEST, CONCEPTS#nonproblem, AIDLC gates, target artifact HTML</td>
+          <td>—</td>
+          <td>implementation rabbit holes</td>
+        </tr>
+      </table>
+    </section>
+
+    <section data-agent-block="stage-load" id="stage-load">
+      <h2>2. Load graph by AIDLC stage (FEDzk HTML)</h2>
+      <table>
+        <tr><th>Stage</th><th>HTML produces / reads</th></tr>
+        <tr><td>intent / scope</td><td>PROPOSAL, prd, CONCEPTS, rules/project</td></tr>
+        <tr><td>reverse-engineering</td><td>intents/…/reverse-engineering.html + code</td></tr>
+        <tr><td>requirements-analysis</td><td>REQUIREMENTS + intents/…/requirements.html</td></tr>
+        <tr><td>units-generation</td><td>PLAN + intents/…/units.html</td></tr>
+        <tr><td>application-design</td><td>architecture, DESIGN, STACK</td></tr>
+        <tr><td>construction bolt</td><td>PLAN unit id + INTEGRATION + QUALITY sensors</td></tr>
+      </table>
+    </section>
+
+    <section data-agent-block="dispatch" id="dispatch">
+      <h2>3. Dispatch template (HTML-only)</h2>
+      <pre class="copy-prompt" id="dispatch-prompt"><code>You are aidlc-&lt;role&gt;-agent on FEDzk (Cursor).
+HTML-FIRST: Read only docs/agent-kit HTML listed in MANIFEST for your role.
+Do NOT load vendor/aidlc-workflows/**/*.md.
+Write contribution as HTML to:
+  v2/docs/agent-kit/intents/260722-fedzk-contribution/&lt;stage&gt;/contributions/&lt;role&gt;.html
+First line in &lt;h1&gt;: Contribution: aidlc-&lt;role&gt;-agent
+Include diary sections. Do not spawn nested Task.</code></pre>
+      <button type="button" data-copy="#dispatch-prompt">Copy dispatch prompt</button>
+    </section>
+
+    <section data-agent-block="token" id="token-budget">
+      <h2>4. Token budget guidance</h2>
+      <ul>
+        <li>Default context pack ≤ 4 HTML pages + 1 rules page.</li>
+        <li>Use section anchors (<code>CONCEPTS.html#quantize</code>) instead of full files when possible.</li>
+        <li>Prefer tables over prose when stating contracts.</li>
+        <li>If blocked, re-read MANIFEST — do not expand to entire kit.</li>
+      </ul>
+    </section>
+
+    <footer class="doc-foot">HTML-first agent kit · AIDLC methodology without upstream MD · <a href="index.html">Hub</a> · <a href="FORMAT.html">FORMAT</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

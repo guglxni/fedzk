@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DESIGN — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>DESIGN — Protocols, APIs, Circuits, UX</h1>
+    <p class="lead">Concrete design decisions agents must implement consistently.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Conceptual primer:</strong> DESIGN turns CONCEPTS into contracts—SDK shapes, proof envelope, chunk binding, CLI verbs.
+      If a design choice is unclear, ask: “Which CONCEPTS principle (P1–P10) does this serve?” · <a href="CONCEPTS.html#principles">Principles</a>
+    </div>
+    <h2 id="why-design">How &amp; why we design APIs this way</h2>
+    <ul>
+      <li><strong>Prove returns (proof, public) plus meta:</strong> verification needs public inputs; papers need scale_bits/chunk metadata.</li>
+      <li><strong>circuit_id in the envelope:</strong> policy versioning—so clients cannot mix vk A with circuit B accidentally.</li>
+      <li><strong>Chunk protocol with commitment:</strong> static circuit width is a cryptographic constraint; silent truncation would violate CONCEPTS P4 (honest capacity).</li>
+      <li><strong>engine=auto:</strong> conceptual stability of the statement; Rust vs snarkjs is an implementation detail behind the same L.</li>
+      <li><strong>Single coordinator surface:</strong> one protocol concept ⇒ one HTTP schema (dual aggregators break the mental model).</li>
+    </ul>
+
+
+
+    <h2>1. Public Python SDK (target)</h2>
+    <pre><code>from fedzk import LocalTrainer, GradientQuantizer, ZKProver, ZKVerifier
+from fedzk.coordinator import CoordinatorClient
+from fedzk.config import EnvironmentConfig
+
+cfg = EnvironmentConfig.from_env()
+trainer = LocalTrainer(model_type="linear", learning_rate=0.01)
+quant = GradientQuantizer(scale_bits=12)
+prover = ZKProver(circuit="model_update_secure", engine="auto")  # rust|snarkjs
+
+updates = trainer.train(dataloader, epochs=1)
+q_grads, meta = quant.encode(updates)
+proof, public = prover.prove(q_grads, meta)
+assert ZKVerifier(circuit="model_update_secure").verify(proof, public)
+
+CoordinatorClient(cfg.coordinator_url).submit_update(
+    gradients=q_grads, proof=proof, public_inputs=public, client_id="c1"
+)</code></pre>
+
+    <h2>2. Proof wire format <code>fedzk.proof.v1</code></h2>
+    <pre><code>{
+  "schema": "fedzk.proof.v1",
+  "protocol": "groth16",
+  "curve": "bn128",
+  "circuit_id": "model_update_secure@2",
+  "proof": { "pi_a": [...], "pi_b": [...], "pi_c": [...], "protocol": "groth16", "curve": "bn128" },
+  "public_signals": ["..."],
+  "meta": { "scale_bits": 12, "chunk_index": 0, "chunk_count": 1, "round_id": "..." }
+}</code></pre>
+
+    <h2>3. Chunk Protocol v1</h2>
+    <ul>
+      <li>Circuit fixed length <code>N</code> (e.g. 64, 256).</li>
+      <li>Flatten update; pad last chunk with zeros; each chunk proves local constraints.</li>
+      <li>Public signals include <code>chunk_index</code>, <code>chunk_count</code>, binding hash of full vector commitment.</li>
+      <li>Coordinator verifies all chunks + commitment consistency before accepting update.</li>
+      <li>Paper must report chunk counts and overhead.</li>
+    </ul>
+
+    <h2>4. Circuit family</h2>
+    <table>
+      <tr><th>circuit_id</th><th>Statement (informal)</th><th>v1 priority</th></tr>
+      <tr><td>model_update_quantized@N</td><td>Encoded grads well-formed; optional GD step</td><td>P0</td></tr>
+      <tr><td>model_update_secure@N</td><td>‖g‖² ≤ B ∧ nnz(g) ≥ m</td><td>P0</td></tr>
+      <tr><td>sparse_gradients@N</td><td>Sparsity / index constraints</td><td>P1</td></tr>
+      <tr><td>differential_privacy@N</td><td>Noise / clipping related constraints</td><td>P1</td></tr>
+      <tr><td>batch_verification@K</td><td>Aggregate verify optimization</td><td>P1 (paper CIFAR)</td></tr>
+    </table>
+
+    <h2>5. Engine selection</h2>
+    <pre><code>FEDZK_ZK_BACKEND=auto|rust|snarkjs
+# auto: rust if fedzk-zk health OK else snarkjs
+# CI: run both on goldens weekly</code></pre>
+
+    <h2>6. Coordinator HTTP (single app)</h2>
+    <ul>
+      <li><code>POST /v1/rounds/{id}/updates</code></li>
+      <li><code>GET /v1/model</code></li>
+      <li><code>GET /health</code> <code>GET /ready</code></li>
+      <li>Deprecate legacy <code>/submit_update</code> via alias for one minor version.</li>
+      <li>Delete or archive duplicate aggregator app.</li>
+    </ul>
+
+    <h2>7. Error model</h2>
+    <ul>
+      <li><code>QuantizationError</code>, <code>CircuitInputError</code>, <code>ProofGenerationError</code>, <code>ProofVerificationError</code>, <code>RateLimited</code>.</li>
+      <li>Never return proof bytes on failure. Log proof_hash on verify fail.</li>
+    </ul>
+
+    <h2>8. UX / CLI</h2>
+    <pre><code>fedzk setup zk
+fedzk circuit list
+fedzk prove --input grads.json --circuit model_update_secure --out proof.json
+fedzk verify --proof proof.json
+fedzk round run --config spec/experiments/adult-lr-fedzk.yaml
+fedzk mpc serve --backend auto
+fedzk doctor   # toolchain + artifact hashes</code></pre>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

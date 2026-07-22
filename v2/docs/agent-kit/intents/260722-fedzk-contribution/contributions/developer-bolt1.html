@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/><title>Contribution developer Bolt1</title>
+<link rel="stylesheet" href="../../../styles.css"/></head>
+<body data-kit="fedzk-html-first">
+<main style="max-width:900px;margin:2rem auto;padding:1rem">
+<h1>Contribution: aidlc-developer-agent</h1>
+<p data-stage="construction">Branch <code>v2</code> — Bolt 1 walking skeleton + Phase0 parallel hygiene.</p>
+<h2>Produces</h2>
+<ul>
+<li>CLI unshadow; <code>fedzk doctor</code>; quantized prove path; MPC path fix; aggregator shim; secrets untrack; torch core; Alpha classifier</li>
+<li>tests/unit/test_phase0_bolt1.py (7 passed)</li>
+<li>Smoke: generate+verify OK</li>
+</ul>
+<h2>Diary</h2>
+<ul>
+<li><strong>Interpretations:</strong> Package shadow was the root cause of dead entrypoint — not missing Typer app.</li>
+<li><strong>Deviations:</strong> Aggregator fully deleted deferred; shim re-exports api:app.</li>
+<li><strong>Tradeoffs:</strong> torch in core increases install size; honesty over optional fiction.</li>
+<li><strong>Open questions:</strong> When regenerate circuits vs freeze hashes for paper?</li>
+</ul>
+<p><a href="../../../scratchpad.html">scratchpad</a> · <a href="../../../PLAN.html">PLAN</a></p>
+</main></body></html>

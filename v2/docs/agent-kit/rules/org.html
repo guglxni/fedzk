@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>rules/org — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar" data-nav-depth="../"></nav>
+  <main>
+
+    <h1 data-rule-layer="org">Organization rules (HTML)</h1>
+    <p class="lead">Replaces <code>aidlc/.../memory/org.md</code>. Binding for all FEDzk agent work.</p>
+    <section data-agent-block="org-rules">
+      <ol class="checklist">
+        <li data-rule="ORG-1"><strong>HTML-first:</strong> Operating instructions live in <code>docs/agent-kit/**/*.html</code>.</li>
+        <li data-rule="ORG-2"><strong>No upstream AIDLC MD in context:</strong> Do not Read <code>vendor/aidlc-workflows/core/**/*.md</code> during FEDzk runs.</li>
+        <li data-rule="ORG-3"><strong>Security:</strong> Never commit secrets, keys, or <code>secrets/</code> materials; remove tracked secrets before public release.</li>
+        <li data-rule="ORG-4"><strong>Truth over marketing:</strong> Docs must match code; inventing APIs is a defect.</li>
+        <li data-rule="ORG-5"><strong>Human gates:</strong> APPROVE/HALT via human-proxy audit HTML before phase advance.</li>
+        <li data-rule="ORG-6"><strong>Learning loop:</strong> After bolts, update QUALITY + PLAN HTML from measured sensors.</li>
+      </ol>
+    </section>
+
+    <footer class="doc-foot">HTML rules layer · <a href="../index.html">Hub</a> · <a href="../MANIFEST.html">MANIFEST</a></footer>
+  </main>
+</div>
+<script src="../nav.js" defer></script>
+<script src="../agent-kit.js" defer></script>
+</body>
+</html>

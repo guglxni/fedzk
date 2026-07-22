@@ -1,0 +1,49 @@
+{
+  "title": "FEDZK Audit Trail Sample",
+  "description": "Sample of audit logging and monitoring",
+  "sample_events": [
+    {
+      "timestamp": "2025-09-15T19:34:23.880954",
+      "event_type": "user_login",
+      "user_id": "user_123",
+      "ip_address": "192.168.1.100",
+      "user_agent": "Mozilla/5.0 (compatible)",
+      "success": true,
+      "additional_info": {
+        "mfa_used": true
+      }
+    },
+    {
+      "timestamp": "2025-09-15T19:34:23.880955",
+      "event_type": "data_access",
+      "user_id": "user_456",
+      "resource": "model_weights",
+      "action": "read",
+      "ip_address": "10.0.0.50",
+      "success": true,
+      "additional_info": {
+        "data_classification": "confidential"
+      }
+    },
+    {
+      "timestamp": "2025-09-15T19:34:23.880957",
+      "event_type": "federated_computation",
+      "user_id": "participant_789",
+      "action": "gradient_update",
+      "computation_id": "comp_001",
+      "zk_proof_verified": true,
+      "success": true,
+      "additional_info": {
+        "privacy_preserved": true
+      }
+    }
+  ],
+  "audit_log_features": [
+    "Immutable log storage",
+    "Cryptographic log integrity",
+    "Real-time log monitoring",
+    "Automated alerting",
+    "Log retention policies",
+    "Compliance reporting"
+  ]
+}

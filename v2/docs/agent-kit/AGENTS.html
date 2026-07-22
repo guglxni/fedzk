@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AGENTS — FEDzk Agent Kit</title>
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>AGENTS.html — Operating Manual</h1>
+    <p class="lead">Non-negotiable rules for every coding agent working on FEDzk. Read before any edit. Bootstrap via <a href="MANIFEST.html">MANIFEST.html</a>.</p>
+    <div class="meta">
+      <span class="pill ok">HTML-first source of truth</span>
+      <span class="pill bad">Do not trust README production claims</span>
+      <span class="pill info">Dual mission: paper + OSS</span>
+    </div>
+
+    <div class="callout bad" id="html-first">
+      <strong>HTML-first (binding):</strong> Load only <code>v2/v2/docs/agent-kit/**/*.html</code> for methodology/ops.
+      Do <em>not</em> Read <code>vendor/aidlc-workflows/**/*.md</code> into FEDzk agent context.
+      Rationale + load graphs: <a href="FORMAT.html">FORMAT.html</a> · <a href="MANIFEST.html">MANIFEST.html</a>.
+      Rules layers: <a href="rules/org.html">rules/org.html</a> · <a href="rules/project.html">rules/project.html</a>.
+    </div>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Mandatory:</strong> Read <a href="CONCEPTS.html">CONCEPTS.html</a> before any feature work.
+      Every PR should state which concept/principle it advances (e.g. P2 fail-closed, P4 honest capacity).
+    </div>
+
+    <div class="callout" id="aidlc-primer">
+      <strong>AI-DLC mode (method, not upstream MD):</strong> You are either the <em>conductor</em> (parent) or a <em>delegated agent</em> (Task).
+      Conductor owns topologies (inline/subagent/pipeline/mob). Delegated agents never spawn Task.
+      Stages, gates, learning loop: <a href="AIDLC.html">AIDLC.html</a> · <a href="LOOPS.html">LOOPS.html</a> ·
+      <a href="ROSTER.html">ROSTER.html</a>. Memory chain: <a href="MEMORY.html">MEMORY.html</a> (HTML rules, not <code>aidlc/**/*.md</code>).
+    </div>
+
+
+    <h2 id="agents-concepts">Concept guardrails for agents</h2>
+    <ul>
+      <li>Do not implement “convenience” paths that skip verify-before-aggregate—that deletes the product concept.</li>
+      <li>Do not silent-truncate updates to N without chunk protocol—violates honest capacity.</li>
+      <li>Do not describe FEDzk as “fully private FL” in docs/paper unless DP+hiding are actually built.</li>
+      <li>Prefer changes that make CONCEPTS §17 module mapping truer (wire quantizer, single coordinator, etc.).</li>
+    </ul>
+
+
+
+    <h2>1. Mission</h2>
+    <p>Transform FEDzk from a research-demo scaffold into:</p>
+    <ol>
+      <li>A <strong>production-grade open-source framework</strong> for ZK-verified federated learning.</li>
+      <li>A <strong>reproducible research platform</strong> capable of supporting a peer-reviewed paper.</li>
+    </ol>
+    <p>Both missions share one codebase. Marketing language that contradicts runnable code is a defect.</p>
+
+    <h2>2. Agent roles</h2>
+    <table>
+      <tr><th>Role</th><th>Owns</th><th>Must read</th></tr>
+      <tr><td>Architect</td><td>System boundaries, stack, protocol versions</td><td>architecture, DESIGN, STACK</td></tr>
+      <tr><td>Crypto / circuits</td><td>Circom, quantization, prove/verify, golden vectors</td><td>MATH, RESEARCH, INTEGRATION</td></tr>
+      <tr><td>FL / ML</td><td>Trainers, datasets, FedAvg, experiments</td><td>PAPER, PLAN, REQUIREMENTS</td></tr>
+      <tr><td>Platform / Rust</td><td>fedzk-zk sidecar, Axum, artifact loading</td><td>STACK, REPOS, PLAN Phase 3</td></tr>
+      <tr><td>OSS / quality</td><td>CI, security, docs honesty, release</td><td>QUALITY, prd</td></tr>
+      <tr><td>Paper</td><td>Claims, baselines, transcripts, figures</td><td>PAPER, RESEARCH, MATH</td></tr>
+    </table>
+
+    <h2>3. Non-negotiables</h2>
+    <ul class="checklist">
+      <li><strong>No mock proofs in production paths.</strong> Fail loud if toolchain/artifacts/inputs invalid.</li>
+      <li><strong>No silent truncation of model parameters</strong> without explicit config + logged warning + paper-visible limitation.</li>
+      <li><strong>Public API must match docs.</strong> If you change an export, update getting_started and examples in the same PR.</li>
+      <li><strong>Never commit secrets.</strong> Remove tracked <code>secrets/</code>; use env / secret managers.</li>
+      <li><strong>Proof wire format is a versioned contract</strong> (<code>fedzk.proof.v1</code>): snarkjs-compatible Groth16 JSON unless a major version bump.</li>
+      <li><strong>Quantization is mandatory on the prove path</strong> for float tensors (field elements are integers).</li>
+      <li><strong>Graphify after structural code changes</strong> when available: <code>graphify update .</code></li>
+      <li><strong>Prefer small, verified PRs</strong> with golden crypto tests over large speculative rewrites.</li>
+    </ul>
+
+    <h2>4. Current codebase truth (branch <code>v2</code>)</h2>
+    <div class="callout ok">
+      <strong>Bolt 1 fixed (2026-07-22):</strong> CLI shadow removed · doctor added · quantizer wired ·
+      MPC paths corrected · secrets untracked · torch core · prove/verify smoke green.
+      See <a href="scratchpad.html">scratchpad.html</a>.
+    </div>
+    <table>
+      <tr><th>Issue</th><th>Status on v2</th><th>Remaining</th></tr>
+      <tr><td>CLI broken</td><td>✅ fixed — <code>cli.py</code> is module</td><td>—</td></tr>
+      <tr><td>torch optional but required</td><td>✅ torch in core deps</td><td>—</td></tr>
+      <tr><td>n=4 circuits</td><td>honest N_dev=4 + warn</td><td>Phase 1 parameterize N</td></tr>
+      <tr><td>Quantizer unwired</td><td>✅ wired in ZKProver</td><td>—</td></tr>
+      <tr><td>MPC paths wrong</td><td>✅ → <code>src/fedzk/zk/</code></td><td>—</td></tr>
+      <tr><td>circom vs wasm drift</td><td>warn via doctor</td><td>freeze or regenerate</td></tr>
+      <tr><td>Fictional APIs in tests/docs</td><td>open</td><td>rewrite e2e</td></tr>
+      <tr><td>Dual coordinators</td><td>aggregator → api shim</td><td>delete after test retarget</td></tr>
+      <tr><td>Secrets tracked</td><td>✅ untracked + gitignore</td><td>human: rotate if ever leaked</td></tr>
+    </table>
+
+    <h2>5. Standard workflow per task</h2>
+    <ol>
+      <li><strong>Boot:</strong> <a href="MANIFEST.html">MANIFEST.html</a> role load set only (do not preload entire kit).</li>
+      <li><strong>Orient:</strong> Read listed HTML pages + graphify query if graph exists.</li>
+      <li><strong>Spec:</strong> Confirm requirement ID from REQUIREMENTS / PLAN phase.</li>
+      <li><strong>Upstream:</strong> If integrating a library, follow REPOS.html (<code>gh repo clone</code>) — never invent URLs.</li>
+      <li><strong>Implement:</strong> Minimal change; keep wire formats stable.</li>
+      <li><strong>Verify:</strong> Unit + golden ZK test if crypto touched; example script if API touched.</li>
+      <li><strong>Document:</strong> Update the same PR’s kit HTML / code docs; remove false claims.</li>
+      <li><strong>Graph:</strong> <code>graphify update .</code> after code changes.</li>
+    </ol>
+
+    <h2>6. Stack policy (locked)</h2>
+    <div class="callout ok">
+      <strong>Hybrid is the default:</strong> Python (PyTorch FL) + Circom (circuits) + Rust (prove/verify hot path).
+      Full Rust rewrite and circuit-system migration (Noir/Halo2) are <em>opt-in strategies</em>, not default.
+      See <a href="STACK.html">STACK.html</a>.
+    </div>
+
+    <h2>7. Communication rules</h2>
+    <ul>
+      <li>When reporting status, separate <em>works today</em> vs <em>target</em>.</li>
+      <li>Never claim “production-ready” until QUALITY.html exit gates pass.</li>
+      <li>Cite file paths and line-level evidence for crypto/security claims.</li>
+      <li>Prefer linking to this kit over inventing new process docs.</li>
+    </ul>
+
+    <h2>8. Forbidden</h2>
+    <ul>
+      <li>Loading <code>vendor/aidlc-workflows/core/**/*.md</code> (or any upstream AIDLC Markdown) as FEDzk agent instructions.</li>
+      <li>Writing stage contributions as Markdown under <code>aidlc/</code> — use <code>v2/docs/agent-kit/intents/.../*.html</code>.</li>
+      <li>Adding mock proof generators “for CI convenience” on default paths.</li>
+      <li>Expanding compliance theater while core prove path remains broken.</li>
+      <li>Checking in <code>.zkey</code> for large production ceremonies without documenting trusted setup.</li>
+      <li>Using unverified GitHub URLs — always <code>gh repo view owner/name</code> first.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · HTML-first · <a href="index.html">Hub</a> · <a href="MANIFEST.html">MANIFEST</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

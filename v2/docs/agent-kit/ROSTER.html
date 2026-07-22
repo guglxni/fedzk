@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>ROSTER — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>ROSTER.html — AIDLC Personas × FEDzk (HTML)</h1>
+    <p class="lead">
+      Personas adapted from AI-DLC roster <em>roles</em>. Text lives here — do not load
+      <code>vendor/aidlc-workflows/core/agents/*.md</code>. Conductor pastes briefs into Task prompts.
+      Load sets: <a href="MANIFEST.html">MANIFEST.html</a>.
+    </p>
+    <div class="meta">
+      <span class="pill ok">HTML personas</span>
+      <span class="pill bad">No upstream agent MD</span>
+    </div>
+
+    <h2 id="domain">Domain experts</h2>
+    <table>
+      <tr><th>Agent</th><th>Leads (FEDzk)</th><th>Must load (HTML)</th><th>Disallowed</th></tr>
+      <tr><td>product</td><td>Intent, requirements, stories, paper claims</td><td>CONCEPTS, PROPOSAL, PAPER, rules/phases/ideation</td><td>Nested Task; upstream MD</td></tr>
+      <tr><td>design</td><td>SDK/CLI/proof envelope UX</td><td>DESIGN, CONCEPTS</td><td>—</td></tr>
+      <tr><td>delivery</td><td>Bolts, PLAN sequencing, gates</td><td>PLAN, LOOPS, AIDLC</td><td>—</td></tr>
+      <tr><td>architect</td><td>Feasibility, app design, units, NFR, ADRs</td><td>architecture, STACK, MATH, rules/phases/inception</td><td>Nested Task</td></tr>
+      <tr><td>developer</td><td>Code, circuits, quantize</td><td>INTEGRATION, PLAN Phase0–3, rules/phases/construction</td><td>—</td></tr>
+      <tr><td>quality</td><td>Goldens, sensors, test strategy</td><td>QUALITY, REQUIREMENTS</td><td>—</td></tr>
+      <tr><td>devsecops</td><td>Secrets, TLS, supply chain</td><td>QUALITY, CONCEPTS threats</td><td>—</td></tr>
+      <tr><td>compliance</td><td>Deferred until crypto green</td><td>AGENTS forbidden</td><td>Theater expansion</td></tr>
+      <tr><td>aws-platform</td><td>Infra prefs (post-mvp)</td><td>INTEGRATION Helm</td><td>—</td></tr>
+      <tr><td>pipeline-deploy</td><td>CI/CD, charts</td><td>QUALITY CI</td><td>—</td></tr>
+      <tr><td>operations</td><td>SLOs, feedback metrics</td><td>PAPER metrics, rules/phases/operations</td><td>mvp skip</td></tr>
+    </table>
+
+    <h2 id="review">Review-only</h2>
+    <ul>
+      <li><strong>product-lead</strong> — VG1: intent/scope honesty vs CONCEPTS non-goals.</li>
+      <li><strong>architecture-reviewer</strong> — VG2: units DAG, stack ADR, no dual coordinators.</li>
+    </ul>
+
+    <h2 id="composer">Composer</h2>
+    <p><strong>aidlc-composer-agent</strong> — proposes tailored stage plan; FEDzk default compose in AIDLC.html §9. Reads MANIFEST + PLAN only.</p>
+
+    <h2 id="dispatch">Dispatch template (Cursor) — HTML-only</h2>
+    <pre class="copy-prompt" id="roster-dispatch"><code>You are aidlc-&lt;role&gt;-agent for FEDzk.
+HTML-FIRST: Read MANIFEST.html load set for your role. Then listed kit HTML only.
+Rules: docs/agent-kit/rules/{org,team,project}.html + rules/phases/&lt;phase&gt;.html
+Do NOT Read vendor/aidlc-workflows/**/*.md
+Write contribution HTML to:
+  docs/agent-kit/intents/260722-fedzk-contribution/contributions/&lt;role&gt;.html
+First heading: Contribution: aidlc-&lt;role&gt;-agent
+Include diary: Interpretations / Deviations / Tradeoffs / Open questions
+Do NOT spawn nested agents.</code></pre>
+    <button type="button" data-copy="#roster-dispatch">Copy dispatch prompt</button>
+
+    <footer class="doc-foot">HTML roster · <a href="MANIFEST.html">MANIFEST</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

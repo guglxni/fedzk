@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QUALITY — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>QUALITY — Production OSS &amp; CI Bars</h1>
+    <p class="lead">Definition of “production-grade open source” for FEDzk. Aligns with quality-gates/config.yaml intent but grounded in runnable truth.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Quality means the concept is real:</strong> goldens prove L is enforceable; docs smoke proves the SDK matches CONCEPTS;
+      forbidding mock proofs protects fail-closed (P2). <a href="CONCEPTS.html#principles">Principles</a>
+    </div>
+
+
+
+    <h2>1. Release gates (must all pass)</h2>
+    <table>
+      <tr><th>Gate</th><th>Check</th></tr>
+      <tr><td>Install</td><td>Clean VM: pip/uv install; <code>fedzk doctor</code> OK</td></tr>
+      <tr><td>CLI</td><td><code>fedzk --help</code>; <code>from fedzk.cli import app</code> (no package shadow)</td></tr>
+      <tr><td>Prove smoke</td><td>Quantized N_dev vector: generate + verify OK</td></tr>
+      <tr><td>Crypto</td><td>All goldens verify; no mocks on default path</td></tr>
+      <tr><td>Tests</td><td>CI green; critical coverage ≥90% on prover/coordinator/quantizer</td></tr>
+      <tr><td>Security</td><td>gitleaks clean; no tracked secrets; bandit high=0; cargo-audit OK</td></tr>
+      <tr><td>Docs</td><td>Every getting-started command in CI smoke</td></tr>
+      <tr><td>Supply chain</td><td>SBOM + lockfiles; pinned actions SHA</td></tr>
+      <tr><td>License</td><td>LICENSE matches pyproject; third-party notices</td></tr>
+      <tr><td>Version</td><td>Single version source; CHANGELOG; CITATION.cff</td></tr>
+    </table>
+
+    <h2>2. CI pipeline (target)</h2>
+    <pre><code>lint (ruff/mypy) → unit → golden-zk (artifact cache) →
+integration (compose) → rust-cross-verify →
+docs-smoke → security-scan → build-wheel</code></pre>
+
+    <h2>3. Quality gates file</h2>
+    <p>Repo has <code>quality-gates/config.yaml</code>. Agents must reconcile fantasy thresholds (e.g. prove &lt; 2s) with measured N:</p>
+    <ul>
+      <li>Either raise thresholds to measured SLOs, or</li>
+      <li>Keep aspirational targets labeled <code>aspirational:</code> separate from <code>enforced:</code>.</li>
+    </ul>
+
+    <h2>4. OSS community hygiene</h2>
+    <ul>
+      <li>CONTRIBUTING.md matching real workflow.</li>
+      <li>CODE_OF_CONDUCT.md; SECURITY.md with disclosure email.</li>
+      <li>Issue templates: bug, circuit, experiment.</li>
+      <li>Good first issues after Phase 0.</li>
+      <li>CODEOWNERS for <code>src/fedzk/zk/</code> and <code>crates/</code>.</li>
+    </ul>
+
+    <h2>5. Semantic versioning policy</h2>
+    <ul>
+      <li>MAJOR: proof schema break, circuit public-input break, remove backend.</li>
+      <li>MINOR: new circuits, Flower adapter, Rust engine stable.</li>
+      <li>PATCH: bugfixes, docs.</li>
+    </ul>
+
+    <h2>6. Honesty policy (non-optional)</h2>
+    <div class="callout bad">
+      README badges claiming “Production Ready”, “100% Tested”, “Enterprise Deployed” are forbidden
+      until Release gates pass and a human maintainer signs the release checklist.
+    </div>
+
+    <h2>7. Mapping from prior review</h2>
+    <ul>
+      <li>Graph hubs → prioritize tests on ZKProver/Verifier/MPC/Coordinator.</li>
+      <li>Compliance modules → lint-only until core gates green.</li>
+      <li>Hybrid stack → CI matrix includes <code>snarkjs</code> and <code>rust</code> backends.</li>
+    </ul>
+
+    <h2>8. Release checklist (human)</h2>
+    <ol>
+      <li>Phase 0–5 exit criteria in PLAN.html checked.</li>
+      <li>Paper transcripts frozen &amp; hashed.</li>
+      <li>Ceremony/dev-key warnings audited in docs.</li>
+      <li>Tag v1.0.0; publish; Zenodo; announce.</li>
+    </ol>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

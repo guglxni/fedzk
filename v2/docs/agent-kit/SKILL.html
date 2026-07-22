@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SKILL — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>SKILL — Reusable Agent Procedures</h1>
+    <p class="lead">Copy these procedures into agent skills / slash-commands.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Skill zero:</strong> Before any other skill, open <a href="CONCEPTS.html">CONCEPTS.html</a> and restate the round loop + what π asserts.
+    </div>
+
+    <div class="callout bad" id="html-first">
+      <strong>HTML-first skills:</strong> Never instruct agents to Read upstream AIDLC <code>*.md</code>.
+      Boot: <a href="MANIFEST.html">MANIFEST.html</a>. Theory: <a href="FORMAT.html">FORMAT.html</a>.
+    </div>
+    <div class="callout" id="aidlc-primer">
+      <strong>AIDLC skills:</strong> Prefer conductor loop skills below before ad-hoc coding.
+    </div>
+    <h2>Skill: aidlc-conductor-tick</h2>
+    <pre><code>1. Read MANIFEST.html + AIDLC.html compose § + LOOPS.html
+2. Pick ONE stage move; choose topology
+3. Dispatch Task with ROSTER HTML dispatch template (no vendor/**/*.md)
+4. Collect intents/.../contributions/*.html ; integrate as lead
+5. Diary sections inside contribution HTML
+6. Run sensors; learning-gate → rules/project.html; human-proxy or halt-and-ask
+7. Append human-proxy-audit.html</code></pre>
+    <h2>Skill: aidlc-clone-upstream (human study only)</h2>
+    <pre><code># Optional — do NOT load resulting MD into agent context
+gh repo clone awslabs/aidlc-workflows vendor/aidlc-workflows -- --branch v2 --depth 1
+git -C vendor/aidlc-workflows rev-parse HEAD | tee docs/agent-kit/.aidlc-v2.pin</code></pre>
+    <h2>Skill: fedzk-html-boot</h2>
+    <pre><code>1. Read docs/agent-kit/MANIFEST.html for your role
+2. Read FORMAT.html §3 hard rules
+3. Read only the listed HTML paths (≤4 pages + 1 rules page)
+4. Prefer section anchors (e.g. CONCEPTS.html#quantize)
+5. Write outputs as HTML under v2/docs/agent-kit/intents/...</code></pre>
+
+
+    <h2>Skill: fedzk-concepts</h2>
+    <pre><code>1. Read CONCEPTS.html §§1–6 (what, problem, non-goals, glossary, loop, prove-what)
+2. Answer in chat:
+   - What does π claim?
+   - What does π not claim?
+   - Which principle (P1–P10) does my task serve?
+3. Only then proceed to implement</code></pre>
+
+
+
+    <h2>Skill: fedzk-orient</h2>
+    <pre><code>1. Open v2/docs/agent-kit/MANIFEST.html → role load set
+2. Open AGENTS.html + architecture.html (if listed)
+3. If graphify-out/graph.json exists: graphify query "&lt;task&gt;"
+4. List current blockers from AGENTS §4 — do not skip Phase 0
+5. Summarize: works-today vs target for the task</code></pre>
+
+    <h2>Skill: fedzk-verify-repo</h2>
+    <pre><code># NEVER add a dependency URL without this
+gh repo view OWNER/NAME --json nameWithOwner,url,description,stargazerCount,defaultBranchRef
+gh api repos/OWNER/NAME/releases/latest --jq .tag_name 2>/dev/null || true</code></pre>
+
+    <h2>Skill: fedzk-clone-vendor</h2>
+    <pre><code>mkdir -p vendor
+gh repo clone OWNER/NAME vendor/NAME -- --depth 1
+# pin commit
+cd vendor/NAME && git rev-parse HEAD &gt; ../NAME.pin
+# record in INTEGRATION.html / pyproject / Cargo.toml notes</code></pre>
+
+    <h2>Skill: fedzk-zk-golden</h2>
+    <pre><code>1. Prepare integer input.json matching circuit N
+2. snarkjs wtns calculate circuit.wasm input.json witness.wtns
+3. snarkjs groth16 prove circuit.zkey witness.wtns proof.json public.json
+4. snarkjs groth16 verify verification_key.json public.json proof.json
+5. Store under tests/goldens/&lt;circuit&gt;/ with SHA256SUMS
+6. CI must reproduce verify=OK</code></pre>
+
+    <h2>Skill: fedzk-wire-quantize</h2>
+    <pre><code>Before any prove call:
+  from fedzk.zk.input_normalization import GradientQuantizer
+  q = GradientQuantizer(scale_factor=2**scale_bits)
+  ints = q.quantize_gradient_dict(grads)
+ZKProver must accept ints / quantized path only for snarkjs.</code></pre>
+
+    <h2>Skill: fedzk-fix-cli</h2>
+    <pre><code>Option A: move contents of cli.py into cli/__init__.py exporting `app`
+Option B: delete empty cli/ package so cli.py is the module
+Verify: python -c "from fedzk.cli import app; print(app)"
+Verify: pip install -e . && fedzk --help</code></pre>
+
+    <h2>Skill: fedzk-rust-sidecar-smoke</h2>
+    <pre><code>1. Build fedzk-zk (Axum) with vk loaded
+2. POST /verify with golden proof.json
+3. Compare to snarkjs verify
+4. Feature flag FEDZK_ZK_BACKEND=rust|snarkjs on MPC server</code></pre>
+
+    <h2>Skill: fedzk-paper-run</h2>
+    <pre><code>python spec/experiments/round-runner.py \\
+  --config spec/experiments/adult-lr-fedzk.yaml \\
+  --out artifacts/transcripts/adult-lr-fedzk/
+# Validate against transcript-schema.json
+# Export tables for PAPER.html experiment matrix</code></pre>
+
+    <h2>Skill: fedzk-graphify</h2>
+    <pre><code>graphify query "&lt;question&gt;"
+graphify path "ZKProver" "ZKVerifier"
+graphify explain "MPCClient"
+graphify update .   # after code edits</code></pre>
+
+    <footer class="doc-foot">FEDzk Agent Kit · HTML-first · <a href="MANIFEST.html">MANIFEST</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

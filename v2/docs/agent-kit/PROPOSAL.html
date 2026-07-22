@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PROPOSAL — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>PROPOSAL — Research &amp; OSS Contribution Thesis</h1>
+    <p class="lead">What FEDzk contributes to the world — paper + framework — and how it differs from prior work.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Thesis concept:</strong> Open framework + evaluation for <em>client-side</em> ZK update integrity in FL,
+      complementary to aggregator-focused zkFL. Conceptual positioning: <a href="CONCEPTS.html#why-client">CONCEPTS §8</a>.
+    </div>
+
+
+
+    <h2>1. Contribution statement</h2>
+    <div class="callout ok">
+      <strong>Proposed contribution:</strong> An open, end-to-end framework and empirical study for
+      <em>client-side zkSNARK proofs of federated model-update integrity</em> (constraint satisfaction on quantized gradients),
+      with reproducible benchmarks, attack rejection evaluation, and a hybrid systems stack suitable for real deployment experimentation.
+    </div>
+
+    <h2>2. Novelty angles (pick primary + secondary for paper)</h2>
+    <table>
+      <tr><th>Angle</th><th>Why publishable</th><th>Risk</th></tr>
+      <tr><td>Open artifact pipeline</td><td>Many ZK-FL papers lack runnable frameworks</td><td>Must actually run</td></tr>
+      <tr><td>Client-update ZK (not only aggregator ZK)</td><td>Complements zkFL-style aggregator proofs</td><td>Position vs zkFL clearly</td></tr>
+      <tr><td>Chunked proofs for practical N</td><td>Bridges toy n=4 and real models</td><td>Needs clean protocol</td></tr>
+      <tr><td>Systems: Rust prove path + Python FL</td><td>Engineering contribution + latency study</td><td>Secondary for theory venues</td></tr>
+      <tr><td>Combined ZK + DP circuit option</td><td>Aligns with privacy literature</td><td>Harder circuits</td></tr>
+    </table>
+
+    <h2>3. Positioning vs prior work</h2>
+    <ul>
+      <li><strong>zkFL (Wang et al.):</strong> focuses on aggregator honesty via ZK (+ blockchain). FEDzk focuses on <em>client update validity</em> proofs. Complementary; cite and contrast.</li>
+      <li><strong>zkFDL / Federify / BV-ICVs:</strong> various ZK+FL+chain designs. FEDzk prioritizes offline/open coordinator first; chain optional.</li>
+      <li><strong>Flower / FedML / FedScale:</strong> FL frameworks without ZK. Integrate as experiment backends, do not reinvent FL orchestration blindly.</li>
+      <li><strong>Circom/snarkjs apps:</strong> FEDzk specializes circuits + FL metrics + reproducible transcripts.</li>
+    </ul>
+    <p>Details and links: <a href="RESEARCH.html">RESEARCH.html</a>.</p>
+
+    <h2>4. OSS contribution (beyond paper)</h2>
+    <ul>
+      <li>Stable SDK: train → quantize → prove → submit → verify → aggregate.</li>
+      <li>Circuit library with versioned parameters and golden tests.</li>
+      <li>Experiment harness (<code>spec/experiments</code>) others can cite.</li>
+      <li>Documented trusted setup / development keys vs production ceremony.</li>
+      <li>Optional Rust engine for operators who refuse Node in prod images.</li>
+    </ul>
+
+    <h2>5. Ethics &amp; security disclosure</h2>
+    <ul>
+      <li>Development zkeys are <strong>not</strong> production-trusted; paper and README must say so.</li>
+      <li>ZK proves constraint satisfaction—not “model is beneficial” or “data is clean.”</li>
+      <li>Quantization/chunking can reduce fidelity; report accuracy deltas vs plaintext FL.</li>
+    </ul>
+
+    <h2>6. Acceptance of this proposal</h2>
+    <p>Human maintainers accept by tagging milestone <code>proposal-accepted</code> and locking STACK decisions. Agents treat this as normative.</p>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

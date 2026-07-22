@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INTEGRATION — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>INTEGRATION — Wiring Upstream into FEDzk</h1>
+    <p class="lead">Step-by-step integration instructions for toolchain, FL frameworks, Rust engine, and CI. Follow after cloning via REPOS.html.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Integration = making concepts executable:</strong> Circom compiles policy L;
+      snarkjs/Rust prove the statement; Flower optionally orchestrates clients;
+      coordinator enforces verify-before-FedAvg. Never integrate a path that bypasses verification.
+      <a href="CONCEPTS.html#loop">Round loop</a>
+    </div>
+
+
+
+    <h2>1. Circom + snarkjs (developer machine)</h2>
+    <pre><code># Node + Rust required for circom install paths — see iden3/circom README
+npm install -g snarkjs
+# or use npx snarkjs
+
+# Build circom from vendor or releases
+gh repo clone iden3/circom vendor/circom
+# follow upstream build; ensure `circom` on PATH
+
+./scripts/setup_zk.sh   # project script — fix paths if broken
+fedzk doctor            # target command: checks circom, snarkjs, artifact hashes</code></pre>
+    <h3>Compile a circuit (normative)</h3>
+    <pre><code>cd src/fedzk/zk/circuits
+circom model_update_secure.circom --r1cs --wasm --sym -o ../build
+# Powers of Tau + groth16 setup (dev):
+snarkjs groth16 setup model_update_secure.r1cs potXX_final.ptau circuit_0000.zkey
+snarkjs zkey contribute circuit_0000.zkey circuit_final.zkey --name="dev"
+snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
+# Record sha256 in artifacts/manifest.json</code></pre>
+
+    <h2>2. circomlib vendor policy</h2>
+    <ul>
+      <li>Prefer <code>include "../vendor/comparators.circom"</code> vendored copies <em>or</em> git submodule of circomlib — pick one; document in DESIGN.</li>
+      <li>Pin submodule commit in CI.</li>
+    </ul>
+    <pre><code>gh repo clone iden3/circomlib vendor/circomlib -- --depth 1
+# include paths in circom: -l vendor/circomlib/circuits</code></pre>
+
+    <h2>3. Python package integration</h2>
+    <pre><code>uv venv .venv && source .venv/bin/activate   # https://github.com/astral-sh/uv
+uv pip install -e ".[dev,gpu]"
+python -c "from fedzk.prover.zkgenerator import ZKProver"
+python -c "from fedzk.zk.input_normalization import GradientQuantizer"</code></pre>
+    <ul>
+      <li>Add <code>pydantic-settings</code> to core deps if using config_legacy.</li>
+      <li>Ensure MANIFEST.in / package-data includes wasm/zkey/vkey/json needed at runtime.</li>
+    </ul>
+
+    <h2>4. Flower adapter (optional Phase 2+)</h2>
+    <pre><code>gh repo clone flwrlabs/flower vendor/flower -- --depth 1
+uv pip install flwr torch</code></pre>
+    <p>Integration shape:</p>
+    <pre><code># fedzk/integrations/flower.py
+class FEDzkClient(fl.client.NumPyClient):
+    def fit(self, parameters, config):
+        # train locally with LocalTrainer
+        # quantize + prove
+        # return weights, n, {"proof": proof_b64, "public": ...}
+# Server strategy wraps aggregate_fit: verify proofs before FedAvg</code></pre>
+    <div class="callout warn">Keep Flower as optional extra <code>fedzk[flower]</code> — do not hard-depend in core.</div>
+
+    <h2>5. Rust fedzk-zk crate</h2>
+    <pre><code>mkdir -p crates/fedzk-zk
+cd crates/fedzk-zk
+cargo init --lib
+# Cargo.toml deps (crates.io):
+# ark-groth16, ark-bn254, ark-circom (or circom-compat), serde, serde_json, axum, tokio, tracing</code></pre>
+    <h3>Sidecar endpoints</h3>
+    <ul>
+      <li><code>GET /healthz</code></li>
+      <li><code>POST /v1/prove</code> body: circuit_id, input JSON</li>
+      <li><code>POST /v1/verify</code> body: vk_id, proof, public</li>
+    </ul>
+    <h3>Python façade</h3>
+    <pre><code>class RustEngine:
+    def prove(self, circuit_id, inputs):
+        return httpx.post(f"{URL}/v1/prove", json=...).json()
+# ZKProver(engine="rust") uses RustEngine; engine="snarkjs" uses subprocess</code></pre>
+    <h3>Cross-verify CI job</h3>
+    <pre><code>snarkjs groth16 verify vk public proof_snarkjs.json
+curl -s localhost:8088/v1/verify -d @golden.json
+# assert both OK; also verify snarkjs proof with Rust and vice versa</code></pre>
+
+    <h2>6. MPC server integration points</h2>
+    <div class="callout ok">
+      <strong>v2:</strong> Defaults now point at <code>src/fedzk/zk/{model_update.wasm,proving_key.zkey,…}</code>.
+      Quantization runs inside <code>ZKProver</code> before witness gen.
+    </div>
+    <ul>
+      <li>✅ Default artifact paths = package <code>zk/</code> dir (env overrides still work).</li>
+      <li>✅ Quantize before prove (ZKProver choke point).</li>
+      <li>☐ Proxy to Rust when <code>FEDZK_ZK_BACKEND=rust</code> (Phase 3).</li>
+      <li>☐ Require <code>MPC_API_KEYS</code> when <code>ENVIRONMENT=production</code>.</li>
+    </ul>
+
+    <h2>7. Coordinator integration</h2>
+    <ul>
+      <li>✅ Canonical app: <code>uvicorn fedzk.coordinator.api:app</code>; aggregator is deprecated shim.</li>
+      <li>☐ Verify all chunk proofs + commitment (Phase 1).</li>
+      <li>☐ Emit OpenTelemetry spans: verify_ms, aggregate_ms.</li>
+      <li>☐ Persist proof_hash for replay detection.</li>
+    </ul>
+
+    <h2>8. Experiment / paper integration</h2>
+    <pre><code>python spec/experiments/round-runner.py \\
+  --config spec/experiments/adult-lr-fedzk.yaml \\
+  --out artifacts/transcripts/adult-lr-fedzk
+python tools/validate_transcript.py artifacts/transcripts/adult-lr-fedzk \\
+  --schema spec/experiments/transcript-schema.json</code></pre>
+
+    <h2>9. Helm / Docker</h2>
+    <ul>
+      <li>Images: <code>fedzk-coordinator</code>, <code>fedzk-prove</code> (Rust), <code>fedzk-compile</code> (Node+circom, Job-only).</li>
+      <li>Probes: HTTP /healthz — not <code>snarkjs --version</code> on Rust image.</li>
+      <li>Mount artifact volume read-only; keys via secrets.</li>
+    </ul>
+
+    <h2>10. Integration test matrix</h2>
+    <table>
+      <tr><th>Test</th><th>Requires</th><th>Phase</th></tr>
+      <tr><td>unit quantize</td><td>pytest</td><td>0</td></tr>
+      <tr><td>golden snarkjs</td><td>Node+artifacts</td><td>1</td></tr>
+      <tr><td>coordinator e2e</td><td>services up</td><td>1</td></tr>
+      <tr><td>rust cross-verify</td><td>cargo+goldens</td><td>3</td></tr>
+      <tr><td>flower optional</td><td>flwr installed</td><td>2+</td></tr>
+      <tr><td>paper smoke 2 rounds</td><td>full stack</td><td>4</td></tr>
+    </table>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

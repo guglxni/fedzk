@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CONCEPTS — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>CONCEPTS — Core Ideas of FEDzk (What / How / Why)</h1>
+    <p class="lead">
+      Canonical conceptual specification for agents and humans. Every design choice in this kit
+      should be traceable to a concept here. Read this before implementing circuits, APIs, or paper claims.
+    </p>
+    <div class="meta">
+      <span class="pill info">Integrity-constrained FL</span>
+      <span class="pill ok">Client-side Groth16 proofs</span>
+      <span class="pill warn">Not full training privacy by itself</span>
+    </div>
+
+    <div class="toc">
+      <strong>Contents</strong>
+      <ol>
+        <li><a href="#what">What FEDzk is</a></li>
+        <li><a href="#problem">Problem we are solving</a></li>
+        <li><a href="#nonproblem">What we are deliberately not solving (v1)</a></li>
+        <li><a href="#glossary">Core concept glossary</a></li>
+        <li><a href="#loop">The FEDzk round (conceptual loop)</a></li>
+        <li><a href="#prove-what">What the proof asserts</a></li>
+        <li><a href="#why-zk">Why zero-knowledge (not just signatures)</a></li>
+        <li><a href="#why-client">Why client-side proofs (vs aggregator-only ZK)</a></li>
+        <li><a href="#quantize">Why quantization exists</a></li>
+        <li><a href="#circuits">Why circuits / constraint languages</a></li>
+        <li><a href="#roles">Roles: client, prove service, coordinator</a></li>
+        <li><a href="#principles">Design principles (how we design)</a></li>
+        <li><a href="#decisions">Decision table: choice → why → consequence</a></li>
+        <li><a href="#threats">Threat model concepts</a></li>
+        <li><a href="#limits">Conceptual limitations agents must not paper over</a></li>
+        <li><a href="#mental">Mental models &amp; analogies</a></li>
+        <li><a href="#map">Map concepts → code modules</a></li>
+      </ol>
+    </div>
+
+    <h2 id="what">1. What FEDzk is</h2>
+    <p>
+      <strong>FEDzk</strong> (Federated Learning + Zero-Knowledge) is a framework in which
+      participants collaboratively train a model under Federated Averaging (or similar aggregation),
+      but each client must attach a <em>cryptographic proof</em> that its submitted update satisfies
+      a publicly agreed <em>integrity policy</em> encoded as an arithmetic circuit—without requiring
+      the coordinator to re-run local training or see the client’s private dataset.
+    </p>
+    <div class="callout ok">
+      <strong>One-sentence product concept:</strong>
+      “Only updates that can prove they obey the rules get into the global model.”
+    </div>
+    <p>FEDzk is simultaneously:</p>
+    <ul>
+      <li>A <strong>systems framework</strong> (train → quantize → prove → verify → aggregate → measure).</li>
+      <li>A <strong>research platform</strong> (configs, transcripts, attack suites, baselines).</li>
+      <li>A <strong>cryptographic application</strong> of Groth16 zkSNARKs to FL update integrity.</li>
+    </ul>
+
+    <h2 id="problem">2. Problem we are solving</h2>
+    <h3>2.1 Federated learning’s trust gap</h3>
+    <p>
+      Classical FL (McMahan et al.) keeps raw data on clients and ships model updates to a coordinator.
+      That improves <em>data locality</em>, but the coordinator still <strong>trusts clients to send valid updates</strong>.
+      A malicious client can send unbounded, sparse-but-poisonous, or garbage updates and damage the global model
+      (Byzantine / model poisoning).
+    </p>
+    <h3>2.2 Verification without re-training</h3>
+    <p>
+      The coordinator cannot simply “check the training” without either (a) seeing private data or
+      (b) trusting the client’s word. We need a check that is:
+    </p>
+    <ul>
+      <li><strong>Locally enforceable as a predicate</strong> on the update (and related public parameters),</li>
+      <li><strong>Efficient to verify</strong> relative to training,</li>
+      <li><strong>Binding</strong> so the client cannot claim one update and submit another,</li>
+      <li>Optionally <strong>zero-knowledge</strong> so verification does not force extra leakage beyond the update itself.</li>
+    </ul>
+    <h3>2.3 Open infrastructure gap</h3>
+    <p>
+      Academic ZK-FL systems often lack a complete, honest, reproducible open-source pipeline.
+      FEDzk’s contribution concept includes making that pipeline real enough to cite and extend.
+    </p>
+
+    <h2 id="nonproblem">3. What we are deliberately not solving (v1)</h2>
+    <table>
+      <tr><th>Non-goal</th><th>Why deferred</th></tr>
+      <tr><td>Hiding the update entirely from the coordinator</td><td>Standard FedAvg still consumes updates; ZK here is about <em>integrity of constraints</em>, not replacing secure aggregation</td></tr>
+      <tr><td>Proving “I trained correctly on my dataset”</td><td>Full training traces are enormous; v1 proves properties of the <em>submitted update</em></td></tr>
+      <tr><td>Aggregator honesty (did FedAvg use all clients?)</td><td>That’s zkFL-style aggregator proofs; complementary future work</td></tr>
+      <tr><td>On-chain settlement</td><td>Optional; not required for science or OSS usefulness</td></tr>
+      <tr><td>Removing all FL leakage</td><td>Updates can still leak; DP is optional layered defense</td></tr>
+    </table>
+    <div class="callout warn">
+      <strong>Precision for paper &amp; docs:</strong> Say “zero-knowledge proofs of update constraint satisfaction,”
+      not “fully private federated learning” unless DP + secure aggregation are actually in scope and evaluated.
+    </div>
+
+    <h2 id="glossary">4. Core concept glossary</h2>
+    <table>
+      <tr><th>Concept</th><th>Meaning in FEDzk</th></tr>
+      <tr><td>Client</td><td>Party with private data; trains locally; produces update + proof</td></tr>
+      <tr><td>Coordinator / aggregator</td><td>Orchestrates rounds; verifies proofs; runs FedAvg on accepted updates</td></tr>
+      <tr><td>Global model w<sup>t</sup></td><td>Shared parameters at round t</td></tr>
+      <tr><td>Update Δ / gradients g</td><td>What the client proposes to apply (or average)</td></tr>
+      <tr><td>Integrity policy / language L</td><td>Set of allowed updates (e.g. bounded L2 norm, min sparsity)</td></tr>
+      <tr><td>Circuit</td><td>Arithmetic encoding of “x ∈ L” (plus well-formedness) compilable to R1CS</td></tr>
+      <tr><td>Witness</td><td>Private/public signals satisfying the circuit (includes quantized update)</td></tr>
+      <tr><td>Public inputs x</td><td>Values verifier sees (bounds, commitments, round binding, …)</td></tr>
+      <tr><td>Proof π</td><td>Groth16 object attesting knowledge of a valid witness for x</td></tr>
+      <tr><td>Quantization</td><td>Map floats → field-safe integers with scale metadata</td></tr>
+      <tr><td>Chunking</td><td>Split long updates into circuit-width-N pieces with a binding commitment</td></tr>
+      <tr><td>Prove service / MPC server</td><td>Optional remote prover for clients that cannot run snarkjs/Rust locally</td></tr>
+      <tr><td>Trusted setup</td><td>Ceremony producing pk/vk; toxic waste must not be retained in production</td></tr>
+      <tr><td>Golden vector</td><td>Fixed (input, proof, public, vk) tuple used as CI truth</td></tr>
+      <tr><td>Transcript</td><td>Structured log of a full experiment for reproducibility</td></tr>
+    </table>
+
+    <h2 id="loop">5. The FEDzk round (conceptual loop)</h2>
+    <pre><code>1. Setup (once per circuit version): compile Circom → R1CS/wasm; trusted setup → pk, vk
+2. Coordinator announces: round_id, w^t, circuit_id, scale_bits, bounds B,m, N
+3. Client: local train on private D_k → raw update g
+4. Client: quantize g → ĝ with scale s   [WHY: SNARK fields are integers]
+5. Client: if dim(ĝ) &gt; N, chunk + commit  [WHY: circuits are fixed-width]
+6. Client: prove π for “ĝ (chunks) satisfy L and bind to commitment/round”
+7. Client → Coordinator: (ĝ or refs, π, public signals, meta)
+8. Coordinator: structural validate → Verify(vk, x, π) → accept or reject
+9. On enough accepts: FedAvg → w^{t+1}; emit metrics/transcript events
+10. Clients pull w^{t+1}; next round</code></pre>
+    <p><strong>How this differs from plain FL:</strong> step 6–8 are mandatory gates. Aggregation never sees unverified junk (unless misconfigured—which QUALITY forbids).</p>
+
+    <h2 id="prove-what">6. What the proof asserts</h2>
+    <p>Informally, a successful verify means:</p>
+    <div class="formula">
+      ∃ witness w s.t. Circuit(w, x) = 1<br/>
+      where x includes public policy parameters and binding data,<br/>
+      and w includes the quantized update (and auxiliaries).
+    </div>
+    <p>For the secure-update family, the intended English statement is:</p>
+    <ul>
+      <li>“I know a quantized vector ĝ of length N (or chunks of one committed vector),</li>
+      <li>whose squared L2 norm is ≤ B,</li>
+      <li>with at least m nonzero entries (if enabled),</li>
+      <li>consistent with the public commitment / round_id binding.”</li>
+    </ul>
+    <p><strong>It does not assert:</strong> “my local loss decreased,” “my data is IID,” “I am not colluding,” or “ĝ is optimal.”</p>
+
+    <h2 id="why-zk">7. Why zero-knowledge (not just signatures or hashes)</h2>
+    <table>
+      <tr><th>Mechanism</th><th>What it gives</th><th>Why insufficient alone</th></tr>
+      <tr><td>TLS + API keys</td><td>Channel auth</td><td>Does not constrain update content</td></tr>
+      <tr><td>Digital signature on ĝ</td><td>Attribution</td><td>Signer can sign poisonous ĝ</td></tr>
+      <tr><td>Hash commitment</td><td>Binding/hiding of a value</td><td>Does not prove ĝ ∈ L</td></tr>
+      <tr><td>Recompute training</td><td>Strong check</td><td>Needs data or heavy TEE assumptions</td></tr>
+      <tr><td><strong>zkSNARK for Circuit</strong></td><td>ĝ ∈ L + optional ZK</td><td>Chosen path for FEDzk integrity policy</td></tr>
+    </table>
+    <p>
+      <strong>Why ZK specifically:</strong> the witness may include intermediate signals we do not want to publish,
+      and we want a stable verify interface that does not expand as circuits grow. Even when ĝ itself is delivered
+      to the coordinator for FedAvg (common in v1), the proof still provides <em>succinct verifiable integrity</em>
+      and a path to future designs where more stays private (e.g. proof of properties + secure aggregation).
+    </p>
+
+    <h2 id="why-client">8. Why client-side proofs (design positioning)</h2>
+    <p>
+      Literature such as <em>zkFL</em> emphasizes proving that the <strong>aggregator</strong> correctly averaged client models.
+      FEDzk’s primary v1 concept is the dual problem: proving that <strong>each client update</strong> meets policy
+      before it is allowed into the average.
+    </p>
+    <ul>
+      <li><strong>Why this first:</strong> poisoning enters through clients; filtering bad Δ is immediately useful in classical FL topologies.</li>
+      <li><strong>Why not only this forever:</strong> a malicious aggregator can still drop/replace updates—cite and optionally add aggregator ZK later.</li>
+      <li><strong>How we design for complementarity:</strong> keep proof schema and transcript events composable with future aggregator proofs.</li>
+    </ul>
+
+    <h2 id="quantize">9. Why quantization exists</h2>
+    <p>
+      Circom / Groth16 operate over a finite field. Machine learning gradients are floating-point.
+      Without a defined encode/decode:
+    </p>
+    <ul>
+      <li>Witness generation fails (BigInt conversion errors), or</li>
+      <li>Developers invent ad-hoc casts that break soundness or reproducibility.</li>
+    </ul>
+    <p><strong>How we design it:</strong> first-class <code>GradientQuantizer</code> with <code>scale_bits</code>, clip bounds, and metadata in the proof envelope so verifiers and papers know the numeric regime.</p>
+    <p><strong>Why it must be on the prove path:</strong> optional quantize is how the current demo breaks on real tensors. Conceptually, quantization is part of the statement’s encoding, not a convenience helper.</p>
+
+    <h2 id="circuits">10. Why circuits / constraint languages</h2>
+    <p>
+      A circuit is how we turn an English policy (“norm at most B”) into something a SNARK can prove.
+      We use Circom in v1 because:
+    </p>
+    <ul>
+      <li>It compiles to R1CS understood by snarkjs / arkworks-circom stacks,</li>
+      <li>The ecosystem (circomlib gadgets) matches bound/comparison patterns we need,</li>
+      <li>Migrating to Noir/Halo2 is a proving-system redesign (Strategy D), not a refactor.</li>
+    </ul>
+    <p><strong>Why fixed width N:</strong> R1CS templates are statically sized. Real models need chunking + commitments rather than pretending one circuit holds 10M floats.</p>
+
+    <h2 id="roles">11. Roles: client, prove service, coordinator</h2>
+    <h3>Client</h3>
+    <ul>
+      <li><strong>Concept:</strong> data trustee + prover (or prove-client).</li>
+      <li><strong>Why local train stays here:</strong> privacy of D_k; FL definition.</li>
+      <li><strong>Why prove may be remote:</strong> proving is CPU-heavy; thin clients need a prove service—but policy must still bind to their update.</li>
+    </ul>
+    <h3>Prove service (“MPC server” in current code)</h3>
+    <ul>
+      <li><strong>Concept:</strong> outsourced witness+prove worker, not multiparty computing in the cryptographic MPC sense (naming legacy).</li>
+      <li><strong>Why it exists:</strong> operational separation of heavy proving; shared artifact mounts; scaling workers.</li>
+      <li><strong>How we design trust:</strong> treat it as trusted for availability/performance unless we add oblivious proving later; still cannot accept unverified updates at coordinator.</li>
+    </ul>
+    <h3>Coordinator</h3>
+    <ul>
+      <li><strong>Concept:</strong> policy enforcer + aggregator + round clock.</li>
+      <li><strong>Why verify-before-aggregate:</strong> integrity gate; the entire product collapses if skipped.</li>
+      <li><strong>Why single coordinator API:</strong> dual schemas (legacy aggregator vs logic API) destroy the concept of one protocol.</li>
+    </ul>
+
+    <h2 id="principles">12. Design principles (how we design)</h2>
+    <table>
+      <tr><th>#</th><th>Principle</th><th>How it shows up</th></tr>
+      <tr><td>P1</td><td>Integrity before theater</td><td>Golden proofs &gt; compliance PDFs</td></tr>
+      <tr><td>P2</td><td>Fail closed</td><td>No mock proofs on default paths</td></tr>
+      <tr><td>P3</td><td>Explicit encodings</td><td>Quantization + scale in meta; no silent float casts</td></tr>
+      <tr><td>P4</td><td>Honest capacity</td><td>N and chunking visible in API/paper; no silent truncate</td></tr>
+      <tr><td>P5</td><td>Stable wire contracts</td><td><code>fedzk.proof.v1</code> across Python/Rust engines</td></tr>
+      <tr><td>P6</td><td>Hybrid where ecosystems win</td><td>Python FL, Circom circuits, Rust prove hot path</td></tr>
+      <tr><td>P7</td><td>Reproducibility is a feature</td><td>YAML experiments + transcripts + artifact hashes</td></tr>
+      <tr><td>P8</td><td>Complementarity over ego</td><td>Position vs zkFL; don’t claim “first ZK-FL”</td></tr>
+      <tr><td>P9</td><td>Docs = tests</td><td>Public examples must run in CI</td></tr>
+      <tr><td>P10</td><td>Security of setup is part of the concept</td><td>Dev keys labeled untrusted</td></tr>
+    </table>
+
+    <h2 id="decisions">13. Decision table: choice → why → consequence</h2>
+    <table>
+      <tr><th>Decision</th><th>Why</th><th>Consequence for implementers</th></tr>
+      <tr><td>Groth16 / BN254</td><td>Mature, succinct verify, Circom/snarkjs fit</td><td>Need trusted setup; proof JSON snarkjs-shaped</td></tr>
+      <tr><td>Client-update ZK first</td><td>Directly targets poisoning ingress</td><td>Circuits about Δ/ĝ, not full train trace</td></tr>
+      <tr><td>Deliver ĝ + π in v1</td><td>Keeps FedAvg simple; still verifies L</td><td>Don’t claim update-hiding</td></tr>
+      <tr><td>Quantization mandatory</td><td>Field arithmetic reality</td><td>Wire quantizer before prove; measure accuracy gap</td></tr>
+      <tr><td>Chunk protocol</td><td>Static N vs real d</td><td>Commit+multi-proof verify</td></tr>
+      <tr><td>Python trainers</td><td>Paper + ecosystem</td><td>Don’t rewrite ML in Rust for v1</td></tr>
+      <tr><td>Rust prove engine</td><td>Drop Node from hot path</td><td>Feature flag; dual-verify goldens</td></tr>
+      <tr><td>Optional Flower</td><td>Adoption without owning all orchestration</td><td>Extra <code>[flower]</code>; core stays lean</td></tr>
+      <tr><td>No default prod API keys</td><td>Security concept: auth ≠ demo</td><td>Fail boot if prod && missing keys</td></tr>
+    </table>
+
+    <h2 id="threats">14. Threat model concepts</h2>
+    <ul>
+      <li><strong>Malicious client:</strong> crafts ĝ ∉ L or forged π → must fail verify (soundness).</li>
+      <li><strong>Honest-but-curious coordinator:</strong> follows protocol; may try to infer extra from ĝ/π; ZK limits witness leakage; ĝ still revealed in v1 FedAvg.</li>
+      <li><strong>Network adversary:</strong> TLS + auth; replay detected via proof_hash/round_id.</li>
+      <li><strong>Setup adversary:</strong> if toxic waste retained, soundness can break—operational concept, not just crypto trivia.</li>
+      <li><strong>Out of scope v1:</strong> malicious aggregator rewriting averages; side channels in prove service.</li>
+    </ul>
+
+    <h2 id="limits">15. Conceptual limitations (do not paper over)</h2>
+    <ul>
+      <li>In-bound adversarial updates still possible if they satisfy L.</li>
+      <li>Quantization/chunking can change learning dynamics.</li>
+      <li>Prove cost may dominate tiny local epochs—report honestly.</li>
+      <li>Circuit bugs are security bugs; tests + review required.</li>
+      <li>Current legacy code (n=4, unwired quantize) does <em>not</em> instantiate these concepts yet—agents build toward them.</li>
+    </ul>
+
+    <h2 id="mental">16. Mental models &amp; analogies</h2>
+    <ul>
+      <li><strong>Airport liquids rule:</strong> you can bring a bottle (update) but it must pass a size rule (circuit); ZK is a scanner that checks the rule without tasting your drink (extra witness detail).</li>
+      <li><strong>Type system at the edge:</strong> L is a type; the proof is a certificate that ĝ typechecks before the aggregator’s “compiler” (FedAvg) runs.</li>
+      <li><strong>CI for model updates:</strong> coordinator is a merge gate; π is the required green check.</li>
+    </ul>
+
+    <h2 id="map">17. Map concepts → code modules (target)</h2>
+    <table>
+      <tr><th>Concept</th><th>Module / artifact</th></tr>
+      <tr><td>Local train</td><td><code>fedzk.client.trainer.LocalTrainer</code></td></tr>
+      <tr><td>Quantization</td><td><code>fedzk.zk.input_normalization.GradientQuantizer</code></td></tr>
+      <tr><td>Circuit policy L</td><td><code>src/fedzk/zk/circuits/*.circom</code></td></tr>
+      <tr><td>Prove / verify</td><td><code>ZKProver</code> / <code>ZKVerifier</code> + future <code>crates/fedzk-zk</code></td></tr>
+      <tr><td>Remote prove</td><td><code>fedzk.mpc.server</code> / client</td></tr>
+      <tr><td>Verify-before-aggregate</td><td><code>fedzk.coordinator.logic.submit_update</code></td></tr>
+      <tr><td>Structural prechecks</td><td><code>ProofValidator</code>, <code>GradientValidator</code></td></tr>
+      <tr><td>Experiment concept</td><td><code>spec/experiments/*</code>, round-runner, transcripts</td></tr>
+      <tr><td>Doctor / toolchain</td><td><code>ZKValidator</code> + <code>fedzk doctor</code></td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Agent rule:</strong> If a change cannot be justified from this CONCEPTS page (or explicitly amends it in the same PR),
+      it is likely scope creep or conceptual drift—reconsider before coding.
+    </div>
+
+    <footer class="doc-foot">FEDzk Agent Kit · Core concepts · <a href="index.html">Hub</a> · <a href="CONCEPTS.html">CONCEPTS</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <title>MEMORY — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>MEMORY.html — Rules Layers &amp; Learning Store (HTML)</h1>
+    <p class="lead">
+      Five-layer strict-additive chain from AI-DLC methodology — implemented as
+      <strong>HTML under this kit</strong>, not <code>aidlc/**/*.md</code> or upstream AIDLC Markdown.
+    </p>
+    <div class="meta">
+      <span class="pill ok">HTML source of truth</span>
+      <span class="pill warn">aidlc/*.md deprecated for agents</span>
+    </div>
+
+    <h2 id="layout">Layout</h2>
+    <pre><code>v2/docs/agent-kit/rules/
+  org.html                 # ORG-* binding rules
+  team.html                # TEAM-* Cursor topology
+  project.html             # PRJ-* FEDzk locks + proxy policy
+  phases/
+    ideation.html
+    inception.html
+    construction.html
+    operations.html
+
+v2/docs/agent-kit/intents/260722-fedzk-contribution/
+  intent/intent.html
+  scope/scope.html
+  reverse-engineering/…
+  contributions/*.html     # subagent writes (HTML)
+  human-proxy-audit.html   # APPROVE / HALT log</code></pre>
+
+    <h2 id="how">How agents must use memory</h2>
+    <ol>
+      <li>At stage start, Read <a href="rules/org.html">org</a> + <a href="rules/team.html">team</a> + <a href="rules/project.html">project</a> + matching phase HTML.</li>
+      <li>During work, append diary sections inside your contribution HTML (Interpretations / Deviations / Tradeoffs / Open questions).</li>
+      <li>At gate, promote durable lessons into <a href="rules/project.html">rules/project.html</a> (not org).</li>
+      <li>Never hand-edit another agent’s contribution file; lead integrates into stage HTML.</li>
+      <li>Do not load <code>vendor/aidlc-workflows/**/*.md</code> for rules — see <a href="FORMAT.html">FORMAT.html</a>.</li>
+    </ol>
+
+    <h2 id="standing">FEDzk standing rules (pointer)</h2>
+    <ul>
+      <li>Full text: <a href="rules/project.html">rules/project.html</a> + <a href="AGENTS.html">AGENTS.html</a>.</li>
+      <li>No mock proofs; fail closed.</li>
+      <li>No silent truncation without chunk protocol.</li>
+      <li>Docs=API in same PR.</li>
+      <li>Hybrid stack locked; Strategy D needs halt-and-ask.</li>
+    </ul>
+
+    <footer class="doc-foot">HTML-first memory · <a href="MANIFEST.html">MANIFEST</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

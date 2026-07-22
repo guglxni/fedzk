@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLAUDE — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>CLAUDE — Project Memory for Agents</h1>
+    <p class="lead">Persistent context block. Session start: Read <a href="MANIFEST.html">MANIFEST.html</a> first (not a Markdown dump).</p>
+
+    <div class="callout bad" id="html-first">
+      <strong>HTML-first:</strong> Operating instructions = <code>v2/docs/agent-kit/**/*.html</code>.
+      Do not load <code>vendor/aidlc-workflows/**/*.md</code>. Rules: <a href="rules/project.html">rules/project.html</a>.
+      Why: <a href="FORMAT.html">FORMAT.html</a>.
+    </div>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Concept anchor:</strong> FEDzk = client proves update satisfies circuit policy L; coordinator verifies then FedAvg.
+      Deep dive: <a href="CONCEPTS.html">CONCEPTS.html</a>. Math: <a href="MATH.html">MATH.html</a>.
+    </div>
+
+    <div class="callout" id="aidlc-primer">
+      <strong>@AIDLC (method):</strong> Intent <code>260722-fedzk-contribution</code>, scope <code>mvp</code>.
+      Stages/gates: <a href="AIDLC.html">AIDLC.html</a> · <a href="LOOPS.html">LOOPS.html</a>.
+      Artifacts: <code>v2/docs/agent-kit/intents/260722-fedzk-contribution/</code> (HTML).
+    </div>
+
+
+
+
+
+    <h2>Project one-liner</h2>
+    <p><strong>FEDzk</strong> = Federated Learning with client-side zero-knowledge proofs (Groth16/BN254) that a model update satisfies circuit constraints (bounds, sparsity, optional DP) without revealing raw gradients, verified by a coordinator before aggregation.</p>
+
+    <h2>Repo layout (authoritative)</h2>
+    <pre><code>src/fedzk/
+  client/          # LocalTrainer (real class — not Trainer)
+  prover/          # ZKProver, ZKVerifier, ZKValidator, BatchZKProver
+  zk/              # circuits/*.circom + wasm/zkey/vkey artifacts
+  mpc/             # FastAPI prove server + MPCClient
+  coordinator/     # api.py + logic.py (prefer); aggregator.py legacy
+  validation/      # GradientValidator, ProofValidator
+  security/        # KeyManager, TLS, API security
+  config/          # EnvironmentConfig (not FedZKConfig)
+  monitoring/ logging/ compliance/ benchmark/ cli/
+spec/              # PRD, plans, experiment YAMLs, round-runner
+docs/agent-kit/    # THIS kit — agent instructions
+tests/ demos/ helm/ scripts/</code></pre>
+
+    <h2>God nodes (from graphify)</h2>
+    <p>ZKProver, ZKVerifier, ZKValidator, ProofValidator, MPCClient, FEDzkMetricsCollector, GradientValidator, FEDzkLogger, OptimizedModelUpdateCircuit, KeyManager.</p>
+
+    <h2>Commands agents should know</h2>
+    <pre><code># Graph
+graphify query "How does prove verify aggregate work?"
+graphify update .
+
+# Package (after CLI fix)
+pip install -e ".[dev,gpu]"
+fedzk --help
+
+# ZK toolchain (host)
+./scripts/setup_zk.sh
+circom --version && snarkjs --version
+
+# Tests (ZK-gated)
+FEDZK_ZK_VERIFIED=true pytest tests/unit/test_zkgenerator.py -q
+
+# Upstream clone pattern
+gh repo view iden3/circom --json url
+gh repo clone iden3/circom ../vendor/circom</code></pre>
+
+    <h2>Config names (stop inventing)</h2>
+    <ul>
+      <li>Use <code>EnvironmentConfig</code> / <code>FEDzkConfig</code> (legacy) — <strong>not</strong> <code>FedZKConfig</code>.</li>
+      <li>Use <code>LocalTrainer</code> — not <code>Trainer</code> / <code>FederatedTrainer</code>.</li>
+      <li>Use <code>ZKProver</code> — not <code>ZKGenerator</code>.</li>
+      <li>Coordinator: FastAPI <code>app</code> + <code>submit_update()</code> — not <code>CoordinatorAPI</code> class.</li>
+      <li><code>GradientQuantizer</code> lives in <code>fedzk.zk.input_normalization</code>.</li>
+    </ul>
+
+    <h2>License / version notes</h2>
+    <ul>
+      <li>License file: FSL-1.1-Apache-2.0; pyproject may incorrectly say MIT — align before OSS launch.</li>
+      <li>Version skew: pyproject 1.2.0 vs <code>__version__</code> 1.0.1 — unify.</li>
+    </ul>
+
+    <h2>Decision log (agents must not reopen without human)</h2>
+    <ul>
+      <li>Hybrid Python + Circom + Rust prove path is default.</li>
+      <li>Proof JSON remains snarkjs-shaped through v1.</li>
+      <li>Paper targets Adult LR + CIFAR-10 CNN batch configs under <code>spec/experiments/</code>.</li>
+      <li>Strategy D (Noir/Halo2) only via explicit RFC.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · HTML-first · <a href="MANIFEST.html">MANIFEST</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

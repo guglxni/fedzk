@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RESEARCH — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>RESEARCH — Curated Papers &amp; Inspiration</h1>
+    <p class="lead">Agents must cite and contrast these works. Links are public arXiv / DOI / GitHub. Prefer primary sources when writing PAPER.md/tex.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Read papers through the FEDzk lens:</strong> client-update integrity vs aggregator ZK (zkFL);
+      FedAvg as baseline learning concept; Groth16 as proof system. Map each citation to a CONCEPTS section when writing Related Work.
+    </div>
+
+
+
+    <h2>1. Core ZK-FL papers</h2>
+    <table>
+      <tr><th>Work</th><th>Link</th><th>Relevance to FEDzk</th></tr>
+      <tr>
+        <td>zkFL: ZK Proof-based Gradient Aggregation for FL (Wang et al.)</td>
+        <td><a href="https://arxiv.org/abs/2310.02554">arXiv:2310.02554</a></td>
+        <td>Aggregator-side ZK; contrast with our client-update ZK</td>
+      </tr>
+      <tr>
+        <td>zkFDL: Decentralized FL with ZKP</td>
+        <td><a href="https://arxiv.org/abs/2312.04579">arXiv:2312.04579</a> / <a href="https://arxiv.org/html/2312.04579v1">HTML</a></td>
+        <td>Groth16 FedAvg aggregation proofs; circuit inspiration</td>
+      </tr>
+      <tr>
+        <td>Federify: Verifiable FL with zkSNARKs + Blockchain</td>
+        <td><a href="https://doi.org/10.1109/ACCESS.2023.3347039">IEEE Access DOI</a></td>
+        <td>Verifiable FL scheme; related architecture</td>
+      </tr>
+      <tr>
+        <td>Blockchain-based FL with ZKP for verifiable training/aggregation</td>
+        <td><a href="https://doi.org/10.1109/Blockchain62396.2024.00017">DOI</a></td>
+        <td>Training+aggregation verifiability; cost discussion</td>
+      </tr>
+      <tr>
+        <td>Verifiable Split Learning via zk-SNARKs</td>
+        <td><a href="https://arxiv.org/abs/2511.01356">arXiv:2511.01356</a></td>
+        <td>Groth16 on forward/backward; cost vs FL</td>
+      </tr>
+      <tr>
+        <td>FedZKP: Federated model ownership verification with ZKP</td>
+        <td><a href="https://arxiv.org/abs/2305.04507">arXiv:2305.04507</a></td>
+        <td>Different goal (ownership); cite as adjacent</td>
+      </tr>
+    </table>
+
+    <h2>2. Foundational FL</h2>
+    <table>
+      <tr><th>Work</th><th>Link</th><th>Use</th></tr>
+      <tr><td>Communication-Efficient Learning of Deep Networks from Decentralized Data (McMahan et al., FedAvg)</td><td><a href="https://arxiv.org/abs/1602.05629">arXiv:1602.05629</a></td><td>Baseline algorithm</td></tr>
+      <tr><td>Advances and Open Problems in Federated Learning</td><td><a href="https://arxiv.org/abs/1912.04977">arXiv:1912.04977</a></td><td>Threats, privacy taxonomy</td></tr>
+    </table>
+
+    <h2>3. zkSNARK foundations</h2>
+    <table>
+      <tr><th>Work</th><th>Link</th><th>Use</th></tr>
+      <tr><td>On the Size of Pairing-based Non-interactive Arguments (Groth16)</td><td><a href="https://eprint.iacr.org/2016/260">ePrint 2016/260</a></td><td>Proof system</td></tr>
+      <tr><td>Circom compiler paper / docs</td><td><a href="https://docs.circom.io/">docs.circom.io</a> · repo <a href="https://github.com/iden3/circom">iden3/circom</a></td><td>Circuits</td></tr>
+      <tr><td>snarkjs</td><td><a href="https://github.com/iden3/snarkjs">iden3/snarkjs</a></td><td>Tooling reference</td></tr>
+    </table>
+
+    <h2>4. Differential privacy (optional track)</h2>
+    <ul>
+      <li>Abadi et al., Deep Learning with Differential Privacy — <a href="https://arxiv.org/abs/1607.00133">arXiv:1607.00133</a></li>
+      <li>Google DP library — <a href="https://github.com/google/differential-privacy">google/differential-privacy</a></li>
+      <li>OpenMined PyDP — <a href="https://github.com/OpenMined/PyDP">OpenMined/PyDP</a></li>
+    </ul>
+
+    <h2>5. Systems / frameworks to cite or integrate</h2>
+    <ul>
+      <li>Flower — <a href="https://github.com/flwrlabs/flower">flwrlabs/flower</a></li>
+      <li>FedML — <a href="https://github.com/FedML-AI/FedML">FedML-AI/FedML</a></li>
+      <li>FedScale — <a href="https://github.com/SymbioticLab/FedScale">SymbioticLab/FedScale</a></li>
+      <li>PySyft — <a href="https://github.com/OpenMined/PySyft">OpenMined/PySyft</a></li>
+      <li>FLSim — <a href="https://github.com/facebookresearch/FLSim">facebookresearch/FLSim</a></li>
+    </ul>
+
+    <h2>6. How agents should use papers</h2>
+    <ol>
+      <li>When designing a circuit constraint, find the nearest paper formalization and match notation in MATH.html.</li>
+      <li>Related Work section must contrast <em>client vs aggregator</em> proof targets.</li>
+      <li>Do not claim “first ZK-FL” — claim open framework + client-update integrity + reproducible study.</li>
+      <li>Copy numbers from papers only with citation; regenerate FEDzk numbers from transcripts.</li>
+    </ol>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

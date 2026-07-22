@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STACK — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>STACK — Why Python + Circom + Rust Hybrid</h1>
+    <p class="lead">Full rationale for the locked stack decision when building a contribution-grade ZK-FL framework.</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>Conceptual primer:</strong> Stack choices follow the three-layer nature of FEDzk
+      (learning vs constraints vs proving). Full product concepts: <a href="CONCEPTS.html">CONCEPTS.html</a>.
+    </div>
+    <h2 id="why-stack-concepts">How stack maps to concepts</h2>
+    <table>
+      <tr><th>Concept</th><th>Why this layer’s language</th></tr>
+      <tr><td>Local train / FedAvg experiments</td><td>Python+PyTorch—research gravity; accuracy papers live here</td></tr>
+      <tr><td>Integrity policy L as circuit</td><td>Circom—R1CS ecosystem for Groth16</td></tr>
+      <tr><td>Prove/verify hot path</td><td>Rust—remove Node from production path; dual-verify for science</td></tr>
+      <tr><td>Wire format fedzk.proof.v1</td><td>Language-agnostic concept boundary so hybrid does not fork the protocol</td></tr>
+    </table>
+
+
+
+    <h2>1. Three-layer gravity</h2>
+    <table>
+      <tr><th>Layer</th><th>Job</th><th>Best ecosystem</th><th>FEDzk choice</th></tr>
+      <tr><td>Learning</td><td>Models, optimizers, data, FL loops</td><td>Python / PyTorch / Flower</td><td><strong>Keep Python</strong></td></tr>
+      <tr><td>Circuits</td><td>Constraint systems, trusted setup</td><td>Circom (or Noir/Halo2 redesign)</td><td><strong>Keep Circom for v1</strong></td></tr>
+      <tr><td>Proving services</td><td>Witness, prove, verify, deploy</td><td>Rust / C++</td><td><strong>Move hot path to Rust</strong></td></tr>
+    </table>
+
+    <h2>2. Why hybrid is advisable for ZK-FL specifically</h2>
+    <ul>
+      <li>ML research and paper experiments are Python-native; rewriting trainers delays publication without improving ZK novelty.</li>
+      <li>Circom has mature Groth16 tooling and matches existing FEDzk artifacts; rewriting circuits is a crypto product change.</li>
+      <li>snarkjs-via-Node in production images is the weak link — Rust replaces that hop.</li>
+      <li>Stable wire format (<code>fedzk.proof.v1</code>) lets both languages evolve behind a contract.</li>
+      <li>Dual-verify (snarkjs ↔ Rust) gives scientific confidence for the paper’s systems section.</li>
+    </ul>
+
+    <h2>3. When NOT to hybrid</h2>
+    <ul>
+      <li>Tiny team that cannot maintain two toolchains — then stay Python+snarkjs until Phase 3 funded.</li>
+      <li>Single static edge binary with no Python — greenfield Rust client (later product).</li>
+      <li>Explicit goal to leave Groth16/Circom — Strategy D (separate RFC).</li>
+    </ul>
+
+    <h2>4. Strategies (effort)</h2>
+    <table>
+      <tr><th>ID</th><th>Name</th><th>Effort</th><th>Use</th></tr>
+      <tr><td>C</td><td>Rust crypto core, keep Circom+Python</td><td>12–22 pw</td><td><strong>Do first</strong></td></tr>
+      <tr><td>B</td><td>Strangler FastAPI→Axum prove</td><td>24–45 pw</td><td>End-state services</td></tr>
+      <tr><td>D</td><td>New proving system / circuits</td><td>30–70 pw</td><td>Only if N/fidelity blocked</td></tr>
+      <tr><td>A</td><td>Full Rust rewrite</td><td>90–160 pw</td><td>Avoid for this contribution</td></tr>
+    </table>
+
+    <h2>5. Crate / library targets</h2>
+    <ul>
+      <li><a href="https://github.com/arkworks-rs/groth16">arkworks-rs/groth16</a> + <a href="https://github.com/arkworks-rs/circom-compat">arkworks-rs/circom-compat</a></li>
+      <li><a href="https://github.com/iden3/circom-witnesscalc">iden3/circom-witnesscalc</a> or <a href="https://github.com/philsippl/circom-witness-rs">philsippl/circom-witness-rs</a></li>
+      <li><a href="https://github.com/tokio-rs/axum">tokio-rs/axum</a> sidecar</li>
+      <li><a href="https://github.com/PyO3/pyo3">PyO3/pyo3</a> optional later; prefer HTTP/UDS first</li>
+      <li>Fallback: <a href="https://github.com/iden3/snarkjs">iden3/snarkjs</a>, <a href="https://github.com/iden3/rapidsnark">iden3/rapidsnark</a></li>
+    </ul>
+    <p>Clone recipes: <a href="REPOS.html">REPOS.html</a>.</p>
+
+    <h2>6. FL framework integration policy</h2>
+    <ul>
+      <li>v1: first-party trainer loop.</li>
+      <li>v1.1: optional adapter for <a href="https://github.com/flwrlabs/flower">flwrlabs/flower</a>.</li>
+      <li>Benchmark harnesses may compare with FedML / FedScale datasets — not required as runtime deps.</li>
+    </ul>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>

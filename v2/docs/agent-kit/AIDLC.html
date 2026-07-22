@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AIDLC — FEDzk Agent Kit</title>
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>AIDLC.html — AI-DLC Methodology for FEDzk (HTML surface)</h1>
+    <p class="lead">
+      Method adapted from AWS Labs
+      <a href="https://github.com/awslabs/aidlc-workflows/tree/v2">AI-DLC Workflows v2</a>
+      (5 phases, stages, roster, scopes/depth, gates, sensors, learning loop, topologies).
+      <strong>Operating files are this HTML kit</strong> — agents do not load upstream
+      <code>core/**/*.md</code>. See <a href="FORMAT.html">FORMAT.html</a> · <a href="MANIFEST.html">MANIFEST.html</a>.
+      Pin (human study only): <code>docs/agent-kit/.aidlc-v2.pin</code>.
+    </p>
+    <div class="meta">
+      <span class="pill info">Methodology: AI-DLC 2.x</span>
+      <span class="pill ok">Surface: docs/agent-kit HTML</span>
+      <span class="pill bad">Forbidden: upstream AIDLC MD in agent context</span>
+      <span class="pill">Scope default: mvp</span>
+    </div>
+
+    <div class="callout warn">
+      <strong>Upstream clone (optional, humans only):</strong> Clone for methodology study — never @-include those MD files in FEDzk Task prompts.
+      <pre><code>gh repo clone awslabs/aidlc-workflows vendor/aidlc-workflows -- --branch v2 --depth 1
+# Agents: use ROSTER.html + AIDLC.html + LOOPS.html instead of core/agents/*.md</code></pre>
+    </div>
+
+    <h2>1. Why AI-DLC for FEDzk</h2>
+    <ul>
+      <li>FEDzk is brownfield + dual mission (paper + OSS) — ad-hoc prompting drifts; gated stages keep crypto honesty.</li>
+      <li>14-agent roster maps cleanly onto FEDzk domains (product, architect, developer, quality, devsecops, compliance…).</li>
+      <li>Learning loop captures corrections into <a href="rules/project.html">rules/project.html</a>.</li>
+      <li>Swarm/construction autonomy fits Phase 0 parallel hygiene units after walking skeleton.</li>
+    </ul>
+
+    <h2>2. Lifecycle mapping (5 phases → FEDzk kit)</h2>
+    <table>
+      <tr><th>AI-DLC Phase</th><th>Stages (summary)</th><th>FEDzk kit / artifacts</th><th>Gate</th></tr>
+      <tr><td>0 Initialization</td><td>scaffold, detect, state-init</td><td><a href="MANIFEST.html">MANIFEST</a> + <code>intents/260722-fedzk-contribution/</code></td><td>auto</td></tr>
+      <tr><td>1 Ideation</td><td>intent, research*, feasibility, scope, team*, mockups*, approval*</td><td>CONCEPTS, PROPOSAL, prd, RESEARCH (*skipped in mvp)</td><td>VG1</td></tr>
+      <tr><td>2 Inception</td><td>reverse-eng, requirements, app design, stories, units, delivery…</td><td>architecture, DESIGN, REQUIREMENTS, PLAN units DAG</td><td>VG2</td></tr>
+      <tr><td>3 Construction</td><td>functional/NFR design, code-gen, build-test, CI…</td><td>PLAN Phases 0–3 code; goldens; QUALITY</td><td>VG3</td></tr>
+      <tr><td>4 Operation</td><td>deploy, observe, incident…</td><td>Helm/monitoring — <em>skipped under mvp</em> until promote</td><td>feedback→Ideation</td></tr>
+    </table>
+
+    <h2>3. Full stage checklist (FEDzk-adapted)</h2>
+    <h3>Initialization (always)</h3>
+    <ol>
+      <li>0.1 Workspace scaffold → intent record dir</li>
+      <li>0.2 Workspace detection → brownfield Python/Circom/Rust signals</li>
+      <li>0.3 State init → intent HTML + <a href="intents/260722-fedzk-contribution/human-proxy-audit.html">audit</a></li>
+    </ol>
+    <h3>Ideation (mvp-reduced)</h3>
+    <ol>
+      <li>1.1 Intent capture → dual mission locked</li>
+      <li>1.3 Feasibility → N, quantization, hybrid stack risks</li>
+      <li>1.4 Scope definition → AIDLC scope=mvp, depth=comprehensive crypto</li>
+      <li>1.7 Approval handoff → human-proxy OK for docs; user for releases</li>
+    </ol>
+    <h3>Inception</h3>
+    <ol>
+      <li>2.1 Reverse engineering → code truth vs README (done in prior review; refresh each major loop)</li>
+      <li>2.2 Practices discovery → mob: quality + developer + devsecops</li>
+      <li>2.3 Requirements analysis → REQUIREMENTS IDs</li>
+      <li>2.4 Application design → architecture.html + CONCEPTS invariant</li>
+      <li>2.5 User stories → researcher / FL eng / security eng</li>
+      <li>2.6 Units generation → Bolt DAG</li>
+      <li>2.7 Delivery planning → PLAN.html sequencing</li>
+    </ol>
+    <h3>Construction (per unit / bolt)</h3>
+    <ol>
+      <li>3.x Functional + NFR design for unit</li>
+      <li>3.x Code generation</li>
+      <li>3.x Build and test (+ goldens if crypto)</li>
+      <li>3.x CI pipeline updates</li>
+    </ol>
+
+    <h2>4. Agent roster → FEDzk ownership</h2>
+    <p>See <a href="ROSTER.html">ROSTER.html</a> for full personas. Summary:</p>
+    <table>
+      <tr><th>AIDLC agent</th><th>FEDzk focus</th><th>Kit pages</th></tr>
+      <tr><td>conductor / orchestrator</td><td>Cursor parent agent; delegates Task subagents</td><td>LOOPS, AGENTS</td></tr>
+      <tr><td>product</td><td>Intent, PRD, paper claims honesty</td><td>prd, PROPOSAL, PAPER, CONCEPTS</td></tr>
+      <tr><td>design</td><td>SDK UX, CLI verbs, proof envelope UX</td><td>DESIGN</td></tr>
+      <tr><td>delivery</td><td>Phase sequencing, bolts, gates</td><td>PLAN, LOOPS</td></tr>
+      <tr><td>architect</td><td>Hybrid stack, units DAG, ADRs</td><td>architecture, STACK, MATH</td></tr>
+      <tr><td>developer</td><td>Code, circuits, quantize wiring</td><td>INTEGRATION, PLAN Phase0–3</td></tr>
+      <tr><td>quality</td><td>Goldens, sensors, coverage</td><td>QUALITY</td></tr>
+      <tr><td>devsecops</td><td>Secrets, keys, TLS, supply chain</td><td>QUALITY, REPOS</td></tr>
+      <tr><td>compliance</td><td>Deferred until crypto core green</td><td>AGENTS forbidden list</td></tr>
+      <tr><td>aws-platform / pipeline / ops</td><td>Helm, CI, observe (post-mvp)</td><td>INTEGRATION, PLAN Phase5</td></tr>
+      <tr><td>product-lead / architecture-reviewer</td><td>Gate reviews (read-only)</td><td>LOOPS gate ritual</td></tr>
+      <tr><td>composer</td><td>Tailor stage plan from intent</td><td>AIDLC compose section</td></tr>
+    </table>
+
+    <h2>5. Collaboration topologies (LOOPS.html)</h2>
+    <table>
+      <tr><th>mode</th><th>Meaning</th><th>FEDzk use</th></tr>
+      <tr><td>inline</td><td>Conductor adopts support personas in one context</td><td>Small doc stages</td></tr>
+      <tr><td>subagent</td><td>Hub-and-spoke; support agents write contribution HTML</td><td>Practices discovery, crypto design review</td></tr>
+      <tr><td>pipeline</td><td>Ordered chain edits artifacts</td><td>Reverse engineering → architect synthesis</td></tr>
+      <tr><td>mob</td><td>Parallel rounds + human/proxy triage</td><td>Units generation disputes; stack ADR</td></tr>
+    </table>
+    <div class="callout ok">
+      <strong>Invariant:</strong> Agents never invoke each other — only the conductor dispatches
+      (Cursor: parent agent + <code>Task</code> tool). Contribution files live under
+      <code>docs/agent-kit/intents/&lt;id&gt;/contributions/*.html</code>.
+    </div>
+
+    <h2>6. Scopes &amp; depth for FEDzk</h2>
+    <table>
+      <tr><th>Scope</th><th>When</th></tr>
+      <tr><td>mvp</td><td>Default now — walking skeleton + paper experiments; skip Operation</td></tr>
+      <tr><td>feature</td><td>After v0.9 SDK works — add Flower, Helm hardening</td></tr>
+      <tr><td>enterprise</td><td>Full ops + compliance stages after crypto gates green</td></tr>
+      <tr><td>bugfix / security-patch</td><td>CLI shadow, secrets, path bugs</td></tr>
+      <tr><td>refactor</td><td>Dual coordinator collapse</td></tr>
+    </table>
+
+    <h2>7. Sensors (deterministic checks)</h2>
+    <ul>
+      <li>Required sections in stage artifacts (AIDLC sensor pattern).</li>
+      <li>FEDzk custom: <code>python -c "from fedzk.cli import app"</code> must succeed after CLI fix.</li>
+      <li>FEDzk custom: artifact manifest sha256 matches files.</li>
+      <li>FEDzk custom: no <code>CoordinatorAPI</code>/<code>ZKGenerator</code> imports in tests.</li>
+      <li>gitleaks / bandit on construction bolts.</li>
+    </ul>
+
+    <h2>8. Learning loop</h2>
+    <p>See <a href="LOOPS.html">LOOPS.html</a> and <a href="MEMORY.html">MEMORY.html</a>. Diary → gate candidates → <a href="rules/project.html">rules/project.html</a>.</p>
+
+    <h2>9. Compose recommendation (current intent)</h2>
+    <pre><code>Intent: fedzk-contribution (brownfield → mvp → paper+OSS)
+Execute: Init ✓, Ideation (reduced), Inception (full RE+units), Construction bolts for Phase0–1
+Skip: Operation until scope promote
+Depth: Comprehensive on architect/crypto stages
+Human-proxy: allowed for doc/planning gates per rules/project.html
+Surface: HTML-only (FORMAT + MANIFEST bind)</code></pre>
+
+    <footer class="doc-foot">HTML-first AIDLC method · <a href="FORMAT.html">FORMAT</a> · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

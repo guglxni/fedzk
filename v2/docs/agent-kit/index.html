@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEDzk Agent Kit — Hub</title>
+  <meta name="fedzk-agent-kit" content="html-first" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-kit="fedzk-html-first">
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+    <h1>FEDzk Agent Instruction Kit</h1>
+    <p class="lead">
+      HTML-first agent operating system for building FEDzk into a
+      <strong>research-publishable</strong> and <strong>production-grade open-source</strong>
+      ZK federated learning framework. AIDLC <em>methodology</em> with FEDzk HTML files —
+      not upstream Markdown personas. Agents boot from <a href="MANIFEST.html">MANIFEST.html</a>.
+    </p>
+    <div class="meta">
+      <span class="pill ok">HTML-first</span>
+      <span class="pill ok">branch v2 · Bolt1 green</span>
+      <span class="pill warn">Codebase: research → contribution rebuild</span>
+      <span class="pill">Stack: Python FL + Circom + Rust prove path</span>
+    </div>
+
+    <div class="callout bad">
+      <strong>Ground truth:</strong> The existing repo is <em>not</em> production-ready.
+      CLI entrypoint is broken (<code>cli/</code> shadows <code>cli.py</code>), torch is optional but hard-imported,
+      circuits are fixed <code>n=4</code>, float→int quantization is unwired, MPC artifact defaults point at a missing path,
+      docs invent APIs that do not exist. Agents must build toward the target architecture — not trust README claims.
+    </div>
+
+    <h2>Core concept (read this)</h2>
+    <div class="callout ok">
+      <strong>FEDzk in one line:</strong> Only federated updates that can
+      <em>cryptographically prove</em> they satisfy a public integrity policy (circuit constraints)
+      are allowed into FedAvg—without the coordinator re-running local training or seeing private datasets.
+      Full what / how / why: <a href="CONCEPTS.html"><strong>CONCEPTS.html</strong></a>.
+    </div>
+    <table>
+      <tr><th>Question</th><th>Short answer</th><th>Deep dive</th></tr>
+      <tr><td>What are we building?</td><td>Integrity-gated FL with client-side Groth16 proofs</td><td><a href="CONCEPTS.html#what">CONCEPTS §1</a></td></tr>
+      <tr><td>Why ZK (not just signatures)?</td><td>Succinct proof that update ∈ language L</td><td><a href="CONCEPTS.html#why-zk">CONCEPTS §7</a></td></tr>
+      <tr><td>Why quantize?</td><td>SNARK fields are integers; floats break witness gen</td><td><a href="CONCEPTS.html#quantize">CONCEPTS §9</a></td></tr>
+      <tr><td>Why hybrid Python+Circom+Rust?</td><td>Ecosystem fit per layer</td><td><a href="STACK.html">STACK</a></td></tr>
+      <tr><td>How does a round work?</td><td>Train → quantize → prove → verify → FedAvg</td><td><a href="CONCEPTS.html#loop">CONCEPTS §5</a> · <a href="architecture.html">Architecture</a></td></tr>
+      <tr><td>What do we not claim?</td><td>Full training correctness; update-hiding; aggregator honesty (v1)</td><td><a href="CONCEPTS.html#nonproblem">CONCEPTS §3</a></td></tr>
+    </table>
+
+    <h2>HTML-first + AI-DLC method</h2>
+    <div class="callout ok">
+      <strong>Why HTML:</strong> denser structure, stable anchors, load graphs, human-scannable gates
+      (Thariq / Anthropic-style argument — see <a href="FORMAT.html">FORMAT.html</a>).
+      Method from <a href="https://github.com/awslabs/aidlc-workflows/tree/v2">aidlc-workflows v2</a>;
+      <em>files</em> are this kit. <strong>Do not</strong> load <code>vendor/aidlc-workflows/**/*.md</code> in agent context.
+      Surface: <a href="MANIFEST.html">MANIFEST</a> · <a href="AIDLC.html">AIDLC</a> · <a href="LOOPS.html">LOOPS</a> ·
+      <a href="ROSTER.html">ROSTER</a> · <a href="MEMORY.html">MEMORY</a> · <a href="rules/project.html">rules/</a>.
+    </div>
+
+    <h2>How to use this kit</h2>
+    <ol>
+      <li><strong>Boot:</strong> <a href="MANIFEST.html">MANIFEST.html</a> (role load graph) + <a href="FORMAT.html">FORMAT.html</a> §3.</li>
+      <li><strong>Internalize concepts:</strong> <a href="CONCEPTS.html">CONCEPTS.html</a> (mandatory before coding).</li>
+      <li><strong>Adopt AI-DLC loop:</strong> <a href="AIDLC.html">AIDLC.html</a> + <a href="LOOPS.html">LOOPS.html</a>.</li>
+      <li>Read <a href="AGENTS.html">AGENTS.html</a> + <a href="ROSTER.html">ROSTER.html</a> + phase <a href="rules/project.html">rules</a>.</li>
+      <li>Load project context via <a href="CLAUDE.html">CLAUDE.html</a> / <a href="SKILL.html">SKILL.html</a>.</li>
+      <li>Align on product: <a href="prd.html">prd.html</a> → <a href="PROPOSAL.html">PROPOSAL.html</a> → <a href="REQUIREMENTS.html">REQUIREMENTS.html</a>.</li>
+      <li>Internalize design: <a href="architecture.html">architecture.html</a>, <a href="DESIGN.html">DESIGN.html</a>, <a href="MATH.html">MATH.html</a>, <a href="RESEARCH.html">RESEARCH.html</a>.</li>
+      <li>Execute: <a href="PLAN.html">PLAN.html</a> + <a href="REPOS.html">REPOS.html</a> + <a href="INTEGRATION.html">INTEGRATION.html</a>.</li>
+      <li>Ship bar: <a href="QUALITY.html">QUALITY.html</a> + <a href="PAPER.html">PAPER.html</a>.</li>
+    </ol>
+
+    <div class="toc">
+      <strong>Document map</strong>
+      <ol>
+        <li><a href="MANIFEST.html">MANIFEST</a> — agent boot + selective load graph</li>
+        <li><a href="FORMAT.html">FORMAT</a> — why HTML-first vs MD; hard rules</li>
+        <li><a href="scratchpad.html">scratchpad</a> — conductor live diary (branch v2)</li>
+        <li><a href="CONCEPTS.html">CONCEPTS</a> — core what/how/why of FEDzk</li>
+        <li><a href="AIDLC.html">AIDLC</a> — AI-DLC phases/stages (HTML surface)</li>
+        <li><a href="LOOPS.html">LOOPS</a> — conductor loop + human-proxy gates</li>
+        <li><a href="ROSTER.html">ROSTER</a> — personas × FEDzk (no upstream MD)</li>
+        <li><a href="MEMORY.html">MEMORY</a> — HTML rules layers + learning store</li>
+        <li><a href="AGENTS.html">AGENTS</a> — agent roles, non-negotiables, workflow</li>
+        <li><a href="CLAUDE.html">CLAUDE</a> — project memory for Claude-style agents</li>
+        <li><a href="SKILL.html">SKILL</a> — reusable skill procedures (graphify, gh, ZK setup)</li>
+        <li><a href="prd.html">PRD</a> — product requirements for contribution-grade FEDzk</li>
+        <li><a href="PROPOSAL.html">PROPOSAL</a> — research + OSS contribution thesis</li>
+        <li><a href="REQUIREMENTS.html">REQUIREMENTS</a> — functional / non-functional / crypto / FL</li>
+        <li><a href="architecture.html">Architecture</a> — end-to-end system design</li>
+        <li><a href="DESIGN.html">DESIGN</a> — API, circuit, protocol, UX decisions</li>
+        <li><a href="STACK.html">STACK</a> — why Python + Circom + Rust hybrid</li>
+        <li><a href="MATH.html">MATH</a> — FedAvg, quantization, Groth16, DP, threat model</li>
+        <li><a href="RESEARCH.html">RESEARCH</a> — curated papers with arXiv links</li>
+        <li><a href="PAPER.html">PAPER</a> — paper outline, claims, experiment matrix</li>
+        <li><a href="PLAN.html">PLAN</a> — phased build plan (Phase 0→paper)</li>
+        <li><a href="REPOS.html">REPOS</a> — verified GitHub clones via <code>gh</code></li>
+        <li><a href="INTEGRATION.html">INTEGRATION</a> — wire upstream into FEDzk</li>
+        <li><a href="QUALITY.html">QUALITY</a> — production OSS + CI bars</li>
+      </ol>
+    </div>
+
+    <h2>North-star outcomes</h2>
+    <div class="grid-2">
+      <div class="callout ok">
+        <strong>Open-source framework</strong>
+        <p>Installable package, honest docs, working CLI, real Groth16 path for quantized gradients,
+        Flower-interop optional, Helm that boots, CI that proves crypto with golden vectors,
+        security hygiene (no tracked secrets), semantic versioning, contribution guide that matches code.</p>
+      </div>
+      <div class="callout">
+        <strong>Research paper</strong>
+        <p>Clear novelty (client-update ZK + reproducible FL benchmarks + open artifact pipeline),
+        Adult + CIFAR (or equivalent) vs plain FL / baselines, prove/verify latency tables,
+        attack rejection rates, open transcripts — see <a href="PAPER.html">PAPER.html</a>.</p>
+      </div>
+    </div>
+
+    <h2>Recommended stack (decision locked for agents)</h2>
+    <table>
+      <tr><th>Layer</th><th>Choice</th><th>Rationale</th></tr>
+      <tr><td>FL / ML training</td><td>Python + PyTorch (+ optional Flower)</td><td>Ecosystem gravity; paper experiments</td></tr>
+      <tr><td>Circuits</td><td>Circom → R1CS / wasm (keep until redesign)</td><td>Existing artifacts + tooling; redesign = Strategy D</td></tr>
+      <tr><td>Prove / verify engine</td><td>Rust (<code>arkworks</code> + circom-compat / witnesscalc); snarkjs fallback</td><td>Drop Node from hot path; keep proof JSON shape</td></tr>
+      <tr><td>Services</td><td>FastAPI façades + Axum prove sidecar</td><td>Strangler migration; rollback via env flag</td></tr>
+      <tr><td>Orchestration</td><td>Python CLI (Typer) wrapping Rust binary</td><td>Operator UX without rewriting trainers</td></tr>
+    </table>
+
+    <h2>Phase summary (see PLAN.html)</h2>
+    <table>
+      <tr><th>Phase</th><th>Goal</th><th>Exit criteria</th></tr>
+      <tr><td>0 Hygiene</td><td>Make repo runnable &amp; honest</td><td>CLI works; torch dep fixed; quantize wired; docs match API</td></tr>
+      <tr><td>1 Real circuits</td><td>n≥64/256 quantized model-update</td><td>Golden prove/verify; Adult LR E2E</td></tr>
+      <tr><td>2 Framework API</td><td>Stable public SDK</td><td>PyPI-installable; examples run CI</td></tr>
+      <tr><td>3 Rust crypto</td><td>fedzk-zk sidecar</td><td>Cross-verify vs snarkjs; Node optional</td></tr>
+      <tr><td>4 Experiments</td><td>Paper-ready transcripts</td><td>Adult + CIFAR matrix; plots; open data</td></tr>
+      <tr><td>5 Production OSS</td><td>v1.0 release</td><td>Security, Helm, docs site, governance</td></tr>
+    </table>
+
+    <h2>Open locally</h2>
+    <pre><code>cd v2/docs/agent-kit
+python3 -m http.server 8765
+# open http://127.0.0.1:8765/</code></pre>
+
+    <footer class="doc-foot">
+      FEDzk Agent Kit · HTML-first · AIDLC method · Links verified via <code>gh</code> where cited · 2026-07-22
+    </footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+<script src="agent-kit.js" defer></script>
+</body>
+</html>

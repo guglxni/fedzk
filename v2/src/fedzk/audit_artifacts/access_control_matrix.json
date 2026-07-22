@@ -1,0 +1,39 @@
+{
+  "title": "FEDZK Access Control Matrix",
+  "version": "1.0",
+  "roles": {
+    "admin": {
+      "description": "System administrator",
+      "permissions": [
+        "full_system_access",
+        "user_management",
+        "security_configuration",
+        "audit_log_access"
+      ]
+    },
+    "data_scientist": {
+      "description": "Data scientist user",
+      "permissions": [
+        "model_training",
+        "data_access_readonly",
+        "federated_computation_participation"
+      ]
+    },
+    "auditor": {
+      "description": "Security auditor",
+      "permissions": [
+        "audit_log_readonly",
+        "security_reports_view",
+        "compliance_reports_view"
+      ]
+    }
+  },
+  "authentication_methods": [
+    "Multi-factor authentication (MFA)",
+    "Certificate-based authentication",
+    "OAuth 2.0 / OpenID Connect",
+    "API key authentication"
+  ],
+  "authorization_model": "Role-Based Access Control (RBAC)",
+  "access_review_frequency": "Quarterly"
+}

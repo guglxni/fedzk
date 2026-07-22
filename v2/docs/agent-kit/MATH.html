@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MATH — FEDzk Agent Kit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main>
+
+    <h1>MATH — Formal Background for FEDzk</h1>
+    <p class="lead">Mathematics agents must respect when implementing circuits, quantization, aggregation, and writing the paper. Inspired by FL + zkSNARK literature (see RESEARCH.html).</p>
+
+    <div class="callout" id="concepts-primer">
+      <strong>How MATH serves CONCEPTS:</strong> FedAvg is the learning concept; L_secure is the integrity concept;
+      quantization is the encoding concept; Groth16 is the proof-system concept. Implement equations only as they support those roles—
+      <a href="CONCEPTS.html">CONCEPTS.html</a>.
+    </div>
+    <h2 id="math-why">Why these mathematical objects</h2>
+    <ul>
+      <li><strong>FedAvg weights n_k/n:</strong> preserves standard FL comparability for the paper.</li>
+      <li><strong>Squared norm in-circuit:</strong> avoids costly sqrt; matches common clipping practice.</li>
+      <li><strong>Commitment binding in chunks:</strong> prevents mix-and-match proofs across rounds/clients.</li>
+      <li><strong>Public vs private signals:</strong> design which parts of the statement are revealed—core product privacy posture.</li>
+    </ul>
+
+
+
+    <h2>1. Federated averaging (FedAvg)</h2>
+    <p>With K clients, local datasets D_k, local steps producing weights w_k^{t+1} from global w^t:</p>
+    <div class="formula">w^{t+1} = Σ_{k=1..K} (n_k / n) · w_k^{t+1} &nbsp;&nbsp; where n = Σ n_k</div>
+    <p>Equivalently on updates Δ_k = w_k^{t+1} − w^t:</p>
+    <div class="formula">w^{t+1} = w^t + Σ_{k=1..K} (n_k / n) · Δ_k</div>
+    <p>FEDzk inserts a verify predicate V(π_k, x_k)=1 before accepting Δ_k (or quantized form) into the sum.</p>
+
+    <h2>2. Threat model (client integrity)</h2>
+    <ul>
+      <li>Malicious client may send arbitrary Δ to poison the global model.</li>
+      <li>Defense (this framework): prove Δ ∈ L for a language L defined by circuit constraints (norm bounds, sparsity, etc.).</li>
+      <li>Does <em>not</em> by itself prevent all poisoning (e.g. in-bound adversarial directions). Paper must be precise.</li>
+    </ul>
+
+    <h2>3. Fixed-point quantization</h2>
+    <p>Field elements of BN254 scalar field F_r are integers mod r. Floats g ∈ ℝ^d map via scale s=2^{b}:</p>
+    <div class="formula">ĝ_i = clip(round(g_i · s), -M, M) ∈ ℤ</div>
+    <p>Require |ĝ_i| &lt; r and typically |ĝ_i| ≪ r. Dequantize for aggregation display: g̃_i = ĝ_i / s.</p>
+    <div class="callout warn">
+      <strong>Implementation law:</strong> Never pass Python floats into Circom/snarkjs witness generation.
+      Quantization error ε_q must be measured in experiments (accuracy vs plaintext FL).
+    </div>
+
+    <h2>4. Example secure-update language</h2>
+    <p>For quantized vector ĝ ∈ ℤ^N:</p>
+    <div class="formula">L_secure = { ĝ | Σ_i ĝ_i² ≤ B ∧ Σ_i 1[ĝ_i ≠ 0] ≥ m }</div>
+    <p>Circuit computes S = Σ ĝ_i² and nnz, enforces comparisons (LessThan gadgets from circomlib).</p>
+
+    <h2>5. Rank-1 Constraint System (R1CS)</h2>
+    <p>Circom compiles to R1CS: for witness z ∈ F^m, matrices A,B,C:</p>
+    <div class="formula">(Az) ∘ (Bz) = Cz</div>
+    <p>Public inputs are a subset of z; private signals are the rest (gradients may be private; bounds/public flags public — design choice documented per circuit).</p>
+
+    <h2>6. Groth16 (intuition for engineers)</h2>
+    <p>Groth16 (Groth, EUROCRYPT 2016) yields proofs π of constant size (3 group elements) for R1CS satisfiability, with pairing-based verification.</p>
+    <ul>
+      <li><strong>Setup:</strong> toxic waste → proving key pk, verification key vk.</li>
+      <li><strong>Prove:</strong> π ← Prove(pk, x, w) for public x, witness w.</li>
+      <li><strong>Verify:</strong> {0,1} ← Verify(vk, x, π).</li>
+      <li><strong>Properties:</strong> completeness, knowledge soundness, zero-knowledge (under assumptions).</li>
+    </ul>
+    <p>Curve in stack: BN254 / BN128 as used by snarkjs (<code>curve: bn128</code> in proof JSON).</p>
+
+    <h2>7. Why proof size / verify matter in FL</h2>
+    <ul>
+      <li>Each round, up to K proofs arrive; verify must be cheap relative to training.</li>
+      <li>Prove is client-side cost; paper reports wall-clock vs local epoch time.</li>
+      <li>Batch verification (same vk, many proofs) can amortize pairings — circuit/tooling dependent.</li>
+    </ul>
+
+    <h2>8. Differential privacy (optional circuit path)</h2>
+    <p>Gaussian mechanism on clipped gradients:</p>
+    <div class="formula">g̃ = clip(g, C) + N(0, σ²C² I)</div>
+    <p>ZK can prove clipping / noise sampling constraints depending on circuit design — non-trivial; treat DP circuits as P1 and cite DP literature separately from ZK soundness.</p>
+
+    <h2>9. Chunking math</h2>
+    <p>For dimension d and circuit width N: k = ⌈d/N⌉ chunks. Commitment binding:</p>
+    <div class="formula">h = H(ĝ_1 ‖ ĝ_2 ‖ … ‖ ĝ_d ‖ round_id)</div>
+    <p>Each chunk proof includes (h, i, k) as public inputs to prevent mix-and-match attacks across clients/rounds.</p>
+
+    <h2>10. Aggregation after ZK</h2>
+    <p>Only updates with Verify=1 enter FedAvg. Optional robust aggregators (trimmed mean, Krum) are orthogonal post-verify layers — future work.</p>
+
+    <h2>11. Notation cheat sheet</h2>
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th></tr>
+      <tr><td>w^t</td><td>Global model at round t</td></tr>
+      <tr><td>Δ_k / g</td><td>Client update / gradient</td></tr>
+      <tr><td>s, b</td><td>Scale factor / scale bits</td></tr>
+      <tr><td>N</td><td>Circuit vector length</td></tr>
+      <tr><td>B, m</td><td>Norm bound, min nonzero</td></tr>
+      <tr><td>π, x, w</td><td>Proof, public inputs, witness</td></tr>
+      <tr><td>vk, pk</td><td>Verification / proving keys</td></tr>
+    </table>
+
+    <footer class="doc-foot">FEDzk Agent Kit · <a href="index.html">Hub</a></footer>
+  </main>
+</div>
+<script src="nav.js" defer></script>
+</body>
+</html>
