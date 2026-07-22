@@ -78,6 +78,32 @@
       <tr><td>E6</td><td>scale_bits / N ablation</td><td>—</td><td>acc vs cost</td></tr>
     </table>
 
+    <h2 id="related-work">Related work stubs (cite carefully)</h2>
+    <p>Expand from <a href="REPOS.html">REPOS.html</a>; verify each paper before claiming novelty.</p>
+    <table>
+      <tr><th>Lineage</th><th>Systems / papers</th><th>FEDzk differentiator (working)</th></tr>
+      <tr>
+        <td>ZK + FL integrity</td>
+        <td>zkFL / zkFDL / Federify-style client proofs</td>
+        <td>Open Circom artifacts + chunk protocol + reproducible transcripts; verify-before-FedAvg</td>
+      </tr>
+      <tr>
+        <td>FL frameworks</td>
+        <td>Flower, FedML, PySyft</td>
+        <td>Optional adapter (<code>fedzk.adapters.flower</code>); ZK is not optional on the integrity path</td>
+      </tr>
+      <tr>
+        <td>Prove/verify engines</td>
+        <td>snarkjs, rapidsnark, arkworks/circom-compat</td>
+        <td>Same <code>fedzk.proof.v1</code> wire; Rust verify-first (E5), prove still snarkjs until U41</td>
+      </tr>
+      <tr>
+        <td>Trusted setup</td>
+        <td>Perpetual Powers of Tau / ceremony tooling</td>
+        <td>N=64/256 currently <code>dev_unsafe</code> — paper must not imply production MPC setup</td>
+      </tr>
+    </table>
+
     <h2>Venues (indicative)</h2>
     <ul>
       <li>Systems/security: IEEE S&amp;P workshops, ACSAC, NDSS workshops, PETS (if privacy angle strong).</li>

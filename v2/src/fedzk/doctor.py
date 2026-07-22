@@ -221,6 +221,44 @@ def run_doctor() -> Dict[str, Any]:
     )
     warnings.append("Circuit capacity N_dev=4 — not production model size; see PLAN Phase 1")
 
+    # 7) Optional Rust verify backend (FEDZK_ZK_BACKEND)
+    try:
+        from fedzk.prover.engine import find_fedzk_zk, resolve_backend, rust_health, selected_backend
+
+        backend_sel = selected_backend()
+        backend_res = resolve_backend()
+        bin_path = find_fedzk_zk()
+        if backend_sel == "rust":
+            ok_h, payload = rust_health()
+            detail = (
+                f"FEDZK_ZK_BACKEND=rust resolved={backend_res} "
+                f"bin={bin_path} health={payload}"
+            )
+            checks.append({"id": "zk_backend", "ok": ok_h, "detail": detail})
+            if not ok_h:
+                errors.append(
+                    "FEDZK_ZK_BACKEND=rust but fedzk-zk health failed — "
+                    "build v2/rust (cargo build -p fedzk-zk) or unset backend"
+                )
+        else:
+            checks.append(
+                {
+                    "id": "zk_backend",
+                    "ok": True,
+                    "detail": (
+                        f"FEDZK_ZK_BACKEND={backend_sel} resolved={backend_res} "
+                        f"fedzk-zk={'yes' if bin_path else 'no'}"
+                    ),
+                }
+            )
+            if backend_sel == "auto" and not bin_path:
+                warnings.append(
+                    "FEDZK_ZK_BACKEND=auto and fedzk-zk missing — falling back to snarkjs"
+                )
+    except Exception as exc:  # noqa: BLE001
+        checks.append({"id": "zk_backend", "ok": True, "detail": f"skip: {exc}"})
+        warnings.append(f"zk_backend check skipped: {exc}")
+
     overall_ok = len(errors) == 0
     return {
         "overall_ok": overall_ok,

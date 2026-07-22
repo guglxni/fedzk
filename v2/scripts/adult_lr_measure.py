@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from fedzk.client.trainer import LocalTrainer  # noqa: E402
 from fedzk.coordinator.api import app  # noqa: E402
 from fedzk.prover.chunked import prove_update  # noqa: E402
-from fedzk.prover.engine import find_fedzk_zk, verify_with_rust  # noqa: E402
+from fedzk.prover.engine import find_fedzk_zk, resolve_backend, verify_with_rust  # noqa: E402
 from fedzk.prover.zkgenerator import ASSET_DIR  # noqa: E402
 from fedzk.zk.circuit_config import profile_for_n  # noqa: E402
 from fedzk.zk.chunk_protocol import commit_quantized  # noqa: E402
@@ -246,6 +246,7 @@ def run_measure() -> dict:
         "experiment": "adult-lr-measure",
         "n_circuit": n_circuit,
         "ceremony": profile.ceremony,
+        "zk_backend": resolve_backend(),
         "baseline": baseline,
         "rounds": round_rows,
         "metrics": {

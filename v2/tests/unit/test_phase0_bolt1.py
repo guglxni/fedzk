@@ -55,6 +55,17 @@ def test_doctor_runs_and_reports_cli():
     assert "overall_ok" in report
     cli_checks = [c for c in report["checks"] if c["id"] == "cli_module"]
     assert cli_checks and cli_checks[0]["ok"] is True
+    backend_checks = [c for c in report["checks"] if c["id"] == "zk_backend"]
+    assert backend_checks and backend_checks[0]["ok"] is True
+
+
+def test_doctor_rust_backend_fail_closed(monkeypatch):
+    monkeypatch.setenv("FEDZK_ZK_BACKEND", "rust")
+    monkeypatch.setenv("FEDZK_ZK_BIN", "/nonexistent/fedzk-zk")
+    report = run_doctor()
+    backend = [c for c in report["checks"] if c["id"] == "zk_backend"][0]
+    assert backend["ok"] is False
+    assert report["overall_ok"] is False
 
 
 def test_version_aligned():
