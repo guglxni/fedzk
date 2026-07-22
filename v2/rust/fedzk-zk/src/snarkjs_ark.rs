@@ -26,7 +26,11 @@ fn g1_from_json(v: &Value) -> Result<G1Affine> {
     }
     let x = fq(arr[0].as_str().ok_or_else(|| anyhow!("G1.x string"))?)?;
     let y = fq(arr[1].as_str().ok_or_else(|| anyhow!("G1.y string"))?)?;
-    Ok(G1Affine::new(x, y))
+    let p = G1Affine::new_unchecked(x, y);
+    if !p.is_on_curve() || !p.is_in_correct_subgroup_assuming_on_curve() {
+        bail!("G1 point not on curve / wrong subgroup");
+    }
+    Ok(p)
 }
 
 fn g2_from_json(v: &Value) -> Result<G2Affine> {
@@ -49,7 +53,11 @@ fn g2_from_json(v: &Value) -> Result<G2Affine> {
         fq(y_arr[0].as_str().ok_or_else(|| anyhow!("G2.y.c0"))?)?,
         fq(y_arr[1].as_str().ok_or_else(|| anyhow!("G2.y.c1"))?)?,
     );
-    Ok(G2Affine::new(x, y))
+    let p = G2Affine::new_unchecked(x, y);
+    if !p.is_on_curve() || !p.is_in_correct_subgroup_assuming_on_curve() {
+        bail!("G2 point not on curve / wrong subgroup");
+    }
+    Ok(p)
 }
 
 fn vk_from_snarkjs(v: &Value) -> Result<VerifyingKey<Bn254>> {

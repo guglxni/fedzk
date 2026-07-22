@@ -22,6 +22,21 @@
       Ceremony for N=64/256 remains <code>dev_unsafe</code> — do not claim production setup.
     </div>
 
+    <h2 id="results-draft">Results draft (fill from transcripts)</h2>
+    <p>Numbers below are from local Apple Silicon runs; regenerate before submission.</p>
+    <ul>
+      <li><strong>E2 overhead:</strong> train ~6ms vs prove ~270ms + submit(~verify) ~240ms per client at N=64
+        (<code>adult-lr-measure.json</code>). Integrity path dominates round time on tiny models — expected;
+        paper should frame ZK cost vs model/compute scale, not claim “negligible.”</li>
+      <li><strong>E4 attacks:</strong> 5/5 reject (pi_a tamper, public tamper, commitment top/meta mismatch, empty proof).
+        Honest submit accepted. False-accept on suite = 0.</li>
+      <li><strong>E5 verify:</strong> arkworks sidecar ~2.4× faster p50 than snarkjs on N=4/N=64 verify
+        (prove still snarkjs). Supports Phase 3 “verify-first” narrative.</li>
+      <li><strong>Non-results yet:</strong> C3 accuracy parity on real Adult/CIFAR; production ceremony;
+        Rust prove path.</li>
+    </ul>
+    <p>Limitations source of truth: <code>v2/LIMITATIONS.md</code>.</p>
+
 
 
     <h2>Working title options</h2>
