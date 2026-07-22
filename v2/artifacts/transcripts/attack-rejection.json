@@ -1,0 +1,69 @@
+{
+  "wire": "fedzk.proof.v1",
+  "experiment": "attack-rejection",
+  "n_circuit": 4,
+  "cases": [
+    {
+      "case": "honest",
+      "expect": "accept",
+      "http": 200,
+      "ok": true,
+      "body": {
+        "status": "accepted",
+        "model_version": 1,
+        "global_update": null
+      }
+    },
+    {
+      "case": "tamper_pi_a",
+      "expect": "reject",
+      "http": 400,
+      "ok": true,
+      "body": {
+        "detail": "Cryptographic proof verification failed for client atk-tamper_pi_a"
+      }
+    },
+    {
+      "case": "tamper_public",
+      "expect": "reject",
+      "http": 400,
+      "ok": true,
+      "body": {
+        "detail": "Cryptographic proof verification failed for client atk-tamper_public"
+      }
+    },
+    {
+      "case": "tamper_commitment_top",
+      "expect": "reject",
+      "http": 400,
+      "ok": true,
+      "body": {
+        "detail": "Cryptographic proof verification failed for client atk-tamper_commitment_top"
+      }
+    },
+    {
+      "case": "tamper_commitment_meta",
+      "expect": "reject",
+      "http": 400,
+      "ok": true,
+      "body": {
+        "detail": "Cryptographic proof verification failed for client atk-tamper_commitment_meta"
+      }
+    },
+    {
+      "case": "empty_proof",
+      "expect": "reject",
+      "http": 400,
+      "ok": true,
+      "body": {
+        "detail": "Cryptographic proof verification failed for client atk-empty_proof"
+      }
+    }
+  ],
+  "metrics": {
+    "honest_accept": true,
+    "attacks_total": 5,
+    "attacks_rejected": 5,
+    "rejection_rate": 1.0
+  }
+}

@@ -3,20 +3,20 @@
 <title>scratchpad</title><link rel="stylesheet" href="styles.css"/></head>
 <body data-kit="fedzk-html-first"><div class="layout"><nav class="sidebar" id="sidebar"></nav><main>
 <h1>scratchpad.html</h1>
-<p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code> · wake 12m</p>
+<p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code></p>
 <div class="meta">
-  <span class="pill ok">arkworks verify</span>
-  <span class="pill ok">Axum /verify</span>
-  <span class="pill ok">Phase4 measure</span>
+  <span class="pill ok">attack reject 100%</span>
+  <span class="pill ok">ZKVerifier→rust</span>
+  <span class="pill ok">paper tables</span>
 </div>
 <div class="callout bad">Isolation: only edit <code>v2/</code>.</div>
 <section id="now"><h2>Now</h2>
-<p>Adult measure harness green (~270ms prove / ~73ms rust verify / N=64). Transcript at <code>artifacts/transcripts/adult-lr-measure.json</code>.</p></section>
+<p>Attack suite 5/5 rejects; commitment meta required; <code>FEDZK_ZK_BACKEND=rust</code> wired through <code>ZKVerifier</code>. Metrics at <code>artifacts/paper/metrics-tables.md</code>.</p></section>
 <section id="next"><h2>Next loop moves</h2>
 <ol>
-<li>Baseline-without-ZK comparison arm in measure script.</li>
-<li>CIFAR batch YAML stub (Phase4).</li>
-<li>Optional: root CI pointer (human-proxy — touches outside v2).</li>
+<li>Microbench snarkjs vs rust verify latency table (E5).</li>
+<li>Docker compose demo under <code>v2/deploy/</code>.</li>
+<li>PAPER.html draft sections from real transcripts.</li>
 </ol></section>
 <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="ARTIFACTS.html">ARTIFACTS</a></footer>
 </main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>

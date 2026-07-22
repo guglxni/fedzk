@@ -145,23 +145,40 @@ class ZKVerifier:
         """
         Verify a zero-knowledge proof using a specific verification key.
 
-        Args:
-            proof: Dictionary containing the ZK proof
-            public_inputs: List of public inputs/signals
-            vkey_path: Path to the verification key to use
-
-        Returns:
-            Boolean indicating whether the proof is valid
+        Backend selected via FEDZK_ZK_BACKEND=snarkjs|rust|auto (see fedzk.prover.engine).
         """
-        # Verify the verification key exists
         if not Path(vkey_path).exists():
             raise RuntimeError(f"Verification key not found: {vkey_path}")
 
+        from fedzk.prover.engine import (
+            RustEngineUnavailable,
+            resolve_backend,
+            verify_with_rust,
+        )
+
+        backend = resolve_backend()
+        if backend == "rust":
+            try:
+                return verify_with_rust(proof, list(public_inputs), vkey_path)
+            except RustEngineUnavailable as e:
+                raise RuntimeError(f"Rust verify unavailable: {e}") from e
+
+        if backend == "snarkjs":
+            return self._verify_snarkjs(proof, public_inputs, vkey_path)
+
+        # auto: prefer rust when healthy, else snarkjs
+        try:
+            return verify_with_rust(proof, list(public_inputs), vkey_path)
+        except RustEngineUnavailable:
+            return self._verify_snarkjs(proof, public_inputs, vkey_path)
+
+    def _verify_snarkjs(
+        self, proof: Dict[str, Any], public_inputs: List[str], vkey_path: str
+    ) -> bool:
         with tempfile.TemporaryDirectory() as tmpdir:
             proof_path = os.path.join(tmpdir, "proof.json")
             public_path = os.path.join(tmpdir, "public.json")
 
-            # Write proof and public inputs to temporary files
             with open(proof_path, "w") as f:
                 json.dump(proof, f)
 
@@ -169,19 +186,21 @@ class ZKVerifier:
                 json.dump(public_inputs, f)
 
             try:
-                # Run SNARKjs verification
-                result = subprocess.run([
-                    "snarkjs", "groth16", "verify",
-                    vkey_path,
-                    public_path,
-                    proof_path
-                ], capture_output=True, text=True, check=True)
-
-                # SNARKjs returns "OK" in stdout if verification succeeds
+                result = subprocess.run(
+                    [
+                        "snarkjs",
+                        "groth16",
+                        "verify",
+                        vkey_path,
+                        public_path,
+                        proof_path,
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
                 return "OK" in result.stdout
-
             except subprocess.CalledProcessError as e:
-                # Verification failed - provide detailed error
                 error_msg = e.stderr.strip() if e.stderr else f"Exit code: {e.returncode}"
                 raise RuntimeError(f"Proof verification failed: {error_msg}")
 

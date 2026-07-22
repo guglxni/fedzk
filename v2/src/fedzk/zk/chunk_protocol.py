@@ -97,15 +97,24 @@ def split_into_chunks(
 
 
 def verify_bundle_commitments(bundle: ChunkProofBundle) -> bool:
-    """Structural check: every chunk meta shares the same commitment and counts."""
+    """Structural check: every chunk meta shares the same commitment and counts.
+
+    Fail-closed if any chunk lacks meta (commitment binding required).
+    """
     if not bundle.chunks:
         return False
+    if not bundle.commitment or not isinstance(bundle.commitment, str):
+        return False
     for ch in bundle.chunks:
-        meta = ch.get("meta") or {}
+        meta = ch.get("meta")
+        if not isinstance(meta, dict) or not meta:
+            return False
         if meta.get("commitment") != bundle.commitment:
             return False
         if int(meta.get("chunk_count", -1)) != len(bundle.chunks):
             return False
         if int(meta.get("n", -1)) != bundle.n:
+            return False
+        if int(meta.get("chunk_index", -1)) < 0:
             return False
     return True
