@@ -3,20 +3,20 @@
 <title>scratchpad</title><link rel="stylesheet" href="styles.css"/></head>
 <body data-kit="fedzk-html-first"><div class="layout"><nav class="sidebar" id="sidebar"></nav><main>
 <h1>scratchpad.html</h1>
-<p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code></p>
+<p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code> · wake 12m</p>
 <div class="meta">
-  <span class="pill ok">N=4/64/256</span>
   <span class="pill ok">arkworks verify</span>
-  <span class="pill ok">ci_local</span>
+  <span class="pill ok">Axum /verify</span>
+  <span class="pill ok">Phase4 measure</span>
 </div>
 <div class="callout bad">Isolation: only edit <code>v2/</code>.</div>
 <section id="now"><h2>Now</h2>
-<p><code>fedzk-zk verify</code> validates N=4 golden via arkworks. Python <code>verify_with_rust</code> returns True on exit 0.</p></section>
+<p>Adult measure harness green (~270ms prove / ~73ms rust verify / N=64). Transcript at <code>artifacts/transcripts/adult-lr-measure.json</code>.</p></section>
 <section id="next"><h2>Next loop moves</h2>
 <ol>
-<li>Cross-check N=64/256 DEV proofs with rust verify.</li>
-<li>Optional Axum <code>/verify</code> HTTP wrapper.</li>
-<li>Phase4 Adult measurement harness from YAML.</li>
+<li>Baseline-without-ZK comparison arm in measure script.</li>
+<li>CIFAR batch YAML stub (Phase4).</li>
+<li>Optional: root CI pointer (human-proxy — touches outside v2).</li>
 </ol></section>
 <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="ARTIFACTS.html">ARTIFACTS</a></footer>
 </main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>
