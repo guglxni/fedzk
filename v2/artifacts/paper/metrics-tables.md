@@ -6,12 +6,12 @@ Source: `adult-lr-measure.json` (n_circuit=64, ceremony=dev_unsafe).
 
 | Arm | mean | p50 | max |
 | --- | ---: | ---: | ---: |
-| baseline train (no ZK) | 5.9 | 1.3 | 15.3 |
-| FEDzk prove (snarkjs) | 272.1 | 260.2 | 296.0 |
-| FEDzk rust verify | 74.3 | 71.4 | 80.5 |
-| FEDzk coordinator submit | 242.5 | 240.5 | 247.5 |
+| baseline train (no ZK) | 12.5 | 1.3 | 35.2 |
+| FEDzk prove (snarkjs) | 283.0 | 273.7 | 308.3 |
+| FEDzk rust verify | 70.2 | 69.7 | 71.3 |
+| FEDzk coordinator submit | 138.8 | 137.2 | 142.6 |
 
-Train loss (FEDzk arm mean): `0.6719358811775843`
+Train loss (FEDzk arm mean): `0.7172777454058329`
 
 ## T3 — Attack rejection (coordinator fail-closed)
 
@@ -30,10 +30,3 @@ Train loss (FEDzk arm mean): `0.6719358811775843`
 
 ---
 Regenerate: `python scripts/adult_lr_measure.py && python scripts/attack_rejection_suite.py && python scripts/render_paper_metrics.py`
-
-## E5 — Verify backend ablation (ms)
-
-| Case | snarkjs mean | snarkjs p50 | rust mean | rust p50 |
-| --- | ---: | ---: | ---: | ---: |
-| n4_golden | 180.3 | 179.3 | 75.1 | 73.7 |
-| n64_live | 189.4 | 182.0 | 71.3 | 70.7 |
