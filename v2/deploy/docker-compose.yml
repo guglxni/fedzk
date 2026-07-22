@@ -1,0 +1,28 @@
+# FEDzk v2 local demo — coordinator + fedzk-zk verify sidecar
+# Usage (from v2/): docker compose -f deploy/docker-compose.yml up --build
+services:
+  fedzk-zk:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.fedzk-zk
+    ports:
+      - "8787:8787"
+    command: ["fedzk-zk", "serve", "--bind", "0.0.0.0:8787"]
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8787/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  coordinator:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.coordinator
+    ports:
+      - "8000:8000"
+    environment:
+      FEDZK_ZK_BACKEND: snarkjs
+      FEDZK_ZK_SIDECAR: http://fedzk-zk:8787
+    depends_on:
+      fedzk-zk:
+        condition: service_healthy

@@ -5,18 +5,18 @@
 <h1>scratchpad.html</h1>
 <p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code></p>
 <div class="meta">
-  <span class="pill ok">attack reject 100%</span>
-  <span class="pill ok">ZKVerifier→rust</span>
-  <span class="pill ok">paper tables</span>
+  <span class="pill ok">E5 rust ~2.4× verify</span>
+  <span class="pill ok">deploy compose</span>
+  <span class="pill ok">31+ tests</span>
 </div>
 <div class="callout bad">Isolation: only edit <code>v2/</code>.</div>
 <section id="now"><h2>Now</h2>
-<p>Attack suite 5/5 rejects; commitment meta required; <code>FEDZK_ZK_BACKEND=rust</code> wired through <code>ZKVerifier</code>. Metrics at <code>artifacts/paper/metrics-tables.md</code>.</p></section>
+<p>E5 ablation + deploy stubs + attack/paper tables landed. Next: limitations section from measurements; optional prove-path Rust (still snarkjs).</p></section>
 <section id="next"><h2>Next loop moves</h2>
 <ol>
-<li>Microbench snarkjs vs rust verify latency table (E5).</li>
-<li>Docker compose demo under <code>v2/deploy/</code>.</li>
-<li>PAPER.html draft sections from real transcripts.</li>
+<li>Write LIMITATIONS.md from real numbers (dev_unsafe, N pad, heuristic validator).</li>
+<li>Example script in CI_LOCAL for attack+e5.</li>
+<li>PAPER results subsection flesh-out.</li>
 </ol></section>
 <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="ARTIFACTS.html">ARTIFACTS</a></footer>
 </main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>

@@ -1,0 +1,14 @@
+# Minimal Rust sidecar image for fedzk-zk serve
+# build context: v2/
+FROM rust:1.85-bookworm AS build
+WORKDIR /src
+COPY rust/Cargo.toml rust/Cargo.lock ./
+COPY rust/fedzk-zk ./fedzk-zk
+RUN cargo build --release -p fedzk-zk
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=build /src/target/release/fedzk-zk /usr/local/bin/fedzk-zk
+EXPOSE 8787
+CMD ["fedzk-zk", "serve", "--bind", "0.0.0.0:8787"]

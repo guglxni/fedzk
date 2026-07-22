@@ -14,10 +14,12 @@
     <h1>PAPER — Research Paper Plan</h1>
     <p class="lead">Working outline for a systems/security + FL venue paper backed by the open framework.</p>
 
-    <div class="callout" id="concepts-primer">
-      <strong>Paper claims must match concepts:</strong> claim update-constraint ZK + open reproducible system;
-      do not claim aggregator honesty or full training proofs unless built.
-      Align wording with <a href="CONCEPTS.html#prove-what">what the proof asserts</a>.
+    <div class="callout ok" id="measured-so-far">
+      <strong>Measured on branch <code>v2</code> (2026-07-22, synthetic Adult):</strong>
+      Attack suite reject rate <code>1.0</code> (5/5). E5 verify p50:
+      snarkjs ~180ms vs rust ~74ms (N=4 golden). Tables:
+      <a href="../../artifacts/paper/metrics-tables.md"><code>artifacts/paper/metrics-tables.md</code></a>.
+      Ceremony for N=64/256 remains <code>dev_unsafe</code> — do not claim production setup.
     </div>
 
 

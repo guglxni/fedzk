@@ -30,3 +30,10 @@ Train loss (FEDzk arm mean): `0.6719358811775843`
 
 ---
 Regenerate: `python scripts/adult_lr_measure.py && python scripts/attack_rejection_suite.py && python scripts/render_paper_metrics.py`
+
+## E5 — Verify backend ablation (ms)
+
+| Case | snarkjs mean | snarkjs p50 | rust mean | rust p50 |
+| --- | ---: | ---: | ---: | ---: |
+| n4_golden | 180.3 | 179.3 | 75.1 | 73.7 |
+| n64_live | 189.4 | 182.0 | 71.3 | 70.7 |

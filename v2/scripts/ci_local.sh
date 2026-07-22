@@ -10,3 +10,7 @@ echo "== cargo build fedzk-zk =="
 (cd rust && cargo build -p fedzk-zk)
 ./rust/target/debug/fedzk-zk health
 echo "CI_LOCAL_OK"
+echo "== e5 transcript present =="
+test -f artifacts/transcripts/e5-backend-ablation.json
+echo "== attack transcript present =="
+test -f artifacts/transcripts/attack-rejection.json
