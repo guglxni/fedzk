@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>scratchpad — FEDzk Agent Kit</title><link rel="stylesheet" href="styles.css"/></head>
+<title>scratchpad</title><link rel="stylesheet" href="styles.css"/></head>
 <body data-kit="fedzk-html-first"><div class="layout"><nav class="sidebar" id="sidebar"></nav><main>
-<h1>scratchpad.html — Conductor working memory</h1>
-<p class="lead">Tree <code>v2/</code> · branch <code>v2</code> · loop engineering active.</p>
-<div class="meta"><span class="pill ok">Bolt3 GREEN</span><span class="pill ok">18 unit tests</span><span class="pill ok">Adult LR smoke OK</span></div>
-<div class="callout bad"><strong>Isolation:</strong> Edit only <code>v2/</code>.</div>
+<h1>scratchpad.html</h1>
+<p class="lead">Conductor loop · tree <code>v2/</code> · branch <code>v2</code></p>
+<div class="meta">
+  <span class="pill ok">Bolt3 N=256</span>
+  <span class="pill ok">Bolt4 SDK+Flower</span>
+  <span class="pill ok">Adult smoke schema</span>
+</div>
+<div class="callout bad">Isolation: only edit <code>v2/</code>. Diff vs main must be <code>v2/**</code> only.</div>
 <section id="now"><h2>Now</h2>
-<p><strong>Bolt 3 complete.</strong> N=64 DEV ceremony artifacts shipped; chunk verify on coordinator;
-<code>prove_update</code>; Adult LR smoke aggregated. Next loop: N=256 build script run OR transcript schema CI; soften single-proof AdvancedValidator false rejects.</p></section>
-<section id="done"><h2>Done this loop</h2>
-<ul>
-<li>N=64 wasm/zkey/vkey (ceremony=dev_unsafe) + manifest pins</li>
-<li>Coordinator <code>chunk_bundle</code> verify-before-FedAvg</li>
-<li><code>prover/chunked.py</code> · <code>scripts/adult_lr_smoke.py</code> · <code>build_gradients_circuit.py</code></li>
-<li>LocalTrainer(model_type=…) kwargs fix</li>
-</ul></section>
-<section id="next"><h2>Next</h2>
+<p>Phase1 capacity complete (N∈{4,64,256}). Phase2 started: package exports + Flower mixin spike + experiment YAML.</p></section>
+<section id="next"><h2>Next loop moves</h2>
 <ol>
-<li>Run build script for N=256 (longer ptau).</li>
-<li>Skip AdvancedProofValidator for known circuit profiles on single-proof path.</li>
-<li>Wire transcript schema validation for smoke JSON.</li>
+<li>Rust verify sidecar scaffold under <code>v2/rust/</code> (fail-closed feature flag).</li>
+<li>Wire smoke YAML → CI job stub under <code>v2/</code>.</li>
+<li>Paper baseline vs FEDzk measurement harness (Phase4).</li>
 </ol></section>
-<footer class="doc-foot"><a href="ARTIFACTS.html">ARTIFACTS</a> · <a href="PLAN.html">PLAN</a></footer>
+<footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="ARTIFACTS.html">ARTIFACTS</a></footer>
 </main></div><script src="nav.js" defer></script><script src="agent-kit.js" defer></script></body></html>

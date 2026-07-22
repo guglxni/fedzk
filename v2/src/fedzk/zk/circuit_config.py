@@ -20,10 +20,11 @@ DEFAULT_SCALE_FACTOR = 1000
 CIRCUIT_ID_STANDARD = "model_update"
 CIRCUIT_ID_SECURE = "model_update_secure"
 CIRCUIT_ID_GRADIENTS_N64 = "model_update_gradients_n64"
+CIRCUIT_ID_GRADIENTS_N256 = "model_update_gradients_n256"
 WIRE_FORMAT = "fedzk.proof.v1"
 
 # N values that have *runtime* artifacts under src/fedzk/zk/
-SHIPPED_N: Tuple[int, ...] = (4, 64)
+SHIPPED_N: Tuple[int, ...] = (4, 64, 256)
 
 
 @dataclass(frozen=True)
@@ -69,11 +70,21 @@ PROFILE_N64 = CircuitProfile(
     vkey_name="verification_key_gradients_n64.json",
     ceremony="dev_unsafe",
 )
+PROFILE_N256 = CircuitProfile(
+    CIRCUIT_ID_GRADIENTS_N256,
+    256,
+    secure=False,
+    wasm_name="model_update_gradients_n256.wasm",
+    zkey_name="proving_key_gradients_n256.zkey",
+    vkey_name="verification_key_gradients_n256.json",
+    ceremony="dev_unsafe",
+)
 
 PROFILES_BY_ID = {
     PROFILE_N4.circuit_id: PROFILE_N4,
     PROFILE_N4_SECURE.circuit_id: PROFILE_N4_SECURE,
     PROFILE_N64.circuit_id: PROFILE_N64,
+    PROFILE_N256.circuit_id: PROFILE_N256,
 }
 
 
@@ -84,9 +95,10 @@ def profile_for_n(n: int, secure: bool = False) -> CircuitProfile:
         return PROFILE_N4
     if n == 64 and not secure:
         return PROFILE_N64
+    if n == 256 and not secure:
+        return PROFILE_N256
     raise ValueError(
-        f"No CircuitProfile for n={n} secure={secure}. Shipped: {list(SHIPPED_N)}. "
-        f"N=256 pending ceremony."
+        f"No CircuitProfile for n={n} secure={secure}. Shipped: {list(SHIPPED_N)}."
     )
 
 

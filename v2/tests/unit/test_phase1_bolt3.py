@@ -13,13 +13,26 @@ from fedzk.prover.zkgenerator import ASSET_DIR as ZK_ASSET
 
 
 def test_prove_n64_single():
-    # Exactly 64 floats → one N=64 proof
     g = {"w": torch.randn(64) * 0.001}
     out = prove_update(g, n=64)
     assert out["mode"] == "single"
     assert out["n"] == 64
     assert out["circuit_id"] == "model_update_gradients_n64"
     vkey = ZK_ASSET / PROFILE_N64.vkey_name
+    ok = ZKVerifier(verification_key_path=str(vkey)).verify_real_proof(
+        out["proof"], out["public_inputs"]
+    )
+    assert ok is True
+
+
+def test_prove_n256_single():
+    g = {"w": torch.randn(256) * 0.001}
+    out = prove_update(g, n=256)
+    assert out["mode"] == "single"
+    assert out["n"] == 256
+    from fedzk.zk.circuit_config import PROFILE_N256
+
+    vkey = ZK_ASSET / PROFILE_N256.vkey_name
     ok = ZKVerifier(verification_key_path=str(vkey)).verify_real_proof(
         out["proof"], out["public_inputs"]
     )

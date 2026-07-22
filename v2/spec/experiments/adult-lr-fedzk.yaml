@@ -1,0 +1,42 @@
+# Adult LR FEDzk smoke — Phase 4 experiment stub (v2 tree only)
+# Driver: scripts/adult_lr_smoke.py
+# Transcript: artifacts/transcripts/adult-lr-smoke.json
+# Schema: artifacts/transcripts/adult-lr-smoke.schema.json
+
+experiment:
+  id: adult-lr-fedzk-smoke
+  paper_table: T1-adult-integrity
+  mode: fedzk
+
+data:
+  source: synthetic_adult_style
+  n_samples: 64
+  n_features: 8
+  note: Full UCI Adult deferred until Phase 4 measurement bolt.
+
+model:
+  type: linear
+  num_classes: 2
+  learning_rate: 0.05
+  epochs_per_round: 1
+
+federated:
+  clients: 3
+  rounds: 1
+  aggregation: fedavg
+  threshold: 3
+
+zk:
+  n_circuit: 64
+  wire: fedzk.proof.v1
+  ceremony: dev_unsafe
+  prove_path: chunk_bundle
+  shipped_n: [4, 64, 256]
+
+outputs:
+  transcript: artifacts/transcripts/adult-lr-smoke.json
+  schema: artifacts/transcripts/adult-lr-smoke.schema.json
+
+runner:
+  command: python scripts/adult_lr_smoke.py
+  cwd: v2

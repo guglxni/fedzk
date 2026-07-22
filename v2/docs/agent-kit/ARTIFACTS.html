@@ -11,16 +11,16 @@
 <div class="layout">
   <nav class="sidebar" id="sidebar"></nav>
   <main>
-    <h1>ARTIFACTS.html — Freeze pin (Phase 0 closeout)</h1>
+    <h1>ARTIFACTS.html — Freeze pin (Phase 0/1)</h1>
     <p class="lead">
       Authoritative runtime artifacts live under <code>v2/src/fedzk/zk/</code>.
       Pins recorded in <code>v2/artifacts/artifact-manifest.json</code>. Policy: <strong>freeze</strong>
-      until a regenerate ceremony updates the manifest.
+      for N=4 legacy; N=64/256 are <code>dev_unsafe</code> until a real ceremony.
     </p>
     <div class="meta">
       <span class="pill ok">policy: freeze (N=4 legacy)</span>
-      <span class="pill ok">N shipped: 4, 64</span>
-      <span class="pill warn">N=64 ceremony=dev_unsafe</span>
+      <span class="pill ok">N shipped: 4, 64, 256</span>
+      <span class="pill warn">N=64/256 ceremony=dev_unsafe</span>
     </div>
 
     <div class="callout bad">
@@ -31,34 +31,27 @@
     </div>
 
     <div class="callout warn">
-      <strong>N=64:</strong> <code>model_update_gradients_n64.*</code> built with a local snarkjs Powers-of-Tau
-      contribution — <em>not</em> a production multiparty ceremony. Rebuild with
-      <code>scripts/build_gradients_circuit.py --n 64</code> or a real ceremony before release.
+      <strong>N=64 / N=256:</strong> <code>model_update_gradients_n{64,256}.*</code> built with local snarkjs
+      Powers-of-Tau — <em>not</em> a production multiparty ceremony. Rebuild via
+      <code>scripts/build_gradients_circuit.py --n {64|256}</code> or a real ceremony before release.
     </div>
 
     <h2>Pinned sha256 (2026-07-22)</h2>
-    <table>
-      <tr><th>File</th><th>sha256</th></tr>
-      <tr><td>model_update.wasm</td><td><code>4af21965ffa4c1c7…4434f0f5</code></td></tr>
-      <tr><td>proving_key.zkey</td><td><code>df80aa50c61adeb2…a5ac9b6c</code></td></tr>
-      <tr><td>verification_key.json</td><td><code>8c1f83bf9659e12d…a30bbbc5</code></td></tr>
-      <tr><td>model_update_secure.wasm</td><td><code>fe72596509db1309…f8ab0e20</code></td></tr>
-      <tr><td>proving_key_secure.zkey</td><td><code>47982e29a6066605…2e240ef2</code></td></tr>
-      <tr><td>verification_key_secure.json</td><td><code>04a760ca27490073…f4e08f10</code></td></tr>
-    </table>
-    <p>Full digests: <code>v2/artifacts/artifact-manifest.json</code>. Enforced by <code>fedzk doctor</code> (<code>artifact_manifest</code> check).</p>
+    <p>Full digests (including N=64/256): <code>v2/artifacts/artifact-manifest.json</code>.
+      Enforced by <code>fedzk doctor</code> (<code>artifact_manifest</code> check).</p>
 
-    <h2>Goldens</h2>
+    <h2>Goldens &amp; transcripts</h2>
     <ul>
       <li><code>v2/tests/goldens/model_update_n4/proof.json</code> — quantized input [0.001,-0.002,0.003,0.0]</li>
+      <li><code>v2/artifacts/transcripts/adult-lr-smoke.json</code> + schema</li>
       <li>Verify: <code>fedzk verify -i tests/goldens/model_update_n4/proof.json</code></li>
     </ul>
 
-    <h2>Phase 1 next</h2>
+    <h2>Phase 1 status</h2>
     <ol>
-      <li>Compile <code>ModelUpdateGradients(64)</code> / <code>(256)</code> + Powers of Tau + zkey.</li>
-      <li>Update manifest + PROFILE_N* + goldens.</li>
-      <li>Wire chunk protocol into coordinator verify-before-FedAvg.</li>
+      <li>✅ Compile ModelUpdateGradients(64) / (256) + DEV zkeys.</li>
+      <li>✅ Manifest + PROFILE_N* + Adult smoke.</li>
+      <li>✅ Chunk protocol into coordinator verify-before-FedAvg.</li>
     </ol>
 
     <footer class="doc-foot"><a href="PLAN.html">PLAN</a> · <a href="scratchpad.html">scratchpad</a> · <a href="index.html">Hub</a></footer>

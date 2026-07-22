@@ -17,10 +17,10 @@
       <a href="scratchpad.html">scratchpad.html</a> (branch <code>v2</code>).</p>
 
     <div class="callout ok" id="v2-status">
-      <strong>v2 / Bolt 1–3 (2026-07-22): GREEN.</strong>
-      N=64 DEV artifacts · chunk verify on coordinator · Adult LR smoke aggregates ·
-      18 unit tests. See <a href="ARTIFACTS.html">ARTIFACTS.html</a> · <a href="scratchpad.html">scratchpad</a>.
-      N=256 pending <code>scripts/build_gradients_circuit.py --n 256</code>.
+      <strong>v2 / Bolt 1–3+ (2026-07-22): GREEN.</strong>
+      N∈{4,64,256} shipped · chunk verify · Adult LR smoke · 19 unit tests.
+      N=64/256 ceremony=<code>dev_unsafe</code>. See
+      <a href="ARTIFACTS.html">ARTIFACTS</a> · <a href="scratchpad.html">scratchpad</a>.
     </div>
 
     <div class="callout" id="concepts-primer">
@@ -48,7 +48,7 @@
 
     <h2>Phase 1 — Real circuits &amp; protocol (3–6 weeks)</h2>
     <ul class="checklist">
-      <li>◐ Parameterize N — N=4 frozen + N=64 <code>dev_unsafe</code> shipped; N=256 pending.</li>
+      <li>✅ Parameterize N — N=4 frozen + N=64/256 <code>dev_unsafe</code> shipped.</li>
       <li>✅ Chunk Protocol v1 + coordinator <code>chunk_bundle</code> verify-before-FedAvg.</li>
       <li>✅ Golden vectors — N=4 + Adult LR smoke transcript.</li>
       <li>✅ Coordinator verify-before-FedAvg (threshold 3) with smoke aggregation.</li>
@@ -57,10 +57,10 @@
 
     <h2>Phase 2 — Framework API &amp; packaging (2–4 weeks)</h2>
     <ul class="checklist">
-      <li>Stable <code>fedzk</code> package exports per DESIGN.</li>
+      <li>◐ Stable <code>fedzk</code> package exports (<code>prove_update</code>, <code>SHIPPED_N</code>).</li>
       <li>Examples in CI; mkdocs or docs site.</li>
       <li>Docker compose demo; remove default test keys in prod profile.</li>
-      <li>Optional Flower adapter spike.</li>
+      <li>◐ Optional Flower adapter spike (<code>fedzk.adapters.flower</code> — no flwr hard dep).</li>
     </ul>
 
     <h2>Phase 3 — Rust proving engine (3–6 weeks)</h2>

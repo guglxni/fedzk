@@ -19,6 +19,9 @@ __all__ = [
     "ZKProver",
     "ZKVerifier",
     "GradientQuantizer",
+    "prove_update",
+    "SHIPPED_N",
+    "profile_for_n",
 ]
 
 
@@ -35,4 +38,12 @@ def __getattr__(name: str) -> Any:
         from fedzk.zk.input_normalization import GradientQuantizer
 
         return GradientQuantizer
+    if name == "prove_update":
+        from fedzk.prover.chunked import prove_update
+
+        return prove_update
+    if name in ("SHIPPED_N", "profile_for_n"):
+        from fedzk.zk import circuit_config as _cc
+
+        return getattr(_cc, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

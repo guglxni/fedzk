@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FEDzk adult-lr smoke transcript",
+  "type": "object",
+  "required": ["rounds", "wire", "n_circuit"],
+  "properties": {
+    "wire": { "const": "fedzk.proof.v1" },
+    "n_circuit": { "type": "integer", "enum": [4, 64, 256] },
+    "rounds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["round", "clients", "status"],
+        "properties": {
+          "round": { "type": "integer", "minimum": 0 },
+          "clients": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["client_id", "http", "prove_mode"],
+              "properties": {
+                "client_id": { "type": "string" },
+                "http": { "type": "integer" },
+                "prove_mode": { "type": "string" },
+                "train_loss": { "type": ["number", "null"] },
+                "body": { "type": "object" }
+              }
+            }
+          },
+          "status": {
+            "type": "object",
+            "required": ["pending_updates", "model_version"]
+          }
+        }
+      }
+    }
+  }
+}
